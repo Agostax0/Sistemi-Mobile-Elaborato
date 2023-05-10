@@ -11,16 +11,16 @@ import com.example.app.data.LocationDetails
 data class Ristorante(
     @PrimaryKey(autoGenerate = true)
     val COD_RIS : Int = 0,
+
     val COD_BR : Int,
 
     val nome: String,
 
-    @Ignore
-    var icona : Bitmap,
+    var icona : String,
 
     @ColumnInfo(name= "numero_preferiti") val numeroPreferiti: Long,
 
     val orari: String,
 
-    val posizione : LocationDetails,
-    )
+    val posizione : String,
+)

@@ -12,10 +12,10 @@ interface RistoranteDAO{
     @Query("SELECT * FROM ristorante")
     fun getRistoranti() : Flow<List<Ristorante>>
 
-    //TODO sistemare
+    /*
     @Query("SELECT * FROM ristorante " +
             "WHERE ristorante.posizione - :location BETWEEN 0 AND :distance")
-    fun getRistorantiNearby(location: LocationDetails, distance: Int)
+    fun getRistorantiNearby(location: LocationDetails, distance: Int)*/
 
     //TODO aggiungere query quante persone hanno messo un ristorante tra i preferiti?
 }

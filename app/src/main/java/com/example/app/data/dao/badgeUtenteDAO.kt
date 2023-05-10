@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface BadgeUtenteDAO{
-    @Query("SELECT * FROM badge_ristorante")
+    @Query("SELECT * FROM badge_utente")
     fun getBadges(): Flow<List<BadgeUtente>>
     @Query(
         "SELECT * FROM badge_utente " +

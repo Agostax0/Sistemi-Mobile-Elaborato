@@ -7,7 +7,7 @@ import androidx.room.Index
 import androidx.room.PrimaryKey
 
 @Entity(tableName = "utente", indices = [Index(value=["username","email"],unique=true)])
-data class Utente(
+data class Utente (
     @PrimaryKey(autoGenerate = true)
     val ID : Int = 0,
 
@@ -16,9 +16,7 @@ data class Utente(
     val username : String,
     val password : String,
     val email : String,
-    @Ignore
-    var icona : Bitmap,
-
-    val esperienza : Long
+    var icona : String,
+    val esperienzaTotale : Long
 )
 

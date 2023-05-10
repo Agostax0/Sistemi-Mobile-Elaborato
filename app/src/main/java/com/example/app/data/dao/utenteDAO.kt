@@ -15,7 +15,7 @@ interface UtenteDAO{
 
     /**
      * Ritorna 1 (esiste) o 0 in base se le credenziali utente sono corrette
-     */
+
     @Query("SELECT COUNT(*) FROM utente WHERE " +
             "(utente.email = :userEmail AND utente.password = :userPassword)  OR " +
             "(utente.username = :userPassword AND utente.password = :userPassword )")
@@ -26,7 +26,7 @@ interface UtenteDAO{
 
     //altrimenti https://developer.android.com/reference/kotlin/androidx/room/Update
     @Update(entity = Utente::class)
-    suspend fun changeUsername(vararg userUsername: String)
+    suspend fun changeUsername(vararg userUsername: String)*/
 
     //TODO update icona
 

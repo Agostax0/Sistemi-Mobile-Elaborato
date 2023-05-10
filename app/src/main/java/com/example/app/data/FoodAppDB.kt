@@ -6,10 +6,12 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.example.app.data.dao.*
 import com.example.app.data.entity.*
+import com.example.app.data.relation.*
 
 @Database(entities = [
-    Cibo::class, Ristorante::class, FiltroConsegna::class, Utente::class, BadgeRistorante::class, BadgeUtente::class, TipoRistorante::class
-                     ], version = 1, exportSchema = true)
+    Cibo::class, Ristorante::class, FiltroConsegna::class, Utente::class, BadgeRistorante::class, BadgeUtente::class, TipoRistorante::class,
+    RistoranteTipoRistoranteCrossRef::class, RistoranteMenuRistoranteCrossRef::class, RistoranteFiltroConsegnaCrossRef::class, UtenteRistoranteCrossRef::class,
+    UtenteBadgeUtenteCrossRef::class, UtenteBadgeRistoranteCrossRef::class], version = 1, exportSchema = true)
 abstract class FoodAppDB : RoomDatabase() {
 
     abstract fun utenteDAO(): UtenteDAO
@@ -25,7 +27,6 @@ abstract class FoodAppDB : RoomDatabase() {
     abstract fun utentePossiedeBadgeRistoranteDao(): UtentePossiedeBadgeRistoranteDAO
     abstract fun utentePossiedeBadgeUtenteDao(): UtentePossiedeBadgeUtenteDAO
     abstract fun utenteScansionaRistoranteDao(): UtenteScansionaRistoranteDAO
-
 
     companion object {
         @Volatile

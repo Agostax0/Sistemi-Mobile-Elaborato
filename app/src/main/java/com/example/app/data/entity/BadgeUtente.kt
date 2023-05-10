@@ -17,8 +17,7 @@ data class BadgeUtente(
 
     val livello : Int,
 
-    @Ignore
-    var icona : Bitmap,
+    var icona : String,
 
     @ColumnInfo(name="numero_utenti") val numeroUtenti: Int
 )

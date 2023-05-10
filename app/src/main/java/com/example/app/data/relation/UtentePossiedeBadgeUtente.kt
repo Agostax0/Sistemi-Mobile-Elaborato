@@ -1,15 +1,31 @@
 package com.example.app.data.relation
 
-import androidx.room.ColumnInfo
-import androidx.room.Embedded
-import androidx.room.Entity
-import androidx.room.Junction
-import androidx.room.Relation
+import androidx.room.*
 import com.example.app.data.entity.BadgeUtente
 import com.example.app.data.entity.Utente
 import java.sql.Date
 
-@Entity(tableName = "utente_possiede_badge_utente")
+@Entity(primaryKeys = ["ID","COD_BU"],
+    foreignKeys = [
+        ForeignKey(
+            entity = Utente::class,
+            parentColumns = ["ID"],
+            childColumns = ["ID"]
+        ),
+        ForeignKey(
+            entity = BadgeUtente::class,
+            parentColumns = ["COD_BU"],
+            childColumns = ["COD_BU"]
+        )
+    ]
+)
+data class UtenteBadgeUtenteCrossRef (
+    val ID : Int,
+    val COD_BU : Int,
+    @ColumnInfo(name="data_acquisizione") val dataAcquisizione: String,
+    val esperienzaBadge : Int
+)
+
 data class UtentePossiedeBadgeUtente(
     @Embedded val utente: Utente,
     @Relation(
@@ -17,14 +33,5 @@ data class UtentePossiedeBadgeUtente(
         entityColumn = "COD_BU",
         associateBy = Junction(UtenteBadgeUtenteCrossRef::class)
     )
-    @ColumnInfo(name="badge_utenti") val badgeUtenti: List<BadgeUtente>,
-
-    @ColumnInfo(name="data_acquisizione") val dataAcquisizione: Date,
-
-    val esperienza : Int
-)
-@Entity(primaryKeys = ["ID","COD_BU"])
-data class UtenteBadgeUtenteCrossRef (
-    val ID : Int,
-    val COD_BU : Int
+    val badgeUtenti: List<BadgeUtente>
 )
