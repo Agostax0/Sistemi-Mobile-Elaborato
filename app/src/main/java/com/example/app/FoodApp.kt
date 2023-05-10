@@ -26,8 +26,7 @@ import com.example.app.ui.LoginScreen
 import com.example.app.ui.MapScreen
 import com.example.app.ui.RegisterScreen
 import com.example.app.ui.ProfileScreen
-import com.example.app.viewModel.RistoranteViewModel
-import com.example.app.viewModel.UtenteViewModel
+import com.example.app.viewModel.*
 /*import com.example.app.data.FoodAppDB
 import com.example.app.ui.AddScreen
 import com.example.app.ui.DetailsScreen
@@ -134,6 +133,17 @@ private fun NavigationGraph(
 ) {
     val utenteViewModel = hiltViewModel<UtenteViewModel>()
     val ristoranteViewModel = hiltViewModel<RistoranteViewModel>()
+    val badgeRistoranteViewModel = hiltViewModel<BadgeRistoranteViewModel>()
+    val badgeUtenteViewModel = hiltViewModel<BadgeUtenteViewModel>()
+    val ciboViewModel = hiltViewModel<CiboViewModel>()
+    val filtroConsegnaViewModel = hiltViewModel<FiltroConsegnaViewModel>()
+    val ristoranteFiltroConsegnaViewModel = hiltViewModel<RistoranteFiltroConsegnaViewModel>()
+    val ristoranteMenuRistoranteViewModel = hiltViewModel<RistoranteMenuRistoranteViewModel>()
+    val ristoranteTipoRistoranteViewModel = hiltViewModel<RistoranteTipoRistoranteViewModel>()
+    val tipoRistoranteViewModel = hiltViewModel<TipoRistoranteViewModel>()
+    val utentePossiedeBadgeRistoranteViewModel = hiltViewModel<UtentePossiedeBadgeRistoranteViewModel>()
+    val utentePossiedeBadgeUtenteViewModel = hiltViewModel<UtentePossiedeBadgeUtenteViewModel>()
+    val utenteScansionaRistoranteViewModel = hiltViewModel<UtenteScansionaRistoranteViewModel>()
 
     NavHost(
         navController = navController,
