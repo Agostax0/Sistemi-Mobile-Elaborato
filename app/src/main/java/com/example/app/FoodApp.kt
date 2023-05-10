@@ -48,6 +48,7 @@ sealed class AppScreen(val name: String){
     object Register : AppScreen("Register Screen")
 }
 
+@HiltAndroidApp
 class FoodApp : Application(){
     // lazy --> the database and the repository are only created when they're needed
     val database by lazy { FoodAppDB.getDatabase(this) }
