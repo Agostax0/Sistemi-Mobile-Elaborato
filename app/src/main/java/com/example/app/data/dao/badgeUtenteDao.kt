@@ -5,7 +5,7 @@ import androidx.room.Query
 import com.example.app.data.entity.BadgeUtente
 
 @Dao
-interface badgeUtenteDao{
+interface BadgeUtenteDao{
     @Query(
         "SELECT * FROM badge_utente " +
                 "WHERE badge_utente.COD_BU = :ID"

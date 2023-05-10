@@ -6,7 +6,7 @@ import androidx.room.OnConflictStrategy
 import com.example.app.data.entity.UtenteScansionaRistorante
 
 @Dao
-interface utenteScansionaRistoranteDao{
+interface UtenteScansionaRistoranteDao{
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     fun addScansioneRistorante(vararg utenteScansionaRistorante: UtenteScansionaRistorante)

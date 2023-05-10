@@ -1,6 +1,6 @@
 package com.example.app.data.dao
 
-interface filtroConsegnaDao{
+interface FiltroConsegnaDao{
 
     //fun getFiltroConsegna() : Filtro
 }

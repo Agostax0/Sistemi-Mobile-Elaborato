@@ -6,7 +6,7 @@ import com.example.app.data.LocationDetails
 import com.example.app.data.entity.Ristorante
 
 @Dao
-interface ristoranteDao{
+interface RistoranteDao{
 
     @Query("SELECT * FROM ristorante")
     fun getRistoranti() : List<Ristorante>

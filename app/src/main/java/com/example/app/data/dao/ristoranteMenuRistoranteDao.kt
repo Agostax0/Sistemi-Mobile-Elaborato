@@ -5,7 +5,7 @@ import androidx.room.Query
 import com.example.app.data.entity.Cibo
 
 @Dao
-interface ristoranteMenuRistoranteDao{
+interface RistoranteMenuRistoranteDao{
 
     @Query("SELECT menu FROM menu_ristorante WHERE menu_ristorante.COD_RIS = :COD_RIS")
     fun getMenuOfRistorante(COD_RIS: Int) : List<Cibo>

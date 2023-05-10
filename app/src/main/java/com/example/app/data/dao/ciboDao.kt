@@ -5,7 +5,7 @@ import androidx.room.Query
 import com.example.app.data.entity.Cibo
 
 @Dao
-interface ciboDao{
+interface CiboDao{
     @Query(
         "SELECT * FROM cibo WHERE cibo.nome_cibo=:nomeCibo"
     )

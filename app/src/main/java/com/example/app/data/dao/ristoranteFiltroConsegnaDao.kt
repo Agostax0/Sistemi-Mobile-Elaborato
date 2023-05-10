@@ -7,7 +7,7 @@ import com.example.app.data.entity.Ristorante
 import com.example.app.data.entity.RistoranteFiltroConsegna
 
 @Dao
-interface ristoranteFiltroConsegnaDao{
+interface RistoranteFiltroConsegnaDao{
 
     @Query("SELECT filtri FROM filtro_consegna_ristorante WHERE COD_RIS = :RIS_ID")
     fun getFiltriOfRistorante(RIS_ID: Int) : List<FiltroConsegna>

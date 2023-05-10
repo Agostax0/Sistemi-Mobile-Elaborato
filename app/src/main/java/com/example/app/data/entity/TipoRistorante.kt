@@ -11,6 +11,5 @@ data class TipoRistorante(
     @PrimaryKey
     @ColumnInfo(name="nome_tipo") val nomeTipo: String,
 
-    @Ignore
-    var icona: Bitmap
+    var icona: String
 )

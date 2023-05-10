@@ -19,6 +19,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.app.data.FoodAppDB
 import com.example.app.ui.HomeScreen
 import com.example.app.ui.SettingsScreen
 import com.example.app.ui.LoginScreen
@@ -46,7 +47,7 @@ sealed class AppScreen(val name: String){
 
 class FoodApp : Application(){
     // lazy --> the database and the repository are only created when they're needed
-    //val database by lazy { Fo.getDatabase(this) }
+    val database by lazy { FoodAppDB.getDatabase(this) }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

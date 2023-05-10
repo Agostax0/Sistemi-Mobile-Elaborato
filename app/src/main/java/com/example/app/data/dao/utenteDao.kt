@@ -6,9 +6,13 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
 import com.example.app.data.entity.Utente
+import kotlinx.coroutines.flow.Flow
 
 @Dao
-interface utenteDao{
+interface UtenteDao{
+    @Query("SELECT * FROM utente")
+    fun getUtenti(): Flow<List<Utente>>
+
     /**
      * Ritorna 1 (esiste) o 0 in base se le credenziali utente sono corrette
      */
@@ -29,5 +33,5 @@ interface utenteDao{
     //TODO update esperienza
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    fun newUser(vararg utente: Utente)
+    fun insert(vararg utente: Utente)
 }

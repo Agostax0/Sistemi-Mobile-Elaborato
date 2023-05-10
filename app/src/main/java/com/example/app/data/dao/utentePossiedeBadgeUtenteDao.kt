@@ -7,7 +7,7 @@ import androidx.room.Query
 import com.example.app.data.entity.UtentePossiedeBadgeUtente
 
 @Dao
-interface utentePossiedeBadgeUtenteDao{
+interface UtentePossiedeBadgeUtenteDao{
 
     @Query("SELECT * FROM utente_possiede_badge_utente WHERE utente_possiede_badge_utente.ID = :userId")
     fun getBadgeUtenteObtainedOfUtente(userId:Int) : List<UtentePossiedeBadgeUtente>
