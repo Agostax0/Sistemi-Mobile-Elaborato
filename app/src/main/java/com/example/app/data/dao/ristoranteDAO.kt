@@ -4,12 +4,13 @@ import androidx.room.Dao
 import androidx.room.Query
 import com.example.app.data.LocationDetails
 import com.example.app.data.entity.Ristorante
+import kotlinx.coroutines.flow.Flow
 
 @Dao
-interface RistoranteDao{
+interface RistoranteDAO{
 
     @Query("SELECT * FROM ristorante")
-    fun getRistoranti() : List<Ristorante>
+    fun getRistoranti() : Flow<List<Ristorante>>
 
     //TODO sistemare
     @Query("SELECT * FROM ristorante " +

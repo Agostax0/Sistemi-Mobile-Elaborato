@@ -1,9 +1,11 @@
-package com.example.app.data.entity
+package com.example.app.data.relation
 
 import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.Junction
 import androidx.room.Relation
+import com.example.app.data.entity.Ristorante
+import com.example.app.data.entity.Utente
 
 @Entity(tableName = "scansiona")
 data class UtenteScansionaRistorante(

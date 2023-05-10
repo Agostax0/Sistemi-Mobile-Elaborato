@@ -9,7 +9,7 @@ import com.example.app.data.entity.Utente
 import kotlinx.coroutines.flow.Flow
 
 @Dao
-interface UtenteDao{
+interface UtenteDAO{
     @Query("SELECT * FROM utente")
     fun getUtenti(): Flow<List<Utente>>
 
@@ -22,16 +22,16 @@ interface UtenteDao{
     fun checkLogin(userEmail: String, userUsername: String, userPassword: String) : Int
 
     @Query("UPDATE utente SET username = :newUsername WHERE utente.ID = :userId")
-    fun changeUsernameFromId(userId: Int, newUsername: String)
+    suspend fun changeUsernameFromId(userId: Int, newUsername: String)
 
     //altrimenti https://developer.android.com/reference/kotlin/androidx/room/Update
     @Update(entity = Utente::class)
-    fun changeUsername(vararg userUsername: String)
+    suspend fun changeUsername(vararg userUsername: String)
 
     //TODO update icona
 
     //TODO update esperienza
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    fun insert(vararg utente: Utente)
+    suspend fun insert(vararg utente: Utente)
 }

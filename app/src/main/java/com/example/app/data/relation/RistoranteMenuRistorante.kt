@@ -1,9 +1,11 @@
-package com.example.app.data.entity
+package com.example.app.data.relation
 
 import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.Junction
 import androidx.room.Relation
+import com.example.app.data.entity.Cibo
+import com.example.app.data.entity.Ristorante
 
 @Entity(tableName = "menu_ristorante")
 data class RistoranteMenuRistorante(

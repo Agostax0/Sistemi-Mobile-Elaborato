@@ -12,18 +12,19 @@ import com.example.app.data.entity.*
                      ], version = 1, exportSchema = true)
 abstract class FoodAppDB : RoomDatabase() {
 
-    abstract fun utenteDAO(): UtenteDao
-    abstract fun ristoranteDao(): RistoranteDao
-    abstract fun badgeRistoranteDAO(): BadgeRistoranteDao
-    abstract fun badgeUtenteDAO(): BadgeUtenteDao
-    abstract fun filtroConsegnaDAO(): FiltroConsegnaDao
-    abstract fun ciboDAO(): CiboDao
-    abstract fun ristoranteFiltroConsegnaDAO(): RistoranteFiltroConsegnaDao
-    abstract fun ristoranteMenuRistoranteDAO(): RistoranteMenuRistoranteDao
-    abstract fun ristoranteTipoRistoranteDAO(): RistoranteTipoRistoranteDao
-    abstract fun utentePossiedeBadgeRistoranteDao(): UtentePossiedeBadgeRistoranteDao
-    abstract fun utentePossiedeBadgeUtenteDao(): UtentePossiedeBadgeUtenteDao
-    abstract fun utenteScansionaRistoranteDao(): UtenteScansionaRistoranteDao
+    abstract fun utenteDAO(): UtenteDAO
+    abstract fun ristoranteDao(): RistoranteDAO
+    abstract fun badgeRistoranteDAO(): BadgeRistoranteDAO
+    abstract fun badgeUtenteDAO(): BadgeUtenteDAO
+    abstract fun filtroConsegnaDAO(): FiltroConsegnaDAO
+    abstract fun ciboDAO(): CiboDAO
+    abstract fun tipoRistoranteDAO(): TipoRistoranteDAO
+    abstract fun ristoranteFiltroConsegnaDAO(): RistoranteFiltroConsegnaDAO
+    abstract fun ristoranteMenuRistoranteDAO(): RistoranteMenuRistoranteDAO
+    abstract fun ristoranteTipoRistoRanteDAO(): RistoranteTipoRistoranteDAO
+    abstract fun utentePossiedeBadgeRistoranteDao(): UtentePossiedeBadgeRistoranteDAO
+    abstract fun utentePossiedeBadgeUtenteDao(): UtentePossiedeBadgeUtenteDAO
+    abstract fun utenteScansionaRistoranteDao(): UtenteScansionaRistoranteDAO
 
 
     companion object {
@@ -35,7 +36,7 @@ abstract class FoodAppDB : RoomDatabase() {
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
                     FoodAppDB::class.java,
-                    "items_database"
+                    "food_database"
                 ).build()
                 INSTANCE = instance
 

@@ -3,9 +3,12 @@ package com.example.app.data.dao
 import androidx.room.Dao
 import androidx.room.Query
 import com.example.app.data.entity.BadgeUtente
+import kotlinx.coroutines.flow.Flow
 
 @Dao
-interface BadgeUtenteDao{
+interface BadgeUtenteDAO{
+    @Query("SELECT * FROM badge_ristorante")
+    fun getBadges(): Flow<List<BadgeUtente>>
     @Query(
         "SELECT * FROM badge_utente " +
                 "WHERE badge_utente.COD_BU = :ID"

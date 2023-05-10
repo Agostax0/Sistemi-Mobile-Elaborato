@@ -1,10 +1,12 @@
-package com.example.app.data.entity
+package com.example.app.data.relation
 
 import androidx.room.ColumnInfo
 import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.Junction
 import androidx.room.Relation
+import com.example.app.data.entity.BadgeUtente
+import com.example.app.data.entity.Utente
 import java.sql.Date
 
 @Entity(tableName = "utente_possiede_badge_utente")

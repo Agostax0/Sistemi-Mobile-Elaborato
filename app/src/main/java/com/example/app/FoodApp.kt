@@ -26,6 +26,8 @@ import com.example.app.ui.LoginScreen
 import com.example.app.ui.MapScreen
 import com.example.app.ui.RegisterScreen
 import com.example.app.ui.ProfileScreen
+import com.example.app.viewModel.RistoranteViewModel
+import com.example.app.viewModel.UtenteViewModel
 /*import com.example.app.data.FoodAppDB
 import com.example.app.ui.AddScreen
 import com.example.app.ui.DetailsScreen
@@ -130,7 +132,9 @@ private fun NavigationGraph(
     innerPadding: PaddingValues,
     modifier: Modifier = Modifier
 ) {
-    //val placesViewModel = hiltViewModel<PlacesViewModel>()
+    val utenteViewModel = hiltViewModel<UtenteViewModel>()
+    val ristoranteViewModel = hiltViewModel<RistoranteViewModel>()
+
     NavHost(
         navController = navController,
         startDestination = AppScreen.Home.name,

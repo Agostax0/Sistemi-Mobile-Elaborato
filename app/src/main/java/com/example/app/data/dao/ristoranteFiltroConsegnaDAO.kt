@@ -4,11 +4,10 @@ import androidx.room.Dao
 import androidx.room.Query
 import com.example.app.data.entity.FiltroConsegna
 import com.example.app.data.entity.Ristorante
-import com.example.app.data.entity.RistoranteFiltroConsegna
+import com.example.app.data.relation.RistoranteFiltroConsegna
 
 @Dao
-interface RistoranteFiltroConsegnaDao{
-
+interface RistoranteFiltroConsegnaDAO{
     @Query("SELECT filtri FROM filtro_consegna_ristorante WHERE COD_RIS = :RIS_ID")
     fun getFiltriOfRistorante(RIS_ID: Int) : List<FiltroConsegna>
 
