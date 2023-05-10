@@ -5,12 +5,14 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -58,7 +60,8 @@ fun TopAppBarFunction(
     canNavigateBack: Boolean,
     navigateUp: () -> Unit,
     modifier: Modifier = Modifier,
-    onSettingsButtonClicked: () -> Unit
+    onSettingsButtonClicked: () -> Unit,
+    onProfileButtonClicked: () -> Unit
 ) {
     CenterAlignedTopAppBar(
         title = {
@@ -74,28 +77,33 @@ fun TopAppBarFunction(
                 IconButton(onClick = navigateUp) {
                     Icon(
                         imageVector = Icons.Filled.ArrowBack,
-                        contentDescription = "Back button"
+                        contentDescription = "Back button",
+                        tint = colorResource(id = R.color.white)
                     )
                 }
             }
         },
         actions = {
-            if (currentScreen == AppScreen.Home.name) {
-                IconButton(onClick = { /* doSomething() */ }) {
-                    Icon(Icons.Filled.Search, contentDescription = "Search")
-                }
-            }
-            if (currentScreen != AppScreen.Settings.name) {
-                IconButton(onClick = onSettingsButtonClicked) {
+            if (currentScreen == AppScreen.Profile.name) {
+                IconButton(onClick = onSettingsButtonClicked ) {
                     Icon(
                         Icons.Filled.Settings,
-                        contentDescription = stringResource(id = R.string.settings)
+                        contentDescription = stringResource(id = R.string.settings),
+                        tint = colorResource(id = R.color.white)
+                    )}
+            }
+            else{
+                IconButton(onClick =  onProfileButtonClicked ) {
+                    Icon(
+                        Icons.Filled.Person,
+                        contentDescription = stringResource(id = R.string.profile),
+                        tint = colorResource(id = R.color.white)
                     )
                 }
             }
         },
         colors = TopAppBarDefaults.smallTopAppBarColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer
+            containerColor = colorResource(id = R.color.main_orange)
         )
     )
 }
@@ -116,7 +124,8 @@ fun NavigationApp(
                 currentScreen = currentScreen,
                 canNavigateBack = navController.previousBackStackEntry != null,
                 navigateUp = { navController.navigateUp() },
-                onSettingsButtonClicked = { navController.navigate(AppScreen.Settings.name) }
+                onSettingsButtonClicked = { navController.navigate(AppScreen.Settings.name) },
+                onProfileButtonClicked = { navController.navigate(AppScreen.Profile.name) }
             )
         }
     ) { innerPadding ->
