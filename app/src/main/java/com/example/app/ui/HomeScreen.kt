@@ -15,6 +15,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import com.example.app.R
+import com.example.app.ui.theme.Orange
+import com.example.app.ui.theme.White
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -25,12 +27,12 @@ fun HomeScreen(onMapButtonClicked: ()-> Unit,
     Scaffold(
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { /*TODO map onClick*/ },
-                containerColor = colorResource(id = R.color.main_gray)) {
+                onClick = { onMapButtonClicked },
+                containerColor = White) {
                 Icon(
                     Icons.Filled.Map,
                     contentDescription = "Map",
-                    tint = colorResource(id = R.color.main_orange)
+                    tint = Orange
                 )
             }
         }

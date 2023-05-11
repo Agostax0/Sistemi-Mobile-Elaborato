@@ -28,6 +28,8 @@ import com.example.app.ui.LoginScreen
 import com.example.app.ui.MapScreen
 import com.example.app.ui.RegisterScreen
 import com.example.app.ui.ProfileScreen
+import com.example.app.ui.theme.Orange
+import com.example.app.ui.theme.White
 import com.example.app.viewModel.*
 /*import com.example.app.data.FoodAppDB
 import com.example.app.ui.AddScreen
@@ -79,7 +81,7 @@ fun TopAppBarFunction(
                     Icon(
                         imageVector = Icons.Filled.ArrowBack,
                         contentDescription = "Back button",
-                        tint = colorResource(id = R.color.white)
+                        tint = White
                     )
                 }
             }
@@ -90,7 +92,7 @@ fun TopAppBarFunction(
                     Icon(
                         Icons.Filled.Settings,
                         contentDescription = stringResource(id = R.string.settings),
-                        tint = colorResource(id = R.color.white)
+                        tint = White
                     )}
             }
             else{
@@ -98,13 +100,13 @@ fun TopAppBarFunction(
                     Icon(
                         Icons.Filled.Person,
                         contentDescription = stringResource(id = R.string.profile),
-                        tint = colorResource(id = R.color.white)
+                        tint = White
                     )
                 }
             }
         },
         colors = TopAppBarDefaults.smallTopAppBarColors(
-            containerColor = colorResource(id = R.color.main_orange)
+            containerColor = Orange
         )
     )
 }
