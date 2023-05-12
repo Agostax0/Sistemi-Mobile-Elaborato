@@ -1,5 +1,6 @@
 package com.example.app.ui.compose
 
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
@@ -30,7 +31,7 @@ import com.example.app.ui.theme.*
 fun LoginScreen(
     onLoginButtonClicked: ()->Unit,
     onRegisterButtonClicked: ()->Unit,
-    showError: Boolean
+    showError: Boolean,
 //               placesViewModel:
 ) {
 
@@ -40,7 +41,8 @@ fun LoginScreen(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .padding(20.dp),
-            onClick = { onRegisterButtonClicked },
+            onClick = { Log.d("NAV_TAG " + "LoginScreen.kt","onRegisterButtonClicked")
+                        onRegisterButtonClicked },
             style = TextStyle(
                 fontSize = 14.sp,
                 fontFamily = FontFamily.SansSerif,
@@ -78,14 +80,15 @@ fun LoginScreen(
 
         Box(modifier = Modifier.padding(40.dp, 0.dp, 40.dp, 0.dp)) {
             Button(
-                onClick = { onLoginButtonClicked },
+                onClick = { Log.d("NAV_TAG " + "LoginScreen.kt","onLoginButtonClicked")
+                            onLoginButtonClicked},
                 shape = RoundedCornerShape(50.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Orange),
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp)
             ) {
-                Text(text = "Login", color = White)
+                Text(text = "LOGIN", color = White)
             }
         }
 

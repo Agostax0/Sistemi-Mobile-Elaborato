@@ -1,6 +1,7 @@
 package com.example.app
 
 import android.app.Application
+import android.util.Log
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -20,11 +21,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.app.data.FoodAppDB
-import com.example.app.ui.HomeScreen
-import com.example.app.ui.SettingsScreen
+import com.example.app.ui.*
 import com.example.app.ui.compose.LoginScreen
-import com.example.app.ui.MapScreen
-import com.example.app.ui.ProfileScreen
 import com.example.app.ui.theme.Orange
 import com.example.app.ui.theme.White
 import com.example.app.viewModel.*
@@ -116,7 +114,11 @@ fun NavigationApp(
     // Get current back stack entry
     val backStackEntry by navController.currentBackStackEntryAsState()
     // Get the name of the current screen
-    val currentScreen = backStackEntry?.destination?.route ?: AppScreen.Home.name
+
+    val currentScreen = backStackEntry?.destination?.route ?: AppScreen.Home.name //TODO cambiare in Login
+    //val currentScreen = backStackEntry?.destination?.route ?: AppScreen.Login.name
+
+    Log.d("NAV_TAG", "current screen : $currentScreen")
 
     Scaffold(
 
@@ -124,7 +126,10 @@ fun NavigationApp(
 
         topBar = {
             //Rimuove la TopAppBar dalla pagina di Login e Register
-            if(currentScreen != AppScreen.Login.name || currentScreen != AppScreen.Register.name){
+            if(currentScreen != AppScreen.Login.name && currentScreen != AppScreen.Register.name){
+
+                Log.d("NAV_TAG", "adding TopAppBar in : $currentScreen")
+
                 TopAppBarFunction(
                     currentScreen = currentScreen,
                     canNavigateBack = navController.previousBackStackEntry != null,
@@ -168,8 +173,15 @@ private fun NavigationGraph(
         //startDestination = AppScreen.Login.name,
         modifier = modifier.padding(innerPadding)
     ) {
+
+        val NAV_TAG = "NAV_TAG "
+
         composable(route = AppScreen.Home.name) {
+
+            Log.d(NAV_TAG + "FoodApp.kt" ,"entering "+AppScreen.Home.name)
+
             HomeScreen(
+
                 onMapButtonClicked = {
                     //Mappa
                     navController.navigate(AppScreen.Map.name)
@@ -181,6 +193,9 @@ private fun NavigationGraph(
             )
         }
         composable(route = AppScreen.Map.name) {
+
+            Log.d(NAV_TAG + "FoodApp.kt" ,"entering "+AppScreen.Map.name)
+
             MapScreen(
                 //MapScreen
                 onRestaurantTickClicked = {
@@ -195,20 +210,37 @@ private fun NavigationGraph(
         var showErrorFlag : Boolean = false
 
         composable(route = AppScreen.Login.name) {
+
+            Log.d(NAV_TAG + "FoodApp.kt" ,"entering "+AppScreen.Login.name)
+
             LoginScreen(
                 onLoginButtonClicked = {
-                    showErrorFlag = true
-                    navController.navigate(AppScreen.Login.name) },
+                    Log.d(NAV_TAG + "FoodApp.kt","onLoginButtonClicked")
 
+
+                    showErrorFlag = showErrorFlag.not()
+
+                    if(showErrorFlag)
+                        navController.navigate(AppScreen.Home.name)
+                    else
+                        navController.navigate(AppScreen.Login.name)
+
+
+                                       },
                 onRegisterButtonClicked = {
+                    Log.d(NAV_TAG + " " + AppScreen.Login.name ,"onRegisterButtonClicked")
+
                     navController.navigate(AppScreen.Register.name)
                 },
-                showError = showErrorFlag
+                showError = showErrorFlag,
                 //placesViewModel = placesViewModel
             )
         }
         composable(route = AppScreen.Settings.name) {
             //val settingsViewModel = hiltViewModel<SettingsViewModel>()
+
+            Log.d(NAV_TAG + "FoodApp.kt" ,"entering "+AppScreen.Settings.name)
+
             SettingsScreen(
                 onLogoutButtonClicked = {
                     //logout
@@ -218,9 +250,25 @@ private fun NavigationGraph(
             )
         }
         composable(route = AppScreen.Profile.name){
+
+            Log.d(NAV_TAG + "FoodApp.kt" ,"entering "+AppScreen.Profile.name)
+
             ProfileScreen(
 
                 //placesViewModel = placesViewModel
+            )
+        }
+
+        composable(route = AppScreen.Register.name){
+            Log.d(NAV_TAG + "FoodApp.kt" ,"entering "+AppScreen.Profile.name)
+
+            RegisterScreen(
+                onRegisterButtonClicked = {
+
+                },
+                onLoginButtonClicked = {
+
+                }
             )
         }
     }
