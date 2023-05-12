@@ -178,8 +178,6 @@ private fun NavigationGraph(
 
         composable(route = AppScreen.Home.name) {
 
-            Log.d(NAV_TAG + "FoodApp.kt" ,"entering "+AppScreen.Home.name)
-
             HomeScreen(
 
                 onMapButtonClicked = {
@@ -194,7 +192,7 @@ private fun NavigationGraph(
         }
         composable(route = AppScreen.Map.name) {
 
-            Log.d(NAV_TAG + "FoodApp.kt" ,"entering "+AppScreen.Map.name)
+            Log.d(NAV_TAG + "FoodApp.kt" ,"navigating "+AppScreen.Map.name)
 
             MapScreen(
                 //MapScreen
@@ -211,24 +209,19 @@ private fun NavigationGraph(
 
         composable(route = AppScreen.Login.name) {
 
-            Log.d(NAV_TAG + "FoodApp.kt" ,"entering "+AppScreen.Login.name)
+            Log.d(NAV_TAG + "FoodApp.kt" ,"navigating "+AppScreen.Login.name)
 
             LoginScreen(
                 onLoginButtonClicked = {
-                    Log.d(NAV_TAG + "FoodApp.kt","onLoginButtonClicked")
-
 
                     showErrorFlag = showErrorFlag.not()
 
                     if(showErrorFlag)
-                        navController.navigate(AppScreen.Home.name)
-                    else
-                        navController.navigate(AppScreen.Login.name)
+                        //navController.popBackStack(AppScreen.Home.name, inclusive = true)
 
-
+                        Log.d(NAV_TAG + "FoodApp.kt" ,"successful login ")
                                        },
                 onRegisterButtonClicked = {
-                    Log.d(NAV_TAG + " " + AppScreen.Login.name ,"onRegisterButtonClicked")
 
                     navController.navigate(AppScreen.Register.name)
                 },
@@ -238,8 +231,6 @@ private fun NavigationGraph(
         }
         composable(route = AppScreen.Settings.name) {
             //val settingsViewModel = hiltViewModel<SettingsViewModel>()
-
-            Log.d(NAV_TAG + "FoodApp.kt" ,"entering "+AppScreen.Settings.name)
 
             SettingsScreen(
                 onLogoutButtonClicked = {
@@ -251,8 +242,6 @@ private fun NavigationGraph(
         }
         composable(route = AppScreen.Profile.name){
 
-            Log.d(NAV_TAG + "FoodApp.kt" ,"entering "+AppScreen.Profile.name)
-
             ProfileScreen(
 
                 //placesViewModel = placesViewModel
@@ -260,7 +249,7 @@ private fun NavigationGraph(
         }
 
         composable(route = AppScreen.Register.name){
-            Log.d(NAV_TAG + "FoodApp.kt" ,"entering "+AppScreen.Profile.name)
+            Log.d(NAV_TAG + "FoodApp.kt" ,"navigating "+AppScreen.Register.name)
 
             RegisterScreen(
                 onRegisterButtonClicked = {

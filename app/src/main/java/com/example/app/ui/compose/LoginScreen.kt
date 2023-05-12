@@ -22,6 +22,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.app.AppScreen
 import com.example.app.R
 import com.example.app.ui.theme.*
 
@@ -35,6 +36,8 @@ fun LoginScreen(
 //               placesViewModel:
 ) {
 
+    Log.d("NAV_TAG" + " LoginScreen.kt" ,"entering with : "+ showError)
+
     Box(modifier = Modifier.fillMaxSize()) {
         ClickableText(
             text = AnnotatedString("Registrati"),
@@ -42,7 +45,7 @@ fun LoginScreen(
                 .align(Alignment.BottomCenter)
                 .padding(20.dp),
             onClick = { Log.d("NAV_TAG " + "LoginScreen.kt","onRegisterButtonClicked")
-                        onRegisterButtonClicked },
+                        onRegisterButtonClicked() },
             style = TextStyle(
                 fontSize = 14.sp,
                 fontFamily = FontFamily.SansSerif,
@@ -81,7 +84,7 @@ fun LoginScreen(
         Box(modifier = Modifier.padding(40.dp, 0.dp, 40.dp, 0.dp)) {
             Button(
                 onClick = { Log.d("NAV_TAG " + "LoginScreen.kt","onLoginButtonClicked")
-                            onLoginButtonClicked},
+                            onLoginButtonClicked()},
                 shape = RoundedCornerShape(50.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Orange),
                 modifier = Modifier
