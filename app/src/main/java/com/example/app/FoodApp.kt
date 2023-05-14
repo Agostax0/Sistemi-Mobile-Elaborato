@@ -37,12 +37,12 @@ import dagger.hilt.android.HiltAndroidApp
 
 sealed class AppScreen(val name: String){
     object Home : AppScreen("Home")
-    object Settings : AppScreen("Settings Screen")
-    object Login : AppScreen("Login Screen")
-    object Restaurant : AppScreen("Restaurant Screen")
-    object Map : AppScreen("Map Screen")
-    object Profile : AppScreen("Profile Screen")
-    object Register : AppScreen("Register Screen")
+    object Settings : AppScreen("Settings")
+    object Login : AppScreen("Login")
+    object Restaurant : AppScreen("Restaurant")
+    object Map : AppScreen("Map")
+    object Profile : AppScreen("Profile")
+    object Register : AppScreen("Register")
 }
 
 @HiltAndroidApp
@@ -66,6 +66,7 @@ fun TopAppBarFunction(
             Text(
                 text = currentScreen,
                 fontWeight = FontWeight.Medium,
+                color = MaterialTheme.colorScheme.onPrimary
             )
         },
         modifier = modifier,
@@ -76,7 +77,7 @@ fun TopAppBarFunction(
                     Icon(
                         imageVector = Icons.Filled.ArrowBack,
                         contentDescription = "Back button",
-                        tint = MaterialTheme.colorScheme.primary
+                        tint = MaterialTheme.colorScheme.onPrimary
                     )
                 }
             }
@@ -87,7 +88,7 @@ fun TopAppBarFunction(
                         Icon(
                             Icons.Filled.Settings,
                             contentDescription = stringResource(id = R.string.settings),
-                            tint = MaterialTheme.colorScheme.primary
+                            tint = MaterialTheme.colorScheme.onPrimary
                         )}
                 }
                 else {
@@ -95,13 +96,13 @@ fun TopAppBarFunction(
                         Icon(
                             Icons.Filled.Person,
                             contentDescription = stringResource(id = R.string.profile),
-                            tint = MaterialTheme.colorScheme.primary
+                            tint = MaterialTheme.colorScheme.onPrimary
                         )
                     }
                 }
         },
         colors = TopAppBarDefaults.smallTopAppBarColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer
+            containerColor = MaterialTheme.colorScheme.primary
         )
     )
 }
@@ -178,6 +179,11 @@ private fun NavigationGraph(
                 onRestaurantClicked = {
                     navController.navigate(AppScreen.Restaurant.name)
                 },
+                ristoranteViewModel = ristoranteViewModel
+            )
+        }
+        composable(route = AppScreen.Restaurant.name) {
+            RistoranteScreen(
                 ristoranteViewModel = ristoranteViewModel
             )
         }

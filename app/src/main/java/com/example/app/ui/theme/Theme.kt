@@ -18,17 +18,20 @@ import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Gray,
+    primary = Orange,
+    onPrimary = Black,
     secondary = Orange,
-    primaryContainer = Orange
-    //tertiary = Pink80
+    primaryContainer = Dark_Gray,
+    error = Red
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = White,
+    primary = Orange,
+    onPrimary = White,
     secondary = Orange,
-    primaryContainer = Orange
-    //tertiary = Pink40
+    onSecondary = White,
+    primaryContainer = Light_Gray,
+    error = Red
 
     /* Other default colors to override
     background = Color(0xFFFFFBFE),
@@ -44,18 +47,10 @@ private val LightColorScheme = lightColorScheme(
 @Composable
 fun FoodAppTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = when {
-      dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-        val context = LocalContext.current
-        if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-      }
-      darkTheme -> DarkColorScheme
-      else -> LightColorScheme
-    }
+    val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
+
     val view = LocalView.current
     if (!view.isInEditMode) {
       SideEffect {
@@ -64,8 +59,7 @@ fun FoodAppTheme(
         WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = darkTheme
       }
     }
-    Log.d("NAV_TAG", "DARK : $DarkColorScheme")
-    Log.d("NAV_TAG", "LIGHT : $LightColorScheme")
+
     MaterialTheme(
       colorScheme = colorScheme,
       typography = Typography,

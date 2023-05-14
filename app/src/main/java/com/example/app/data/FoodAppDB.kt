@@ -38,7 +38,9 @@ abstract class FoodAppDB : RoomDatabase() {
                     context.applicationContext,
                     FoodAppDB::class.java,
                     "food_database"
-                ).build()
+                )
+                    //.createFromAsset("database/food.db")
+                    .build()
                 INSTANCE = instance
 
                 instance
