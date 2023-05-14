@@ -16,6 +16,9 @@ import javax.inject.Singleton
 object DataModule {
     @Singleton
     @Provides
+    fun provideSettingsRepository(@ApplicationContext context: Context) = SettingsRepository(context)
+    @Singleton
+    @Provides
     fun provideUtenteRepository(@ApplicationContext context: Context) =
         UtenteRepository((context.applicationContext as FoodApp).database.utenteDAO())
     @Singleton

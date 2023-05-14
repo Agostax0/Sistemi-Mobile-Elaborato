@@ -76,7 +76,7 @@ fun TopAppBarFunction(
                     Icon(
                         imageVector = Icons.Filled.ArrowBack,
                         contentDescription = "Back button",
-                        tint = White
+                        tint = MaterialTheme.colorScheme.primary
                     )
                 }
             }
@@ -87,7 +87,7 @@ fun TopAppBarFunction(
                         Icon(
                             Icons.Filled.Settings,
                             contentDescription = stringResource(id = R.string.settings),
-                            tint = White
+                            tint = MaterialTheme.colorScheme.primary
                         )}
                 }
                 else {
@@ -95,13 +95,13 @@ fun TopAppBarFunction(
                         Icon(
                             Icons.Filled.Person,
                             contentDescription = stringResource(id = R.string.profile),
-                            tint = White
+                            tint = MaterialTheme.colorScheme.primary
                         )
                     }
                 }
         },
         colors = TopAppBarDefaults.smallTopAppBarColors(
-            containerColor = Orange
+            containerColor = MaterialTheme.colorScheme.primaryContainer
         )
     )
 }
@@ -121,9 +121,6 @@ fun NavigationApp(
     Log.d("NAV_TAG", "current screen : $currentScreen")
 
     Scaffold(
-
-
-
         topBar = {
             //Rimuove la TopAppBar dalla pagina di Login e Register
             if(currentScreen != AppScreen.Login.name && currentScreen != AppScreen.Register.name){
@@ -138,14 +135,11 @@ fun NavigationApp(
                     onProfileButtonClicked = { navController.navigate(AppScreen.Profile.name) }
                 )
             }
-
-
         }
     ) { innerPadding ->
         NavigationGraph(navController, innerPadding)
     }
 }
-
 
 @Composable
 private fun NavigationGraph(
@@ -166,6 +160,7 @@ private fun NavigationGraph(
     val utentePossiedeBadgeRistoranteViewModel = hiltViewModel<UtentePossiedeBadgeRistoranteViewModel>()
     val utentePossiedeBadgeUtenteViewModel = hiltViewModel<UtentePossiedeBadgeUtenteViewModel>()
     val utenteScansionaRistoranteViewModel = hiltViewModel<UtenteScansionaRistoranteViewModel>()
+    val settingsViewModel = hiltViewModel<SettingsViewModel>()
 
     NavHost(
         navController = navController,
@@ -173,21 +168,17 @@ private fun NavigationGraph(
         //startDestination = AppScreen.Login.name,
         modifier = modifier.padding(innerPadding)
     ) {
-
         val NAV_TAG = "NAV_TAG "
 
         composable(route = AppScreen.Home.name) {
-
             HomeScreen(
-
                 onMapButtonClicked = {
-                    //Mappa
                     navController.navigate(AppScreen.Map.name)
                 },
                 onRestaurantClicked = {
                     navController.navigate(AppScreen.Restaurant.name)
                 },
-                //placesViewModel = placesViewModel
+                ristoranteViewModel = ristoranteViewModel
             )
         }
         composable(route = AppScreen.Map.name) {
@@ -236,8 +227,8 @@ private fun NavigationGraph(
                 onLogoutButtonClicked = {
                     //logout
                     navController.navigate(AppScreen.Login.name)
-                }
-                //settingsViewModel
+                },
+                settingsViewModel = settingsViewModel
             )
         }
         composable(route = AppScreen.Profile.name){

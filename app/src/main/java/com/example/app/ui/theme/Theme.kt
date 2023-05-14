@@ -2,6 +2,7 @@ package com.example.app.ui.theme
 
 import android.app.Activity
 import android.os.Build
+import android.util.Log
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
@@ -19,12 +20,14 @@ import androidx.core.view.WindowCompat
 private val DarkColorScheme = darkColorScheme(
     primary = Gray,
     secondary = Orange,
+    primaryContainer = Orange
     //tertiary = Pink80
 )
 
 private val LightColorScheme = lightColorScheme(
     primary = White,
     secondary = Orange,
+    primaryContainer = Orange
     //tertiary = Pink40
 
     /* Other default colors to override
@@ -39,7 +42,7 @@ private val LightColorScheme = lightColorScheme(
 )
 
 @Composable
-fun AppTheme(
+fun FoodAppTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     // Dynamic color is available on Android 12+
     dynamicColor: Boolean = true,
@@ -61,7 +64,8 @@ fun AppTheme(
         WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = darkTheme
       }
     }
-
+    Log.d("NAV_TAG", "DARK : $DarkColorScheme")
+    Log.d("NAV_TAG", "LIGHT : $LightColorScheme")
     MaterialTheme(
       colorScheme = colorScheme,
       typography = Typography,
