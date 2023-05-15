@@ -10,6 +10,11 @@ class UtenteRepository(private val utenteDAO:UtenteDAO) {
     val utenti: Flow<List<Utente>> = utenteDAO.getUtenti()
 
     @WorkerThread
+    suspend fun getUtenteFromUsername(username:String): Utente?{
+        return utenteDAO.getUtenteFromUsername(username)
+    }
+
+    @WorkerThread
     suspend fun insertNewUtente(utente: Utente) {
         utenteDAO.insert(utente)
     }
