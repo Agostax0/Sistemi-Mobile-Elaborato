@@ -126,8 +126,6 @@ fun NavigationApp(
             //Rimuove la TopAppBar dalla pagina di Login e Register
             if(currentScreen != AppScreen.Login.name && currentScreen != AppScreen.Register.name){
 
-                Log.d("NAV_TAG", "adding TopAppBar in : $currentScreen")
-
                 TopAppBarFunction(
                     currentScreen = currentScreen,
                     canNavigateBack = navController.previousBackStackEntry != null,
@@ -202,28 +200,19 @@ private fun NavigationGraph(
             )
         }
 
-        var showErrorFlag : Boolean = false
-
         composable(route = AppScreen.Login.name) {
 
             Log.d(NAV_TAG + "FoodApp.kt" ,"navigating "+AppScreen.Login.name)
 
             LoginScreen(
                 onLoginButtonClicked = {
-
-                    showErrorFlag = showErrorFlag.not()
-
-                    if(showErrorFlag)
-                        //navController.popBackStack(AppScreen.Home.name, inclusive = true)
-
-                        Log.d(NAV_TAG + "FoodApp.kt" ,"successful login ")
+                    //navController.popBackStack(AppScreen.Home.name, inclusive = true)
+                    navController.navigate(AppScreen.Home.name)
                                        },
                 onRegisterButtonClicked = {
-
                     navController.navigate(AppScreen.Register.name)
                 },
-                showError = showErrorFlag,
-                //placesViewModel = placesViewModel
+                utenteViewModel = utenteViewModel
             )
         }
         composable(route = AppScreen.Settings.name) {
@@ -253,7 +242,7 @@ private fun NavigationGraph(
 
                 },
                 onLoginButtonClicked = {
-
+                    navController.navigate(AppScreen.Login.name)
                 }
             )
         }
