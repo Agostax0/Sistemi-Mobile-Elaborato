@@ -2,6 +2,8 @@
     <string name="app_name">FoodApp</string>
     <string name="settings">Settings</string>
     <string name="profile">Profile</string>
+    <string name="ristorante_ricerca">Ristorante...</string>
+    <string name="filters">Filters</string>
 
     <string name="light_theme">Light</string>
     <string name="dark_theme">Dark</string>

@@ -2,26 +2,30 @@ package com.example.app.ui
 
 import android.net.Uri
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Map
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.Placeholder
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -36,33 +40,164 @@ import com.example.app.viewModel.RistoranteViewModel
 @Composable
 fun HomeScreen(onMapButtonClicked: ()-> Unit,
                onRestaurantClicked: ()->Unit,
+               onFiltersClicked: ()->Unit,
                ristoranteViewModel: RistoranteViewModel,
                modifier: Modifier = Modifier
 ){
     Scaffold (
         floatingActionButton = {
             FloatingActionButton(onClick =  onMapButtonClicked ) {
-                Icon(Icons.Filled.Map, contentDescription = "Map")
+                Icon(
+                    Icons.Filled.Map,
+                    contentDescription = "Map",
+                    tint = MaterialTheme.colorScheme.primary
+                )
             }
         },
     ) { innerPadding ->
         Column (modifier.padding(innerPadding)) {
-            RistorantiList(onRestaurantClicked, ristoranteViewModel)
+            RistorantiList(onRestaurantClicked, onFiltersClicked, ristoranteViewModel)
         }
     }
+}
+
+fun LazyGridScope.header(
+    content: @Composable LazyGridItemScope.() -> Unit
+) {
+    item(span = { GridItemSpan(this.maxLineSpan) }, content = content)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RistorantiList(
     onRistoranteClicked: () -> Unit,
-    ristoranteViewModel: RistoranteViewModel) {
-
+    onFiltersClicked: ()->Unit,
+    ristoranteViewModel: RistoranteViewModel
+) {
     val ristoranti = ristoranteViewModel.ristoranti.collectAsState(initial = listOf()).value
+    var ricerca by rememberSaveable { mutableStateOf("") }
+    val ristorantiFiltrati = ristoranti.filter {ristorante -> ristorante.nome.lowercase().contains(ricerca.lowercase()) } //da cambiare per i filtri
+
     LazyVerticalGrid(
         columns = GridCells.Fixed(1),
         content = {
-            items(items= ristoranti) { ristorante ->
+            header {
+                Column(
+                    horizontalAlignment = Alignment.Start,
+                    modifier = Modifier
+                        .padding(10.dp)
+                        .fillMaxSize()
+                ) {
+                    Row(
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = CenterVertically
+
+                    ) {
+                        TextField(
+                            value = ricerca,
+                            onValueChange = {
+                                ricerca = it
+                            },
+                            placeholder = { Text(stringResource(id = R.string.ristorante_ricerca)) },
+                            leadingIcon = { Icon(imageVector = Icons.Default.Search, contentDescription = "searchIcon") },
+                            modifier = Modifier.weight(5.5f),
+                            shape = CircleShape,
+                            colors =  TextFieldDefaults.textFieldColors(
+                                disabledTextColor = Color.Transparent,
+                                focusedIndicatorColor = Color.Transparent,
+                                unfocusedIndicatorColor = Color.Transparent,
+                                disabledIndicatorColor = Color.Transparent,
+                                focusedLeadingIconColor = MaterialTheme.colorScheme.primary
+                            )
+                        )
+                        IconButton(
+                            onClick = onFiltersClicked,
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Icon(
+                                Icons.Filled.FilterList,
+                                contentDescription = stringResource(id = R.string.filters),
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(35.dp)
+                            )
+                        }
+                    }
+                    Row(
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = CenterVertically,
+                        modifier = Modifier.padding(top = 10.dp)
+                    ) {
+                        IconButton(
+                            onClick = onFiltersClicked,
+                            modifier = Modifier.weight(1.1f)
+                        ) {
+                            Icon(
+                                Icons.Filled.Filter1,
+                                contentDescription = stringResource(id = R.string.filters),
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(30.dp)
+                            )
+                        }
+                        IconButton(
+                            onClick = onFiltersClicked,
+                            modifier = Modifier.weight(1.1f)
+                        ) {
+                            Icon(
+                                Icons.Filled.Filter2,
+                                contentDescription = stringResource(id = R.string.filters),
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(30.dp)
+                            )
+                        }
+                        IconButton(
+                            onClick = onFiltersClicked,
+                            modifier = Modifier.weight(1.1f)
+                        ) {
+                            Icon(
+                                Icons.Filled.Filter3,
+                                contentDescription = stringResource(id = R.string.filters),
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(30.dp)
+                            )
+                        }
+                        IconButton(
+                            onClick = onFiltersClicked,
+                            modifier = Modifier.weight(1.1f)
+                        ) {
+                            Icon(
+                                Icons.Filled.Filter4,
+                                contentDescription = stringResource(id = R.string.filters),
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(30.dp)
+                            )
+                        }
+                        IconButton(
+                            onClick = onFiltersClicked,
+                            modifier = Modifier.weight(1.1f)
+                        ) {
+                            Icon(
+                                Icons.Filled.Filter5,
+                                contentDescription = stringResource(id = R.string.filters),
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(30.dp)
+                            )
+                        }
+                        IconButton(
+                            onClick = onFiltersClicked,
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Icon(
+                                Icons.Filled.Menu,
+                                contentDescription = stringResource(id = R.string.filters),
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(30.dp)
+                            )
+                        }
+                    }
+                }
+            }
+
+            items(items= ristorantiFiltrati) { ristorante ->
                 Card(
                     onClick =  {
                         ristoranteViewModel.selectRistorante(ristorante)

@@ -19,8 +19,9 @@ import androidx.core.view.WindowCompat
 
 private val DarkColorScheme = darkColorScheme(
     primary = Orange,
-    onPrimary = Black,
-    secondary = Orange,
+    onPrimary = Gray,
+    secondary = Gray,
+    onSecondary = Black,
     primaryContainer = Dark_Gray,
     error = Red
 )
@@ -55,7 +56,7 @@ fun FoodAppTheme(
     if (!view.isInEditMode) {
       SideEffect {
         val window = (view.context as Activity).window
-        window.statusBarColor = colorScheme.primary.toArgb()
+        window.statusBarColor = colorScheme.secondary.toArgb()
         WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = darkTheme
       }
     }

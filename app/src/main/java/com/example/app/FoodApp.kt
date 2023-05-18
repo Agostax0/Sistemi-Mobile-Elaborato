@@ -43,6 +43,7 @@ sealed class AppScreen(val name: String){
     object Map : AppScreen("Map")
     object Profile : AppScreen("Profile")
     object Register : AppScreen("Register")
+    object Filter : AppScreen("Filter")
 }
 
 @HiltAndroidApp
@@ -66,7 +67,7 @@ fun TopAppBarFunction(
             Text(
                 text = currentScreen,
                 fontWeight = FontWeight.Medium,
-                color = MaterialTheme.colorScheme.onPrimary
+                color = MaterialTheme.colorScheme.onSecondary
             )
         },
         modifier = modifier,
@@ -77,7 +78,7 @@ fun TopAppBarFunction(
                     Icon(
                         imageVector = Icons.Filled.ArrowBack,
                         contentDescription = "Back button",
-                        tint = MaterialTheme.colorScheme.onPrimary
+                        tint = MaterialTheme.colorScheme.onSecondary
                     )
                 }
             }
@@ -88,7 +89,7 @@ fun TopAppBarFunction(
                         Icon(
                             Icons.Filled.Settings,
                             contentDescription = stringResource(id = R.string.settings),
-                            tint = MaterialTheme.colorScheme.onPrimary
+                            tint = MaterialTheme.colorScheme.onSecondary
                         )}
                 }
                 else {
@@ -96,13 +97,13 @@ fun TopAppBarFunction(
                         Icon(
                             Icons.Filled.Person,
                             contentDescription = stringResource(id = R.string.profile),
-                            tint = MaterialTheme.colorScheme.onPrimary
+                            tint = MaterialTheme.colorScheme.onSecondary
                         )
                     }
                 }
         },
         colors = TopAppBarDefaults.smallTopAppBarColors(
-            containerColor = MaterialTheme.colorScheme.primary
+            containerColor = MaterialTheme.colorScheme.secondary
         )
     )
 }
@@ -177,11 +178,22 @@ private fun NavigationGraph(
                 onRestaurantClicked = {
                     navController.navigate(AppScreen.Restaurant.name)
                 },
+                onFiltersClicked = {
+                    navController.navigate(AppScreen.Filter.name)
+                },
                 ristoranteViewModel = ristoranteViewModel
             )
         }
         composable(route = AppScreen.Restaurant.name) {
             RistoranteScreen(
+                ristoranteViewModel = ristoranteViewModel
+            )
+        }
+        composable(route = AppScreen.Filter.name) {
+            FiltersScreen(
+                onConfirmClicked = {
+                    navController.navigate(AppScreen.Home.name)
+                },
                 ristoranteViewModel = ristoranteViewModel
             )
         }
