@@ -1,6 +1,5 @@
 package com.example.app.ui
 
-
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -28,12 +27,12 @@ import com.example.app.viewModel.RistoranteViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RistoranteMainScreen(ristoranteViewModel: RistoranteViewModel, modifier: Modifier = Modifier) {
+fun RistoranteScoreboardScreen(ristoranteViewModel: RistoranteViewModel, modifier: Modifier = Modifier) {
     val context = LocalContext.current
     val selectedRistorante = ristoranteViewModel.ristoranteSelected
     Scaffold() { innerPadding ->
         Column (modifier.padding(innerPadding)) {
-            Text(text = selectedRistorante!!.nome)
+            Text(text = "CLASSIFICA")
         }
     }
 }

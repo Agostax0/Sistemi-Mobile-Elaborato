@@ -107,7 +107,8 @@ fun RistorantiList(
                                 focusedIndicatorColor = Color.Transparent,
                                 unfocusedIndicatorColor = Color.Transparent,
                                 disabledIndicatorColor = Color.Transparent,
-                                focusedLeadingIconColor = MaterialTheme.colorScheme.primary
+                                focusedLeadingIconColor = MaterialTheme.colorScheme.primary,
+                                containerColor = MaterialTheme.colorScheme.primaryContainer
                             )
                         )
                         IconButton(

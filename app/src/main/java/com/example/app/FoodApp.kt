@@ -2,7 +2,9 @@ package com.example.app
 
 import android.app.Application
 import android.util.Log
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -14,37 +16,40 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navigation
 import com.example.app.data.FoodAppDB
 import com.example.app.ui.*
 import com.example.app.ui.compose.LoginScreen
-import com.example.app.ui.theme.Orange
-import com.example.app.ui.theme.White
 import com.example.app.viewModel.*
-/*import com.example.app.data.FoodAppDB
-import com.example.app.ui.AddScreen
-import com.example.app.ui.DetailsScreen
-
-
-import com.example.app.viewModel.PlacesViewModel
-import com.example.app.viewModel.SettingsViewModel*/
 import dagger.hilt.android.HiltAndroidApp
 
 sealed class AppScreen(val name: String){
     object Home : AppScreen("Home")
     object Settings : AppScreen("Settings")
     object Login : AppScreen("Login")
-    object Restaurant : AppScreen("Restaurant")
+    object RestaurantMain : AppScreen("RestaurantMain")
+    object RestaurantMenu : AppScreen("RestaurantMenu")
+    object RestaurantScoreboard : AppScreen("RestaurantScoreboard")
     object Map : AppScreen("Map")
     object Profile : AppScreen("Profile")
     object Register : AppScreen("Register")
     object Filter : AppScreen("Filter")
 }
+const val ROOT_ROUTE = "root"
+const val AUTHENTICATION_ROUTE = "authentication"
+const val RESTAURANT_ROUTE = "restaurant"
+val RESTAURANT_SCREENS = listOf<String>(
+    AppScreen.RestaurantMain.name,
+    AppScreen.RestaurantMenu.name,
+    AppScreen.RestaurantScoreboard.name
+)
 
 @HiltAndroidApp
 class FoodApp : Application(){
@@ -108,6 +113,50 @@ fun TopAppBarFunction(
     )
 }
 
+@Composable
+fun BottomAppBarFunc(
+    currentScreen: String,
+    modifier: Modifier = Modifier,
+    onMainClicked: () -> Unit,
+    onMenuClicked: () -> Unit,
+    onScoreboardClicked: () -> Unit
+) {
+    BottomAppBar(
+        modifier = modifier
+            .height(55.dp),
+        contentColor = MaterialTheme.colorScheme.primaryContainer,
+        content = {
+            IconButton(
+                onClick = onMainClicked,
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(
+                    text = "Info",
+                    color = if(currentScreen == AppScreen.RestaurantMain.name) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            }
+            IconButton(
+                onClick = onMenuClicked,
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(
+                    text = "Menu",
+                    color = if(currentScreen == AppScreen.RestaurantMenu.name) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            }
+            IconButton(
+                onClick = onScoreboardClicked,
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(
+                    text = "Classifica",
+                    color = if(currentScreen == AppScreen.RestaurantScoreboard.name) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            }
+        }
+    )
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NavigationApp(
@@ -130,9 +179,19 @@ fun NavigationApp(
                 TopAppBarFunction(
                     currentScreen = currentScreen,
                     canNavigateBack = navController.previousBackStackEntry != null,
-                    navigateUp = { navController.navigateUp() },
+                    navigateUp = { if(!RESTAURANT_SCREENS.contains(currentScreen)) navController.navigateUp() else navController.navigate(ROOT_ROUTE) },
                     onSettingsButtonClicked = { navController.navigate(AppScreen.Settings.name) },
                     onProfileButtonClicked = { navController.navigate(AppScreen.Profile.name) }
+                )
+            }
+        },
+        bottomBar = {
+            if(RESTAURANT_SCREENS.contains(currentScreen)) {
+                BottomAppBarFunc(
+                    currentScreen = currentScreen,
+                    onMainClicked = { navController.navigate(AppScreen.RestaurantMain.name) },
+                    onMenuClicked = { navController.navigate(AppScreen.RestaurantMenu.name) },
+                    onScoreboardClicked = { navController.navigate(AppScreen.RestaurantScoreboard.name) }
                 )
             }
         }
@@ -166,6 +225,7 @@ private fun NavigationGraph(
         navController = navController,
         startDestination = AppScreen.Home.name,
         //startDestination = AppScreen.Login.name,
+        route = ROOT_ROUTE,
         modifier = modifier.padding(innerPadding)
     ) {
         val NAV_TAG = "NAV_TAG "
@@ -176,7 +236,7 @@ private fun NavigationGraph(
                     navController.navigate(AppScreen.Map.name)
                 },
                 onRestaurantClicked = {
-                    navController.navigate(AppScreen.Restaurant.name)
+                    navController.navigate(RESTAURANT_ROUTE)
                 },
                 onFiltersClicked = {
                     navController.navigate(AppScreen.Filter.name)
@@ -184,11 +244,28 @@ private fun NavigationGraph(
                 ristoranteViewModel = ristoranteViewModel
             )
         }
-        composable(route = AppScreen.Restaurant.name) {
-            RistoranteScreen(
-                ristoranteViewModel = ristoranteViewModel
-            )
+
+        navigation(
+            startDestination = AppScreen.RestaurantMain.name,
+            route = RESTAURANT_ROUTE
+        ) {
+            composable(route = AppScreen.RestaurantMain.name) {
+                RistoranteMainScreen(
+                    ristoranteViewModel = ristoranteViewModel
+                )
+            }
+            composable(route = AppScreen.RestaurantMenu.name) {
+                RistoranteMenuScreen(
+                    ristoranteViewModel = ristoranteViewModel
+                )
+            }
+            composable(route = AppScreen.RestaurantScoreboard.name) {
+                RistoranteScoreboardScreen(
+                    ristoranteViewModel = ristoranteViewModel
+                )
+            }
         }
+
         composable(route = AppScreen.Filter.name) {
             FiltersScreen(
                 onConfirmClicked = {
@@ -205,7 +282,7 @@ private fun NavigationGraph(
                 //MapScreen
                 onRestaurantTickClicked = {
                     //carica il ristorante
-                    navController.navigate(AppScreen.Restaurant.name)
+                    navController.navigate(RESTAURANT_ROUTE)
                    //navController.popBackStack(AppScreen.Restaurant.name, inclusive = false)
                 },
                 //placesViewModel = placesViewModel
