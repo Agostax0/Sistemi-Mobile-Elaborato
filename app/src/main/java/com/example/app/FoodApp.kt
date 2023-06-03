@@ -6,6 +6,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.BottomNavigation
+import androidx.compose.material.BottomNavigationItem
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Person
@@ -17,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -78,7 +81,7 @@ fun TopAppBarFunction(
         modifier = modifier,
         navigationIcon = {
             //se si può navigare indietro (non home screen) allora appare la freccetta
-            if (canNavigateBack) {
+            if (canNavigateBack && currentScreen != AppScreen.Home.name) {
                 IconButton(onClick = navigateUp) {
                     Icon(
                         imageVector = Icons.Filled.ArrowBack,
@@ -116,45 +119,35 @@ fun TopAppBarFunction(
 @Composable
 fun BottomAppBarFunc(
     currentScreen: String,
-    modifier: Modifier = Modifier,
-    onMainClicked: () -> Unit,
-    onMenuClicked: () -> Unit,
-    onScoreboardClicked: () -> Unit
+    navController: NavHostController
 ) {
-    BottomAppBar(
-        modifier = modifier
-            .height(55.dp),
-        contentColor = MaterialTheme.colorScheme.primaryContainer,
-        content = {
-            IconButton(
-                onClick = onMainClicked,
-                modifier = Modifier.weight(1f)
-            ) {
-                Text(
-                    text = "Info",
-                    color = if(currentScreen == AppScreen.RestaurantMain.name) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onPrimaryContainer
-                )
+    var text = ""
+    var isSelected = false
+    BottomNavigation(
+        backgroundColor = MaterialTheme.colorScheme.background
+    ) {
+        RESTAURANT_SCREENS.forEach { item ->
+            when (item) {
+                AppScreen.RestaurantMain.name -> text = "Info"
+                AppScreen.RestaurantMenu.name -> text = "Menu"
+                AppScreen.RestaurantScoreboard.name -> text = "Classifica"
             }
-            IconButton(
-                onClick = onMenuClicked,
-                modifier = Modifier.weight(1f)
-            ) {
-                Text(
-                    text = "Menu",
-                    color = if(currentScreen == AppScreen.RestaurantMenu.name) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onPrimaryContainer
-                )
-            }
-            IconButton(
-                onClick = onScoreboardClicked,
-                modifier = Modifier.weight(1f)
-            ) {
-                Text(
-                    text = "Classifica",
-                    color = if(currentScreen == AppScreen.RestaurantScoreboard.name) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onPrimaryContainer
-                )
-            }
+            isSelected = currentScreen == item
+            BottomNavigationItem(
+                icon = {
+                    Text(
+                        text = text,
+                        color = if(isSelected) MaterialTheme.colorScheme.primary
+                            else MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                },
+                selectedContentColor = MaterialTheme.colorScheme.primary,
+                unselectedContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                selected = isSelected,
+                onClick = { navController.navigate(item) }
+            )
         }
-    )
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -189,9 +182,7 @@ fun NavigationApp(
             if(RESTAURANT_SCREENS.contains(currentScreen)) {
                 BottomAppBarFunc(
                     currentScreen = currentScreen,
-                    onMainClicked = { navController.navigate(AppScreen.RestaurantMain.name) },
-                    onMenuClicked = { navController.navigate(AppScreen.RestaurantMenu.name) },
-                    onScoreboardClicked = { navController.navigate(AppScreen.RestaurantScoreboard.name) }
+                    navController
                 )
             }
         }
