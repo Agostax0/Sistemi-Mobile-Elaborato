@@ -1,8 +1,7 @@
 package com.example.app.ui
 
-import android.net.Uri
+import android.util.Log
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.*
 import androidx.compose.foundation.rememberScrollState
@@ -11,7 +10,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -21,20 +19,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.Placeholder
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.AsyncImage
-import coil.request.ImageRequest
 import com.example.app.R
+import com.example.app.data.entity.FiltroConsegna
 import com.example.app.data.entity.Ristorante
+import com.example.app.data.relation.RistoranteFiltroConsegna
 import com.example.app.ui.theme.Green
+import com.example.app.viewModel.FiltroConsegnaViewModel
+import com.example.app.viewModel.RistoranteFiltroConsegnaViewModel
 import com.example.app.viewModel.RistoranteViewModel
+import java.util.Calendar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -42,6 +40,8 @@ fun HomeScreen(onMapButtonClicked: ()-> Unit,
                onRestaurantClicked: ()->Unit,
                onFiltersClicked: ()->Unit,
                ristoranteViewModel: RistoranteViewModel,
+               filtroConsegnaViewModel: FiltroConsegnaViewModel,
+               ristoranteFiltroConsegnaViewModel: RistoranteFiltroConsegnaViewModel,
                modifier: Modifier = Modifier
 ){
     Scaffold (
@@ -56,7 +56,7 @@ fun HomeScreen(onMapButtonClicked: ()-> Unit,
         },
     ) { innerPadding ->
         Column (modifier.padding(innerPadding)) {
-            RistorantiList(onRestaurantClicked, onFiltersClicked, ristoranteViewModel)
+            RistorantiList(onRestaurantClicked, onFiltersClicked, ristoranteViewModel, ristoranteFiltroConsegnaViewModel, filtroConsegnaViewModel)
         }
     }
 }
@@ -72,11 +72,16 @@ fun LazyGridScope.header(
 fun RistorantiList(
     onRistoranteClicked: () -> Unit,
     onFiltersClicked: ()->Unit,
-    ristoranteViewModel: RistoranteViewModel
+    ristoranteViewModel: RistoranteViewModel,
+    ristoranteFiltroConsegnaViewModel: RistoranteFiltroConsegnaViewModel,
+    filtroConsegnaViewModel: FiltroConsegnaViewModel
 ) {
+    val filtriSelezionati = filtroConsegnaViewModel.filtriSelezionati.collectAsState(initial = "").value
+    val filtriPerRistorante = ristoranteFiltroConsegnaViewModel.filtriRistoranti.collectAsState(initial = listOf()).value
     val ristoranti = ristoranteViewModel.ristoranti.collectAsState(initial = listOf()).value
     var ricerca by rememberSaveable { mutableStateOf("") }
-    val ristorantiFiltrati = ristoranti.filter {ristorante -> ristorante.nome.lowercase().contains(ricerca.lowercase()) } //da cambiare per i filtri
+    val ristorantiFiltrati = filtroRistoranti(filtriPerRistorante,filtriSelezionati, ristoranteViewModel)
+    val ristorantiCercati = ristorantiFiltrati.filter {ristorante -> ristorante.nome.lowercase().contains(ricerca.lowercase()) } //da cambiare per i filtri
 
     LazyVerticalGrid(
         columns = GridCells.Fixed(1),
@@ -198,7 +203,7 @@ fun RistorantiList(
                 }
             }
 
-            items(items= ristorantiFiltrati) { ristorante ->
+            items(items= ristorantiCercati) { ristorante ->
                 Card(
                     onClick =  {
                         ristoranteViewModel.selectRistorante(ristorante)
@@ -247,7 +252,7 @@ fun RistorantiList(
                                 .weight(1f)
                         )
 
-                        if(isRistoranteAperto(ristorante)){
+                        if(ristoranteViewModel.isRistoranteAperto(ristorante)) {
                             Text(
                                 text = "Aperto",
                                 fontSize = 15.sp,
@@ -275,6 +280,38 @@ fun RistorantiList(
         })
 }
 
-private fun isRistoranteAperto(ristorante: Ristorante): Boolean {
-    return false
+fun filtroRistoranti(filtriPerRistorante: List<RistoranteFiltroConsegna>, filtriSelezionati: String, ristoranteViewModel: RistoranteViewModel): List<Ristorante> {
+    val ristorantiFiltrati = mutableListOf<Ristorante>()
+    filtriPerRistorante.forEach{ pair ->
+        if(checkFiltri(filtriSelezionati, pair.ristorante, pair.filtri, ristoranteViewModel)) {
+            ristorantiFiltrati.add(pair.ristorante)
+        }
+    }
+    Log.d("FILTRATI", ristorantiFiltrati.toString())
+    return ristorantiFiltrati
+}
+
+fun checkFiltri(filtriSelezionati: String, ristorante: Ristorante, filtriConsegna: List<FiltroConsegna>, ristoranteViewModel: RistoranteViewModel): Boolean {
+    var flag = true
+    if(filtriSelezionati[0] == '1') {
+        if (!filtriConsegna.contains(FiltroConsegna("Consumazione sul posto"))) {
+            flag = false
+        }
+    }
+    if(filtriSelezionati[1] == '1') {
+        if (!filtriConsegna.contains(FiltroConsegna("Consegna a domicilio"))) {
+            flag = false
+        }
+    }
+    if(filtriSelezionati[2] == '1') {
+        if (!filtriConsegna.contains(FiltroConsegna("Asporto"))) {
+            flag = false
+        }
+    }
+    if(filtriSelezionati[3] == '1') {
+        if(!ristoranteViewModel.isRistoranteAperto(ristorante)){
+            flag = false
+        }
+    }
+    return flag
 }

@@ -36,7 +36,7 @@ object DataModule {
     @Singleton
     @Provides
     fun provideFiltroConsegnaRepository(@ApplicationContext context: Context) =
-        FiltroConsegnaRepository((context.applicationContext as FoodApp).database.filtroConsegnaDAO())
+        FiltroConsegnaRepository((context.applicationContext as FoodApp).database.filtroConsegnaDAO(), context)
     @Singleton
     @Provides
     fun provideBadgeRistoranteRepository(@ApplicationContext context: Context) =

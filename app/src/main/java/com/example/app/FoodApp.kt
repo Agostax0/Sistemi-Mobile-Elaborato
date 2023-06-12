@@ -68,12 +68,13 @@ fun TopAppBarFunction(
     navigateUp: () -> Unit,
     modifier: Modifier = Modifier,
     onSettingsButtonClicked: () -> Unit,
-    onProfileButtonClicked: () -> Unit
+    onProfileButtonClicked: () -> Unit,
+    ristoranteViewModel: RistoranteViewModel
 ) {
     CenterAlignedTopAppBar(
         title = {
             Text(
-                text = currentScreen,
+                text = (if(RESTAURANT_SCREENS.contains(currentScreen)) ristoranteViewModel.ristoranteSelected?.nome else stringResource(id = R.string.app_name))!!,
                 fontWeight = FontWeight.Medium,
                 color = MaterialTheme.colorScheme.onSecondary
             )
@@ -81,7 +82,7 @@ fun TopAppBarFunction(
         modifier = modifier,
         navigationIcon = {
             //se si può navigare indietro (non home screen) allora appare la freccetta
-            if (canNavigateBack && currentScreen != AppScreen.Home.name) {
+            if (canNavigateBack && currentScreen != AppScreen.Home.name && currentScreen != AppScreen.Filter.name) {
                 IconButton(onClick = navigateUp) {
                     Icon(
                         imageVector = Icons.Filled.ArrowBack,
@@ -155,6 +156,7 @@ fun BottomAppBarFunc(
 fun NavigationApp(
     navController: NavHostController = rememberNavController()
 ) {
+    val ristoranteViewModel = hiltViewModel<RistoranteViewModel>()
     // Get current back stack entry
     val backStackEntry by navController.currentBackStackEntryAsState()
     // Get the name of the current screen
@@ -174,7 +176,8 @@ fun NavigationApp(
                     canNavigateBack = navController.previousBackStackEntry != null,
                     navigateUp = { if(!RESTAURANT_SCREENS.contains(currentScreen)) navController.navigateUp() else navController.navigate(ROOT_ROUTE) },
                     onSettingsButtonClicked = { navController.navigate(AppScreen.Settings.name) },
-                    onProfileButtonClicked = { navController.navigate(AppScreen.Profile.name) }
+                    onProfileButtonClicked = { navController.navigate(AppScreen.Profile.name) },
+                    ristoranteViewModel = ristoranteViewModel
                 )
             }
         },
@@ -232,7 +235,9 @@ private fun NavigationGraph(
                 onFiltersClicked = {
                     navController.navigate(AppScreen.Filter.name)
                 },
-                ristoranteViewModel = ristoranteViewModel
+                ristoranteViewModel = ristoranteViewModel,
+                filtroConsegnaViewModel = filtroConsegnaViewModel,
+                ristoranteFiltroConsegnaViewModel = ristoranteFiltroConsegnaViewModel
             )
         }
 
@@ -262,7 +267,7 @@ private fun NavigationGraph(
                 onConfirmClicked = {
                     navController.navigate(AppScreen.Home.name)
                 },
-                ristoranteViewModel = ristoranteViewModel
+                filtroConsegnaViewModel = filtroConsegnaViewModel
             )
         }
         composable(route = AppScreen.Map.name) {
