@@ -3,6 +3,7 @@ package com.example.app
 import android.app.Application
 import android.util.Log
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -67,6 +68,7 @@ fun TopAppBarFunction(
     canNavigateBack: Boolean,
     navigateUp: () -> Unit,
     modifier: Modifier = Modifier,
+    onTitleButtonClicked: () -> Unit,
     onSettingsButtonClicked: () -> Unit,
     onProfileButtonClicked: () -> Unit,
     ristoranteViewModel: RistoranteViewModel
@@ -76,7 +78,9 @@ fun TopAppBarFunction(
             Text(
                 text = (if(RESTAURANT_SCREENS.contains(currentScreen)) ristoranteViewModel.ristoranteSelected?.nome else stringResource(id = R.string.app_name))!!,
                 fontWeight = FontWeight.Medium,
-                color = MaterialTheme.colorScheme.onSecondary
+                color = MaterialTheme.colorScheme.onSecondary,
+                modifier = Modifier
+                    .clickable( onClick =  onTitleButtonClicked)
             )
         },
         modifier = modifier,
@@ -175,6 +179,7 @@ fun NavigationApp(
                     currentScreen = currentScreen,
                     canNavigateBack = navController.previousBackStackEntry != null,
                     navigateUp = { if(!RESTAURANT_SCREENS.contains(currentScreen)) navController.navigateUp() else navController.navigate(ROOT_ROUTE) },
+                    onTitleButtonClicked = { navController.navigate(AppScreen.Home.name) },
                     onSettingsButtonClicked = { navController.navigate(AppScreen.Settings.name) },
                     onProfileButtonClicked = { navController.navigate(AppScreen.Profile.name) },
                     ristoranteViewModel = ristoranteViewModel

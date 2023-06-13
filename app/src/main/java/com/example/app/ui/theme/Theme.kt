@@ -23,6 +23,7 @@ private val DarkColorScheme = darkColorScheme(
     secondary = Gray,
     onSecondary = Black,
     primaryContainer = Dark_Gray,
+    onPrimaryContainer = White,
     error = Red
 )
 
@@ -32,6 +33,7 @@ private val LightColorScheme = lightColorScheme(
     secondary = Orange,
     onSecondary = White,
     primaryContainer = Light_Gray,
+    onPrimaryContainer = Black,
     error = Red
 
     /* Other default colors to override

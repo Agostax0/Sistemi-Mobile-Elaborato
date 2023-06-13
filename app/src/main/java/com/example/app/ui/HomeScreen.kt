@@ -80,6 +80,7 @@ fun RistorantiList(
     val filtriPerRistorante = ristoranteFiltroConsegnaViewModel.filtriRistoranti.collectAsState(initial = listOf()).value
     val ristoranti = ristoranteViewModel.ristoranti.collectAsState(initial = listOf()).value
     var ricerca by rememberSaveable { mutableStateOf("") }
+    Log.d("FILTRI", filtriSelezionati)
     val ristorantiFiltrati = filtroRistoranti(filtriPerRistorante,filtriSelezionati, ristoranteViewModel)
     val ristorantiCercati = ristorantiFiltrati.filter {ristorante -> ristorante.nome.lowercase().contains(ricerca.lowercase()) } //da cambiare per i filtri
 
