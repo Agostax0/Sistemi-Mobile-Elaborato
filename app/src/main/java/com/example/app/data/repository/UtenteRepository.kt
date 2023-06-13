@@ -14,6 +14,8 @@ class UtenteRepository(private val utenteDAO:UtenteDAO) {
         return utenteDAO.getUtenteFromUsername(username)
     }
 
+    fun checkUserLogin(username: String, password: String)=utenteDAO.checkLoginCredentials(username, password)
+
     @WorkerThread
     suspend fun insertNewUtente(utente: Utente) {
         utenteDAO.insert(utente)

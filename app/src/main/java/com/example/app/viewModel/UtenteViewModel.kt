@@ -1,6 +1,7 @@
 package com.example.app.viewModel
 
 import androidx.annotation.WorkerThread
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.app.data.entity.Utente
@@ -18,19 +19,27 @@ class UtenteViewModel @Inject constructor(
 
     private var _utenteLoggato:Utente? = null
     val utenteLoggato
-            get() = _utenteLoggato
+        get() = _utenteLoggato
 
-     fun login(username:String, password:String){
+    private var _statoLogin: LiveData<Utente>? = null
+    val statoLogin
+        get() = _statoLogin
+
+    fun login(username:String, password:String){
+
         viewModelScope.launch {
-            val utente:Utente? = repository.getUtenteFromUsername(username)
-
-            if(utente!=null){
-                if(utente.password.equals(password)){
+            try {
+                val loginResponse = repository.checkUserLogin(username, password)
+                loginResponse.collect { utente ->
                     _utenteLoggato = utente
                 }
             }
+            catch (e: java.lang.Exception){
+                return@launch
+            }
         }
     }
+
 
 
 

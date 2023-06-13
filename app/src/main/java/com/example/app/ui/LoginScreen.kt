@@ -1,4 +1,4 @@
-package com.example.app.ui.compose
+package com.example.app.ui
 
 import android.app.Application
 import android.util.Log
@@ -90,14 +90,12 @@ fun LoginScreen(
         Box(modifier = Modifier.padding(40.dp, 0.dp, 40.dp, 0.dp)) {
             Button(
                 onClick = {
-
                             Log.d("LOGIN_TAG " + "LoginScreen.kt","onLoginButtonClicked")
                             if(username.value.text != "" && password.value.text != ""){
 
-                                utenteViewModel.viewModelScope.launch { utenteViewModel.login(username.value.text, password.value.text) }
+                                utenteViewModel.login(username.value.text, password.value.text)
 
-
-                                if(utenteViewModel.utenteLoggato != null){
+                                if(utenteViewModel.utenteLoggato!=null){
                                     Log.d("LOGIN_TAG " + "LoginScreen.kt","successful Login ")
                                     onLoginButtonClicked()
                                 }
