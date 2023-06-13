@@ -5,6 +5,6 @@
     <string name="ristorante_ricerca">Ristorante...</string>
     <string name="filters">Filters</string>
 
-    <string name="light_theme">Light</string>
-    <string name="dark_theme">Dark</string>
+    <string name="light_theme">Chiaro</string>
+    <string name="dark_theme">Scuro</string>
 </resources>

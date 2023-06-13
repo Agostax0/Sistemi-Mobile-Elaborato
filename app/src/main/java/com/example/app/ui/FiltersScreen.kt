@@ -23,8 +23,7 @@ import com.example.app.viewModel.RistoranteViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FiltersScreen(onConfirmClicked: ()-> Unit,
-               filtroConsegnaViewModel: FiltroConsegnaViewModel,
+fun FiltersScreen(filtroConsegnaViewModel: FiltroConsegnaViewModel,
                modifier: Modifier = Modifier
 ){
     val filtri = filtroConsegnaViewModel.filtriConsegna.collectAsState(initial = listOf()).value
@@ -33,26 +32,17 @@ fun FiltersScreen(onConfirmClicked: ()-> Unit,
     Scaffold (
         floatingActionButton = {
             FloatingActionButton(
-                onClick =  onConfirmClicked,
-                containerColor = MaterialTheme.colorScheme.primary,
-            ) {
-                Text(
-                    text = "Conferma",
-                    color = Color.White,
-                    modifier = Modifier.padding(4.dp)
-                )
-            }
-            FloatingActionButton(
-                onClick = { filtroConsegnaViewModel.saveFiltri("1111") },
-                modifier = Modifier.padding(start = 150.dp)
+                onClick = { filtroConsegnaViewModel.saveFiltri("0000") }
             ) {
                 Text(
                     text = "Reset",
                     color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.padding(4.dp)
+                    fontSize = 16.sp,
+                    modifier = Modifier.padding(horizontal = 15.dp)
                 )
             }
-        }, floatingActionButtonPosition = FabPosition.Center,
+        },
+        floatingActionButtonPosition = FabPosition.Center,
     ) { innerPadding ->
         Column (modifier.padding(innerPadding).padding(5.dp)) {
             Text(
@@ -60,7 +50,6 @@ fun FiltersScreen(onConfirmClicked: ()-> Unit,
                 fontWeight = FontWeight.Bold,
                 fontSize = 20.sp
             )
-
             if (!filtriSelezionati.isEmpty() && !filtri.isEmpty()) {
                 for (i in 0 until 4) {
                     CheckBoxFiltro(

@@ -30,7 +30,7 @@ fun SettingsScreen(
     onLogoutButtonClicked: () -> Unit,
     settingsViewModel: SettingsViewModel
 ) {
-    val radioOptions = listOf("Light", "Dark")
+    val radioOptions = listOf("Chiaro", "Scuro")
     val theme = settingsViewModel.theme.collectAsState(initial = "")
     // Note that Modifier.selectableGroup() is essential to ensure correct accessibility behavior
     Column(Modifier.selectableGroup()) {
@@ -82,7 +82,7 @@ fun SettingsScreen(
                             vertical = 12.dp,
                             horizontal = 19.dp,
                         )
-                        .weight(0.4f)
+                        .weight(0.55f)
                 )
             }
         }

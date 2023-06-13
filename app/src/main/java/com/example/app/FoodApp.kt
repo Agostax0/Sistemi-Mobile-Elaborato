@@ -82,7 +82,7 @@ fun TopAppBarFunction(
         modifier = modifier,
         navigationIcon = {
             //se si può navigare indietro (non home screen) allora appare la freccetta
-            if (canNavigateBack && currentScreen != AppScreen.Home.name && currentScreen != AppScreen.Filter.name) {
+            if (canNavigateBack && currentScreen != AppScreen.Home.name) {
                 IconButton(onClick = navigateUp) {
                     Icon(
                         imageVector = Icons.Filled.ArrowBack,
@@ -253,7 +253,8 @@ private fun NavigationGraph(
             }
             composable(route = AppScreen.RestaurantMenu.name) {
                 RistoranteMenuScreen(
-                    ristoranteViewModel = ristoranteViewModel
+                    ristoranteViewModel = ristoranteViewModel,
+                    ristoranteMenuRistoranteViewModel = ristoranteMenuRistoranteViewModel
                 )
             }
             composable(route = AppScreen.RestaurantScoreboard.name) {
@@ -264,12 +265,7 @@ private fun NavigationGraph(
         }
 
         composable(route = AppScreen.Filter.name) {
-            FiltersScreen(
-                onConfirmClicked = {
-                    navController.navigate(AppScreen.Home.name)
-                },
-                filtroConsegnaViewModel = filtroConsegnaViewModel
-            )
+            FiltersScreen(filtroConsegnaViewModel = filtroConsegnaViewModel)
         }
         composable(route = AppScreen.Map.name) {
 

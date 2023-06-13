@@ -1,6 +1,5 @@
 package com.example.app.ui
 
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.*
@@ -80,7 +79,6 @@ fun RistorantiList(
     val filtriPerRistorante = ristoranteFiltroConsegnaViewModel.filtriRistoranti.collectAsState(initial = listOf()).value
     val ristoranti = ristoranteViewModel.ristoranti.collectAsState(initial = listOf()).value
     var ricerca by rememberSaveable { mutableStateOf("") }
-    Log.d("FILTRI", filtriSelezionati)
     val ristorantiFiltrati = filtroRistoranti(filtriPerRistorante,filtriSelezionati, ristoranteViewModel)
     val ristorantiCercati = ristorantiFiltrati.filter {ristorante -> ristorante.nome.lowercase().contains(ricerca.lowercase()) } //da cambiare per i filtri
 
@@ -288,7 +286,6 @@ fun filtroRistoranti(filtriPerRistorante: List<RistoranteFiltroConsegna>, filtri
             ristorantiFiltrati.add(pair.ristorante)
         }
     }
-    Log.d("FILTRATI", ristorantiFiltrati.toString())
     return ristorantiFiltrati
 }
 
