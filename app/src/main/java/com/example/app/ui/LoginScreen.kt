@@ -1,6 +1,5 @@
 package com.example.app.ui
 
-import android.app.Application
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.layout.*
@@ -13,7 +12,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
@@ -25,19 +23,15 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewModelScope
-import com.example.app.AppScreen
 import com.example.app.R
 import com.example.app.ui.theme.*
 import com.example.app.viewModel.UtenteViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.launch
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(
-    onLoginButtonClicked: ()->Unit,
+    onSuccessfulLogin: ()->Unit,
     onRegisterButtonClicked: ()->Unit,
     utenteViewModel: UtenteViewModel
 ) {
@@ -50,7 +44,7 @@ fun LoginScreen(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .padding(20.dp),
-            onClick = { Log.d("NAV_TAG " + "LoginScreen.kt","onRegisterButtonClicked")
+            onClick = {
                         onRegisterButtonClicked() },
             style = TextStyle(
                 fontSize = 14.sp,
@@ -90,14 +84,15 @@ fun LoginScreen(
         Box(modifier = Modifier.padding(40.dp, 0.dp, 40.dp, 0.dp)) {
             Button(
                 onClick = {
-                            Log.d("LOGIN_TAG " + "LoginScreen.kt","onLoginButtonClicked")
                             if(username.value.text != "" && password.value.text != ""){
+
+                                //TODO add wake up call for DB
 
                                 utenteViewModel.login(username.value.text, password.value.text)
 
                                 if(utenteViewModel.utenteLoggato!=null){
                                     Log.d("LOGIN_TAG " + "LoginScreen.kt","successful Login ")
-                                    onLoginButtonClicked()
+                                    onSuccessfulLogin()
                                 }
                                 else{
                                     Toast.makeText(context, "Username e/o Password incorretti", Toast.LENGTH_SHORT)

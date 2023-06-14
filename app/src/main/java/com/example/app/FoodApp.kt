@@ -161,8 +161,8 @@ fun NavigationApp(
     val backStackEntry by navController.currentBackStackEntryAsState()
     // Get the name of the current screen
 
-    val currentScreen = backStackEntry?.destination?.route ?: AppScreen.Home.name //TODO cambiare in Login
-    //val currentScreen = backStackEntry?.destination?.route ?: AppScreen.Login.name
+    //val currentScreen = backStackEntry?.destination?.route ?: AppScreen.Home.name //TODO cambiare in Login
+    val currentScreen = backStackEntry?.destination?.route ?: AppScreen.Login.name
 
     Log.d("NAV_TAG", "current screen : $currentScreen")
 
@@ -218,8 +218,8 @@ private fun NavigationGraph(
 
     NavHost(
         navController = navController,
-        startDestination = AppScreen.Home.name,
-        //startDestination = AppScreen.Login.name,
+        //startDestination = AppScreen.Home.name,
+        startDestination = AppScreen.Login.name,
         route = ROOT_ROUTE,
         modifier = modifier.padding(innerPadding)
     ) {
@@ -287,7 +287,7 @@ private fun NavigationGraph(
             Log.d(NAV_TAG + "FoodApp.kt" ,"navigating "+AppScreen.Login.name)
 
             LoginScreen(
-                onLoginButtonClicked = {
+                onSuccessfulLogin = {
                     //navController.popBackStack(AppScreen.Home.name, inclusive = true)
                     navController.navigate(AppScreen.Home.name)
                                        },
@@ -320,12 +320,13 @@ private fun NavigationGraph(
             Log.d(NAV_TAG + "FoodApp.kt" ,"navigating "+AppScreen.Register.name)
 
             RegisterScreen(
-                onRegisterButtonClicked = {
-
+                onSuccessfulRegister = {
+                    navController.navigate(AppScreen.Home.name)
                 },
                 onLoginButtonClicked = {
                     navController.navigate(AppScreen.Login.name)
-                }
+                },
+                utenteViewModel = utenteViewModel
             )
         }
     }

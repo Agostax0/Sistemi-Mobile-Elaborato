@@ -1,5 +1,6 @@
 package com.example.app.viewModel
 
+import android.util.Log
 import androidx.annotation.WorkerThread
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
@@ -8,6 +9,7 @@ import com.example.app.data.entity.Utente
 import com.example.app.data.repository.UtenteRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import okhttp3.internal.wait
 import javax.inject.Inject
 
 @HiltViewModel
@@ -21,11 +23,9 @@ class UtenteViewModel @Inject constructor(
     val utenteLoggato
         get() = _utenteLoggato
 
-    private var _statoLogin: LiveData<Utente>? = null
-    val statoLogin
-        get() = _statoLogin
-
     fun login(username:String, password:String){
+
+        Log.d("LOGIN_TAG","attemping login with $username and $password")
 
         viewModelScope.launch {
             try {
@@ -38,6 +38,9 @@ class UtenteViewModel @Inject constructor(
                 return@launch
             }
         }
+
+        Log.d("LOGIN_TAG","login: ${_utenteLoggato!=null}")
+
     }
 
 
