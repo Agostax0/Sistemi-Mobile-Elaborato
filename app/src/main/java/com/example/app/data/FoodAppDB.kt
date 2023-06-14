@@ -1,6 +1,7 @@
 package com.example.app.data
 
 import android.content.Context
+import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
@@ -11,7 +12,7 @@ import com.example.app.data.relation.*
 @Database(entities = [
     Cibo::class, Ristorante::class, FiltroConsegna::class, Utente::class, BadgeRistorante::class, BadgeUtente::class, TipoRistorante::class,
     RistoranteTipoRistoranteCrossRef::class, RistoranteMenuRistoranteCrossRef::class, RistoranteFiltroConsegnaCrossRef::class, UtenteRistoranteCrossRef::class,
-    UtenteBadgeUtenteCrossRef::class, UtenteBadgeRistoranteCrossRef::class], version = 1, exportSchema = true)
+    UtenteBadgeUtenteCrossRef::class, UtenteBadgeRistoranteCrossRef::class], version = 2, exportSchema = true, autoMigrations = [AutoMigration (from = 1, to = 2)])
 abstract class FoodAppDB : RoomDatabase() {
 
     abstract fun utenteDAO(): UtenteDAO
@@ -38,9 +39,8 @@ abstract class FoodAppDB : RoomDatabase() {
                     context.applicationContext,
                     FoodAppDB::class.java,
                     "food_database"
-                )
-                    //.createFromAsset("database/food.db")
-                    .build()
+                )//.createFromAsset("database/food.db")
+                .build()
                 INSTANCE = instance
 
                 instance

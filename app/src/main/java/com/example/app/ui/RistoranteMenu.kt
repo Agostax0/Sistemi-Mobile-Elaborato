@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.ArrowDropUp
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.*
@@ -19,6 +21,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.app.data.entity.Cibo
 import com.example.app.data.entity.Ristorante
 import com.example.app.data.relation.RistoranteMenuRistorante
@@ -31,7 +34,6 @@ fun RistoranteMenuScreen(
     modifier: Modifier = Modifier,
     ristoranteMenuRistoranteViewModel: RistoranteMenuRistoranteViewModel
 ) {
-    val context = LocalContext.current
     val selectedRistorante: Ristorante? = ristoranteViewModel.ristoranteSelected
     val menuRistoranti = ristoranteMenuRistoranteViewModel.menuRistoranti.collectAsState(initial = listOf()).value
     val menuSelectedRistorante = menuRistoranti.find { it.ristorante == selectedRistorante }
@@ -65,22 +67,27 @@ fun CollapsableLazyColumn(
                             collapsedState[i] = !collapsed
                         }
                 ) {
-                    Icon(
-                        Icons.Default.run {
-                            if (collapsed)
-                                KeyboardArrowDown
-                            else
-                                KeyboardArrowUp
-                        },
-                        contentDescription = "",
-                        tint = Color.LightGray,
-                    )
                     Text(
                         dataItem.title,
                         fontWeight = FontWeight.Bold,
+                        fontSize = 22.sp,
                         modifier = Modifier
-                            .padding(vertical = 10.dp)
+                            .padding(vertical = 10.dp, horizontal = 7.dp)
                             .weight(1f)
+                    )
+                    Icon(
+                        Icons.Default.run {
+                            if (collapsed)
+                                ArrowDropDown
+                            else
+                                ArrowDropUp
+                        },
+                        contentDescription = "",
+                        tint = if(collapsed) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.primary,
+                        modifier = Modifier
+                            .padding(horizontal = 5.dp)
+                            .weight(.2f)
+                            .size(35.dp)
                     )
                 }
                 Divider()
@@ -91,6 +98,7 @@ fun CollapsableLazyColumn(
                         Spacer(modifier = Modifier.size(MaterialIconDimension.dp))
                         Text(
                             row,
+                            fontSize = 16.sp,
                             modifier = Modifier
                                 .padding(vertical = 10.dp)
                         )

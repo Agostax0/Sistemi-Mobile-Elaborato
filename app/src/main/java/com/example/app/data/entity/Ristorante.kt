@@ -23,4 +23,8 @@ data class Ristorante(
     val orari: String,
 
     val posizione : String,
+
+    @ColumnInfo(name= "numero_telefono", defaultValue = "1234567890") val numeroTelefono: String,
+
+    @ColumnInfo(defaultValue = "descrizione")val descrizione: String
 )
