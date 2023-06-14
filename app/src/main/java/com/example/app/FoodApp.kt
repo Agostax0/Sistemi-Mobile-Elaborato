@@ -248,7 +248,10 @@ private fun NavigationGraph(
         ) {
             composable(route = AppScreen.RestaurantMain.name) {
                 RistoranteMainScreen(
-                    ristoranteViewModel = ristoranteViewModel
+                    ristoranteViewModel = ristoranteViewModel,
+                    ristoranteTipoRistoranteViewModel = ristoranteTipoRistoranteViewModel,
+                    ristoranteFiltroConsegnaViewModel = ristoranteFiltroConsegnaViewModel,
+                    utenteScansionaRistoranteViewModel = utenteScansionaRistoranteViewModel
                 )
             }
             composable(route = AppScreen.RestaurantMenu.name) {

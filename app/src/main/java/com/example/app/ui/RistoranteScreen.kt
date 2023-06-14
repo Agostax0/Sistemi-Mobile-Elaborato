@@ -4,14 +4,27 @@ package com.example.app.ui
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.util.Log
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.QrCode
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.CenterHorizontally
+import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ColorFilter
@@ -19,21 +32,263 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.app.R
+import com.example.app.data.entity.FiltroConsegna
 import com.example.app.data.entity.Ristorante
+import com.example.app.data.entity.TipoRistorante
+import com.example.app.ui.theme.Green
+import com.example.app.viewModel.RistoranteFiltroConsegnaViewModel
+import com.example.app.viewModel.RistoranteTipoRistoranteViewModel
 import com.example.app.viewModel.RistoranteViewModel
+import com.example.app.viewModel.UtenteScansionaRistoranteViewModel
+import java.util.Calendar
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RistoranteMainScreen(ristoranteViewModel: RistoranteViewModel, modifier: Modifier = Modifier) {
-    val context = LocalContext.current
+fun RistoranteMainScreen(ristoranteViewModel: RistoranteViewModel,
+                         modifier: Modifier = Modifier,
+                         ristoranteTipoRistoranteViewModel: RistoranteTipoRistoranteViewModel,
+                         ristoranteFiltroConsegnaViewModel: RistoranteFiltroConsegnaViewModel,
+                         utenteScansionaRistoranteViewModel: UtenteScansionaRistoranteViewModel
+) {
     val selectedRistorante = ristoranteViewModel.ristoranteSelected
-    Scaffold() { innerPadding ->
-        Column (modifier.padding(innerPadding)) {
-            Text(text = selectedRistorante!!.nome)
+    val tipiRistoranti = ristoranteTipoRistoranteViewModel.tipiRistoranti.collectAsState(initial = listOf()).value
+    val tipoRistorante = tipiRistoranti.find { it.ristorante == selectedRistorante }
+    val filtriRistoranti = ristoranteFiltroConsegnaViewModel.filtriRistoranti.collectAsState(initial = listOf()).value
+    val filtriSelectedRistorante = filtriRistoranti.find { it.ristorante == selectedRistorante }
+
+    val openDialog = remember { mutableStateOf(false)  }
+    val scroll = rememberScrollState(0)
+
+    if (!tipoRistorante?.tipi.isNullOrEmpty() && !filtriSelectedRistorante?.filtri.isNullOrEmpty()) {
+        var tipo: TipoRistorante = tipoRistorante!!.tipi.get(0)
+        var filtriConsegna = filtriSelectedRistorante!!.filtri
+        Column(
+            modifier = Modifier
+                .padding(10.dp)
+                .verticalScroll(scroll)
+        ) {
+            Header(ristorante = selectedRistorante!!, tipoRistorante = tipo, filtriConsegna, utenteScansionaRistoranteViewModel)
+            /*AsyncImage(model = ImageRequest.Builder(LocalContext.current)
+                .data(Uri.parse(ristorante.icona))
+                .crossfade(true)
+                .build(),
+                contentDescription = "immagine ristorante",
+                modifier = Modifier
+                    .size(size = 50.dp)
+            )*/
+            Image(
+                painter = painterResource(id = R.drawable.ic_launcher_foreground),
+                contentDescription = "immagine ristorante",
+                modifier = Modifier
+                    .size(size = 300.dp)
+                    .align(CenterHorizontally),
+                colorFilter = ColorFilter.tint(color = MaterialTheme.colorScheme.primary)
+            )
+            Text(
+                text = selectedRistorante.nome,
+                modifier = Modifier
+                    .padding(bottom = 20.dp)
+            )
+
+            ZonaUtente(ristorante = selectedRistorante, utenteScansionaRistoranteViewModel)
+            ZonaInfo(ristorante = selectedRistorante,
+                ristoranteViewModel,
+                { openDialog.value = !openDialog.value }
+            )
         }
     }
+    if (openDialog.value) {
+        val listaGiorni = listOf("Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì", "Sabato", "Domenica")
+        var counter = 0
+        val listaOrari = ristoranteViewModel.getListaOrari(selectedRistorante!!)
+        val date: Calendar = Calendar.getInstance()
+        val day: Int = date.get(Calendar.DAY_OF_WEEK) - 2
+
+        AlertDialog(
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
+            textContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+            onDismissRequest = {
+                openDialog.value = false
+            },
+            title = {
+                Text(text = "Orari")
+            },
+            text = {
+                Column {
+                    listaGiorni.forEach{ giorno ->
+                        Row(modifier = Modifier
+                            .fillMaxWidth()
+                        ) {
+                            Text(
+                                text = giorno,
+                                modifier = modifier.weight(1f)
+                            )
+                            Text(
+                                text = if(listaOrari[counter] == "0-0") "Chiuso" else listaOrari[counter],
+                                modifier = modifier.weight(.2f)
+                            )
+                        }
+                        Divider(
+                            color = if(day == counter) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onPrimaryContainer,
+                            thickness = 1.dp,
+                            modifier = Modifier.padding(vertical = 5.dp)
+                        )
+                        counter++
+                    }
+                }
+            },
+            confirmButton = { }
+        )
+    }
+}
+
+@Composable
+fun Header(ristorante: Ristorante,
+           tipoRistorante: TipoRistorante,
+           filtriConsegna: List<FiltroConsegna>,
+           utenteScansionaRistoranteViewModel: UtenteScansionaRistoranteViewModel
+){
+    var filtriText = ""
+    filtriConsegna.forEach{
+        filtriText += it.filtro + " / "
+    }
+    filtriText = filtriText.removeSuffix(" / ")
+    val scansioniUtenti = utenteScansionaRistoranteViewModel.scansioniUtenti.collectAsState(initial = listOf()).value
+    //val scansioniUtente = scansioniUtenti.find { it.utente.ID == 1 }
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth(),
+    ) {
+        /*AsyncImage(model = ImageRequest.Builder(LocalContext.current)
+            .data(Uri.parse(tipoRistorante.icona))
+            .crossfade(true)
+            .build(),
+            contentDescription = "immagine tipo ristorante",
+            modifier = Modifier
+                .clip(shape = CircleShape)
+                .size(size = 50.dp))
+        }*/
+        Image(
+            painter = painterResource(id = R.drawable.ic_launcher_foreground),
+            contentDescription = "immagine tipo ristorante",
+            modifier = Modifier
+                .clip(shape = CircleShape)
+                .weight(.2f)
+                .size(size = 50.dp),
+            colorFilter = ColorFilter.tint(color = MaterialTheme.colorScheme.onSecondaryContainer)
+        )
+        Box(modifier = Modifier.weight(1f)){
+            Text(
+                text = tipoRistorante.nomeTipo,
+                fontSize = 18.sp,
+                color = MaterialTheme.colorScheme.onSecondaryContainer,
+                textAlign = TextAlign.Start,
+                modifier = Modifier
+            )
+            Text(
+                text = filtriText,
+                fontSize = 13.sp,
+                color = MaterialTheme.colorScheme.onSecondaryContainer,
+                textAlign = TextAlign.Start,
+                modifier = Modifier.padding(top = 23.dp),
+                lineHeight = 15.sp
+            )
+        }
+        IconButton(
+            onClick = { /*TODO aggiunge preferito*/ },
+            modifier = Modifier
+                .weight(.3f)
+                .border(
+                    BorderStroke(1.dp, MaterialTheme.colorScheme.onPrimaryContainer),
+                    shape = CircleShape
+                )
+        ) {
+            Icon(imageVector = Icons.Filled.Star,
+                contentDescription = "Preferiti",
+                modifier = Modifier.padding(end = 25.dp),
+                tint = MaterialTheme.colorScheme.primary //if(isPreferito) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primaryContainer
+            )
+            Text(text = ristorante.numeroPreferiti.toString(),
+                modifier = Modifier.padding(start = 25.dp)
+            )
+        }
+    }
+}
+
+@Composable
+fun ZonaUtente(ristorante: Ristorante, utenteScansionaRistoranteViewModel: UtenteScansionaRistoranteViewModel){
+    Row(modifier = Modifier
+        .fillMaxWidth()
+    ) {
+        Text(text = "Livello 3",
+            modifier = Modifier.weight(1f)
+        )
+        IconButton(
+            onClick = { /*TODO aggiunge preferito*/ },
+            modifier = Modifier
+                .weight(.3f)
+                .border(
+                    BorderStroke(1.dp, MaterialTheme.colorScheme.onPrimaryContainer),
+                    shape = CircleShape
+                )
+        ) {
+            Icon(
+                imageVector = Icons.Filled.QrCode,
+                contentDescription = "Apri camera per codice QR",
+                tint = MaterialTheme.colorScheme.primary //if(isAbbastanzaVicino) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primaryContainer
+            )
+        }
+    }
+    LinearProgressIndicator(progress = 0.7f) //da regolare con l'esperienza
+}
+
+@Composable
+fun ZonaInfo(ristorante: Ristorante, ristoranteViewModel: RistoranteViewModel, onOpenDialog: () -> Unit){
+    Row(modifier = Modifier
+        .fillMaxWidth()
+        .padding(top = 20.dp)
+    ) {
+        Text(
+            text = ristorante.numeroTelefono,
+            modifier = Modifier
+                .weight(.2f)
+                .align(CenterVertically),
+            fontWeight = FontWeight.SemiBold,
+            fontSize = 15.sp
+        )
+        Button(onClick = { /*TODO*/ },
+            modifier = Modifier
+                .weight(.2f)
+                .padding(end = 15.dp),
+            shape = CircleShape
+        ) {
+            Text(
+               text = "Chiama"
+            )
+        }
+        val isRistoranteAperto = ristoranteViewModel.isRistoranteAperto(ristorante)
+        Text(
+            text = if(isRistoranteAperto) "Aperto" else "Chiuso",
+            fontSize = 15.sp,
+            color = if(isRistoranteAperto) Green else MaterialTheme.colorScheme.error,
+            modifier = Modifier
+                .align(CenterVertically)
+                .weight(.11f)
+                .clickable(
+                    enabled = true,
+                    onClick = onOpenDialog
+                )
+        )
+    }
+    Text(
+        text = ristorante.descrizione,
+        modifier = Modifier.padding(top = 10.dp)
+    )
 }
