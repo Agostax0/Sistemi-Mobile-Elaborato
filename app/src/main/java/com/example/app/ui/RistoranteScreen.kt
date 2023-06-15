@@ -1,10 +1,15 @@
 package com.example.app.ui
 
 
+import android.Manifest
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.util.Log
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
@@ -15,29 +20,24 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.QrCode
-import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.AsyncImage
-import coil.request.ImageRequest
+import androidx.core.content.ContextCompat
 import com.example.app.R
 import com.example.app.data.entity.FiltroConsegna
 import com.example.app.data.entity.Ristorante
@@ -47,6 +47,8 @@ import com.example.app.viewModel.RistoranteFiltroConsegnaViewModel
 import com.example.app.viewModel.RistoranteTipoRistoranteViewModel
 import com.example.app.viewModel.RistoranteViewModel
 import com.example.app.viewModel.UtenteScansionaRistoranteViewModel
+import com.journeyapps.barcodescanner.ScanContract
+import com.journeyapps.barcodescanner.ScanOptions
 import java.util.Calendar
 
 @Composable
@@ -56,6 +58,8 @@ fun RistoranteMainScreen(ristoranteViewModel: RistoranteViewModel,
                          ristoranteFiltroConsegnaViewModel: RistoranteFiltroConsegnaViewModel,
                          utenteScansionaRistoranteViewModel: UtenteScansionaRistoranteViewModel
 ) {
+    val context = LocalContext.current
+
     val selectedRistorante = ristoranteViewModel.ristoranteSelected
     val tipiRistoranti = ristoranteTipoRistoranteViewModel.tipiRistoranti.collectAsState(initial = listOf()).value
     val tipoRistorante = tipiRistoranti.find { it.ristorante == selectedRistorante }
@@ -68,9 +72,10 @@ fun RistoranteMainScreen(ristoranteViewModel: RistoranteViewModel,
     if (!tipoRistorante?.tipi.isNullOrEmpty() && !filtriSelectedRistorante?.filtri.isNullOrEmpty()) {
         var tipo: TipoRistorante = tipoRistorante!!.tipi.get(0)
         var filtriConsegna = filtriSelectedRistorante!!.filtri
+
         Column(
             modifier = Modifier
-                .padding(10.dp)
+                .padding(horizontal = 10.dp)
                 .verticalScroll(scroll)
         ) {
             Header(ristorante = selectedRistorante!!, tipoRistorante = tipo, filtriConsegna, utenteScansionaRistoranteViewModel)
@@ -96,13 +101,15 @@ fun RistoranteMainScreen(ristoranteViewModel: RistoranteViewModel,
                     .padding(bottom = 20.dp)
             )
 
-            ZonaUtente(ristorante = selectedRistorante, utenteScansionaRistoranteViewModel)
+            ZonaUtente(ristorante = selectedRistorante, utenteScansionaRistoranteViewModel, context)
             ZonaInfo(ristorante = selectedRistorante,
                 ristoranteViewModel,
-                { openDialog.value = !openDialog.value }
+                { openDialog.value = !openDialog.value },
+                context
             )
         }
     }
+
     if (openDialog.value) {
         val listaGiorni = listOf("Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì", "Sabato", "Domenica")
         var counter = 0
@@ -164,6 +171,7 @@ fun Header(ristorante: Ristorante,
 
     Row(
         modifier = Modifier
+            .padding(top = 5.dp)
             .fillMaxWidth(),
     ) {
         /*AsyncImage(model = ImageRequest.Builder(LocalContext.current)
@@ -223,7 +231,32 @@ fun Header(ristorante: Ristorante,
 }
 
 @Composable
-fun ZonaUtente(ristorante: Ristorante, utenteScansionaRistoranteViewModel: UtenteScansionaRistoranteViewModel){
+fun ZonaUtente(
+    ristorante: Ristorante,
+    utenteScansionaRistoranteViewModel: UtenteScansionaRistoranteViewModel,
+    context: Context
+) {
+    val options = ScanOptions()
+    options.setOrientationLocked(false)
+
+    val barcodeLauncher = rememberLauncherForActivityResult(contract = ScanContract()) { result ->
+        if(result.getContents() == null) {
+            Toast.makeText(context, "Cancelled", Toast.LENGTH_LONG).show();
+        } else {
+            Toast.makeText(context, "Scanned: " + result.getContents(), Toast.LENGTH_LONG).show();
+        }
+    }
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) {
+        if (it) {
+            barcodeLauncher.launch(options)
+        } else {
+            Toast.makeText(context, "Permission Denied", Toast.LENGTH_SHORT).show()
+        }
+    }
+
     Row(modifier = Modifier
         .fillMaxWidth()
     ) {
@@ -231,7 +264,15 @@ fun ZonaUtente(ristorante: Ristorante, utenteScansionaRistoranteViewModel: Utent
             modifier = Modifier.weight(1f)
         )
         IconButton(
-            onClick = { /*TODO aggiunge preferito*/ },
+            onClick = {
+                val permissionCheckResult =
+                    ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA)
+                if (permissionCheckResult == PackageManager.PERMISSION_GRANTED) {
+                    barcodeLauncher.launch(options)
+                } else {
+                    permissionLauncher.launch(Manifest.permission.CAMERA)
+                }
+                      },
             modifier = Modifier
                 .weight(.3f)
                 .border(
@@ -250,7 +291,12 @@ fun ZonaUtente(ristorante: Ristorante, utenteScansionaRistoranteViewModel: Utent
 }
 
 @Composable
-fun ZonaInfo(ristorante: Ristorante, ristoranteViewModel: RistoranteViewModel, onOpenDialog: () -> Unit){
+fun ZonaInfo(
+    ristorante: Ristorante,
+    ristoranteViewModel: RistoranteViewModel,
+    onOpenDialog: () -> Unit,
+    context: Context
+){
     Row(modifier = Modifier
         .fillMaxWidth()
         .padding(top = 20.dp)
@@ -263,7 +309,10 @@ fun ZonaInfo(ristorante: Ristorante, ristoranteViewModel: RistoranteViewModel, o
             fontWeight = FontWeight.SemiBold,
             fontSize = 15.sp
         )
-        Button(onClick = { /*TODO*/ },
+        Button(
+            onClick = { 
+                      makeCall(context, ristorante.numeroTelefono)
+            },
             modifier = Modifier
                 .weight(.2f)
                 .padding(end = 15.dp),
@@ -291,4 +340,9 @@ fun ZonaInfo(ristorante: Ristorante, ristoranteViewModel: RistoranteViewModel, o
         text = ristorante.descrizione,
         modifier = Modifier.padding(top = 10.dp)
     )
+}
+
+private fun makeCall(context: Context, phoneNumber: String){
+    val intent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:" + phoneNumber))
+    context.startActivity(intent)
 }
