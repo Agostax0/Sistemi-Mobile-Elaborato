@@ -238,7 +238,9 @@ private fun NavigationGraph(
                 },
                 ristoranteViewModel = ristoranteViewModel,
                 filtroConsegnaViewModel = filtroConsegnaViewModel,
-                ristoranteFiltroConsegnaViewModel = ristoranteFiltroConsegnaViewModel
+                ristoranteFiltroConsegnaViewModel = ristoranteFiltroConsegnaViewModel,
+                tipoRistoranteViewModel = tipoRistoranteViewModel,
+                ristoranteTipoRistoranteViewModel = ristoranteTipoRistoranteViewModel
             )
         }
 
