@@ -8,6 +8,7 @@ import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -33,10 +34,11 @@ import com.example.app.viewModel.UtenteViewModel
 fun LoginScreen(
     onSuccessfulLogin: ()->Unit,
     onRegisterButtonClicked: ()->Unit,
-    utenteViewModel: UtenteViewModel
+    utenteViewModel: UtenteViewModel,
 ) {
 
     val context = LocalContext.current
+
 
     Box(modifier = Modifier.fillMaxSize()) {
         ClickableText(
@@ -92,6 +94,9 @@ fun LoginScreen(
 
                                 if(utenteViewModel.utenteLoggato!=null){
                                     Log.d("LOGIN_TAG " + "LoginScreen.kt","successful Login ")
+
+                                    utenteViewModel.startSession(utenteViewModel.utenteLoggato!!)
+
                                     onSuccessfulLogin()
                                 }
                                 else{
@@ -127,5 +132,7 @@ fun LoginScreen(
 
 
     }
+
+
 
 }

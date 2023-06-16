@@ -43,7 +43,21 @@ class UtenteViewModel @Inject constructor(
 
     }
 
+    val session = repository.preferenceFlow
 
+    fun startSession(User: Utente){
+        viewModelScope.launch {
+            repository.saveToDataStore(User)
+        }
+
+        Log.d("DATASTORE_TAG", "added ${User.username} into Datastore")
+    }
+
+    fun clearSession(){
+        viewModelScope.launch {
+            repository.clearDataStore()
+        }
+    }
 
 
 

@@ -13,6 +13,7 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -216,10 +217,14 @@ private fun NavigationGraph(
     val utenteScansionaRistoranteViewModel = hiltViewModel<UtenteScansionaRistoranteViewModel>()
     val settingsViewModel = hiltViewModel<SettingsViewModel>()
 
+    val flag: Boolean = utenteViewModel.session.collectAsState(initial = "").value!=""
+
+
+
     NavHost(
         navController = navController,
         //startDestination = AppScreen.Home.name,
-        startDestination = AppScreen.Login.name,
+        startDestination = if(flag) AppScreen.Home.name else AppScreen.Login.name,
         route = ROOT_ROUTE,
         modifier = modifier.padding(innerPadding)
     ) {
@@ -293,7 +298,7 @@ private fun NavigationGraph(
                 onSuccessfulLogin = {
                     //navController.popBackStack(AppScreen.Home.name, inclusive = true)
                     navController.navigate(AppScreen.Home.name)
-                                       },
+                },
                 onRegisterButtonClicked = {
                     navController.navigate(AppScreen.Register.name)
                 },
@@ -308,7 +313,8 @@ private fun NavigationGraph(
                     //logout
                     navController.navigate(AppScreen.Login.name)
                 },
-                settingsViewModel = settingsViewModel
+                settingsViewModel = settingsViewModel,
+                utenteViewModel = utenteViewModel
             )
         }
         composable(route = AppScreen.Profile.name){

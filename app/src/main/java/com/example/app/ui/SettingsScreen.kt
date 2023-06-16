@@ -6,6 +6,8 @@ import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -22,13 +24,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.app.R
+import com.example.app.ui.theme.Orange
 import com.example.app.viewModel.SettingsViewModel
+import com.example.app.viewModel.UtenteViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
     onLogoutButtonClicked: () -> Unit,
-    settingsViewModel: SettingsViewModel
+    settingsViewModel: SettingsViewModel,
+    utenteViewModel: UtenteViewModel
 ) {
     val radioOptions = listOf("Chiaro", "Scuro")
     val theme = settingsViewModel.theme.collectAsState(initial = "")
@@ -101,5 +106,22 @@ fun SettingsScreen(
             modifier = Modifier
                 .padding(horizontal = 5.dp)
         )
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        Button(
+            onClick = {
+                utenteViewModel.clearSession()
+
+                onLogoutButtonClicked()
+            },
+            shape = RoundedCornerShape(50.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = Orange),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(50.dp)
+        ){
+            Text(text = "LOGOUT")
+        }
     }
 }
