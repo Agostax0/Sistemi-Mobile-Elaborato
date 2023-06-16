@@ -51,8 +51,7 @@ class UtenteRepository(private val utenteDAO:UtenteDAO, private val context: Con
     }
 
 
-    @WorkerThread
-    suspend fun getUtenteFromUsername(username:String): Utente?{
+    suspend fun getUtenteFromUsername(username:String): Utente{
         return utenteDAO.getUtenteFromUsername(username)
     }
 

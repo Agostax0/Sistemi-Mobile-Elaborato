@@ -321,7 +321,7 @@ private fun NavigationGraph(
 
             ProfileScreen(
 
-                //placesViewModel = placesViewModel
+                utenteViewModel = utenteViewModel
             )
         }
 

@@ -17,7 +17,7 @@ interface UtenteDAO{
     fun checkLoginCredentials(username: String,password:String) : Flow<Utente?>
     
     @Query("SELECT * FROM utente WHERE utente.username = (:username)")
-    fun getUtenteFromUsername(username: String) : Utente?
+    fun getUtenteFromUsername(username: String) : Utente
 
     @Query("UPDATE utente SET username = :newUsername WHERE utente.ID = :userId")
     suspend fun changeUsernameFromId(userId: Int, newUsername: String)
