@@ -1,5 +1,6 @@
 package com.example.app.ui
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.*
@@ -26,12 +27,15 @@ import androidx.compose.ui.unit.sp
 import com.example.app.R
 import com.example.app.data.entity.FiltroConsegna
 import com.example.app.data.entity.Ristorante
+import com.example.app.data.entity.TipoRistorante
 import com.example.app.data.relation.RistoranteFiltroConsegna
+import com.example.app.data.relation.RistoranteTipoRistorante
 import com.example.app.ui.theme.Green
 import com.example.app.viewModel.FiltroConsegnaViewModel
 import com.example.app.viewModel.RistoranteFiltroConsegnaViewModel
+import com.example.app.viewModel.RistoranteTipoRistoranteViewModel
 import com.example.app.viewModel.RistoranteViewModel
-import java.util.Calendar
+import com.example.app.viewModel.TipoRistoranteViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -41,6 +45,8 @@ fun HomeScreen(onMapButtonClicked: ()-> Unit,
                ristoranteViewModel: RistoranteViewModel,
                filtroConsegnaViewModel: FiltroConsegnaViewModel,
                ristoranteFiltroConsegnaViewModel: RistoranteFiltroConsegnaViewModel,
+               tipoRistoranteViewModel: TipoRistoranteViewModel,
+               ristoranteTipoRistoranteViewModel: RistoranteTipoRistoranteViewModel,
                modifier: Modifier = Modifier
 ){
     Scaffold (
@@ -55,7 +61,7 @@ fun HomeScreen(onMapButtonClicked: ()-> Unit,
         },
     ) { innerPadding ->
         Column (modifier.padding(innerPadding)) {
-            RistorantiList(onRestaurantClicked, onFiltersClicked, ristoranteViewModel, ristoranteFiltroConsegnaViewModel, filtroConsegnaViewModel)
+            RistorantiList(onRestaurantClicked, onFiltersClicked, ristoranteViewModel, ristoranteFiltroConsegnaViewModel, filtroConsegnaViewModel, tipoRistoranteViewModel, ristoranteTipoRistoranteViewModel)
         }
     }
 }
@@ -73,16 +79,27 @@ fun RistorantiList(
     onFiltersClicked: ()->Unit,
     ristoranteViewModel: RistoranteViewModel,
     ristoranteFiltroConsegnaViewModel: RistoranteFiltroConsegnaViewModel,
-    filtroConsegnaViewModel: FiltroConsegnaViewModel
+    filtroConsegnaViewModel: FiltroConsegnaViewModel,
+    tipoRistoranteViewModel: TipoRistoranteViewModel,
+    ristoranteTipoRistoranteViewModel: RistoranteTipoRistoranteViewModel
 ) {
-    val filtriSelezionati = filtroConsegnaViewModel.filtriSelezionati.collectAsState(initial = "").value
-    val filtriPerRistorante = ristoranteFiltroConsegnaViewModel.filtriRistoranti.collectAsState(initial = listOf()).value
-    val ristoranti = ristoranteViewModel.ristoranti.collectAsState(initial = listOf()).value
+    val filtriRistorante = filtroConsegnaViewModel.filtriConsegna.collectAsState(initial = listOf()).value
+    val filtriRistoranti = ristoranteFiltroConsegnaViewModel.filtriRistoranti.collectAsState(initial = listOf()).value
+    val filtriSelezionati by filtroConsegnaViewModel.filtriSelezionati.collectAsState(initial = "")
+
+    val tipiRistorante = tipoRistoranteViewModel.tipiRistorante.collectAsState(initial = listOf()).value
+    val tipiRistoranti = ristoranteTipoRistoranteViewModel.tipiRistoranti.collectAsState(initial = listOf()).value
+    val tipiSelezionati by tipoRistoranteViewModel.tipiSelezionati.collectAsState(initial = "")
+
     var ricerca by rememberSaveable { mutableStateOf("") }
-    val ristorantiFiltrati = filtroRistoranti(filtriPerRistorante,filtriSelezionati, ristoranteViewModel)
+
+    val ristorantiTipati = tipoRistorante(tipiRistoranti, tipiSelezionati, tipiRistorante)
+    val ristorantiFiltrati = filtroRistoranti(ristorantiTipati, filtriRistoranti, filtriSelezionati, ristoranteViewModel, filtriRistorante)
     val ristorantiCercati = ristorantiFiltrati.filter {ristorante -> ristorante.nome.lowercase().contains(ricerca.lowercase()) } //da cambiare per i filtri
 
-    LazyVerticalGrid(
+
+
+        LazyVerticalGrid(
         columns = GridCells.Fixed(1),
         content = {
             header {
@@ -127,76 +144,28 @@ fun RistorantiList(
                             )
                         }
                     }
+
                     Row(
                         horizontalArrangement = Arrangement.Center,
                         verticalAlignment = CenterVertically,
                         modifier = Modifier.padding(top = 10.dp)
                     ) {
-                        IconButton(
-                            onClick = onFiltersClicked,
-                            modifier = Modifier.weight(1.1f)
-                        ) {
-                            Icon(
-                                Icons.Filled.Filter1,
-                                contentDescription = stringResource(id = R.string.filters),
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(30.dp)
-                            )
-                        }
-                        IconButton(
-                            onClick = onFiltersClicked,
-                            modifier = Modifier.weight(1.1f)
-                        ) {
-                            Icon(
-                                Icons.Filled.Filter2,
-                                contentDescription = stringResource(id = R.string.filters),
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(30.dp)
-                            )
-                        }
-                        IconButton(
-                            onClick = onFiltersClicked,
-                            modifier = Modifier.weight(1.1f)
-                        ) {
-                            Icon(
-                                Icons.Filled.Filter3,
-                                contentDescription = stringResource(id = R.string.filters),
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(30.dp)
-                            )
-                        }
-                        IconButton(
-                            onClick = onFiltersClicked,
-                            modifier = Modifier.weight(1.1f)
-                        ) {
-                            Icon(
-                                Icons.Filled.Filter4,
-                                contentDescription = stringResource(id = R.string.filters),
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(30.dp)
-                            )
-                        }
-                        IconButton(
-                            onClick = onFiltersClicked,
-                            modifier = Modifier.weight(1.1f)
-                        ) {
-                            Icon(
-                                Icons.Filled.Filter5,
-                                contentDescription = stringResource(id = R.string.filters),
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(30.dp)
-                            )
-                        }
-                        IconButton(
-                            onClick = onFiltersClicked,
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            Icon(
-                                Icons.Filled.Menu,
-                                contentDescription = stringResource(id = R.string.filters),
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(30.dp)
-                            )
+                        for(index in 0 until  tipiRistorante.size) {
+                            IconButton(
+                                onClick = {
+                                    val newChar = if(tipiSelezionati[index] == '0') "1" else "0"
+                                    val newTipi = tipiSelezionati.substring(0,index) + newChar + tipiSelezionati.substring(index+1)
+                                    tipoRistoranteViewModel.saveTipi(newTipi)
+                                },
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.Filter1, //it.icona
+                                    contentDescription = tipiRistorante[index].nomeTipo,
+                                    tint = if(tipiSelezionati[index] == '1') MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primaryContainer,
+                                    modifier = Modifier.size(30.dp)
+                                )
+                            }
                         }
                     }
                 }
@@ -279,31 +248,65 @@ fun RistorantiList(
         })
 }
 
-fun filtroRistoranti(filtriPerRistorante: List<RistoranteFiltroConsegna>, filtriSelezionati: String, ristoranteViewModel: RistoranteViewModel): List<Ristorante> {
+fun tipoRistorante(tipiRistoranti: List<RistoranteTipoRistorante>, filtriSelezionati: String, tipiRistorante: List<TipoRistorante>): List<Ristorante> {
     val ristorantiFiltrati = mutableListOf<Ristorante>()
-    filtriPerRistorante.forEach{ pair ->
-        if(checkFiltri(filtriSelezionati, pair.ristorante, pair.filtri, ristoranteViewModel)) {
+    tipiRistoranti.forEach{ pair ->
+        if(checkTipi(filtriSelezionati, pair.tipi.get(0), tipiRistorante)) {
             ristorantiFiltrati.add(pair.ristorante)
         }
     }
     return ristorantiFiltrati
 }
 
-fun checkFiltri(filtriSelezionati: String, ristorante: Ristorante, filtriConsegna: List<FiltroConsegna>, ristoranteViewModel: RistoranteViewModel): Boolean {
+fun checkTipi(
+    filtriSelezionati: String,
+    tipoRistorante: TipoRistorante,
+    tipiRistorante: List<TipoRistorante>
+): Boolean {
     var flag = true
-    if(filtriSelezionati[0] == '1') {
-        if (!filtriConsegna.contains(FiltroConsegna("Consumazione sul posto"))) {
-            flag = false
+    for(index in 0 until tipiRistorante.size) {
+        if(filtriSelezionati[index] == '0') {
+            Log.d("TIPI", "RISTORANTE= " + tipoRistorante.nomeTipo + " / FILTRI= " + filtriSelezionati + " / FILTRO= " + tipiRistorante[index].nomeTipo)
+            if (tipoRistorante.nomeTipo == tipiRistorante[index].nomeTipo) {
+                flag = false
+            }
         }
     }
-    if(filtriSelezionati[1] == '1') {
-        if (!filtriConsegna.contains(FiltroConsegna("Consegna a domicilio"))) {
-            flag = false
+    return flag
+}
+
+fun filtroRistoranti(
+    ristorantiTipati: List<Ristorante>,
+    filtriPerRistorante: List<RistoranteFiltroConsegna>,
+    filtriSelezionati: String,
+    ristoranteViewModel: RistoranteViewModel,
+    filtriRistorante: List<FiltroConsegna>
+): List<Ristorante> {
+    val ristorantiFiltrati = mutableListOf<Ristorante>()
+    ristorantiTipati.forEach { ristorante ->
+        val ristoranteTrovato = filtriPerRistorante.find { ristorante == it.ristorante }
+        if(ristoranteTrovato != null) {
+            if(checkFiltri(filtriSelezionati, ristoranteTrovato.ristorante, ristoranteTrovato.filtri, ristoranteViewModel, filtriRistorante)) {
+                ristorantiFiltrati.add(ristoranteTrovato.ristorante)
+            }
         }
     }
-    if(filtriSelezionati[2] == '1') {
-        if (!filtriConsegna.contains(FiltroConsegna("Asporto"))) {
-            flag = false
+    return ristorantiFiltrati
+}
+
+fun checkFiltri(
+    filtriSelezionati: String,
+    ristorante: Ristorante,
+    filtriConsegna: List<FiltroConsegna>,
+    ristoranteViewModel: RistoranteViewModel,
+    filtriRistorante: List<FiltroConsegna>
+): Boolean {
+    var flag = true
+    for(index in 0 until 2) {
+        if(filtriSelezionati[0] == '1') {
+            if (!filtriConsegna.contains(filtriRistorante[index])) {
+                flag = false
+            }
         }
     }
     if(filtriSelezionati[3] == '1') {

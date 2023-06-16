@@ -16,8 +16,6 @@ class FiltroConsegnaViewModel @Inject constructor(
 
     val filtriSelezionati = repository.preferenceFlow
 
-    val ordinamentoSelezionato = repository.preferenceFlow
-
     fun saveFiltri(filtri:String) {
         viewModelScope.launch {
             repository.saveToDataStore(filtri)

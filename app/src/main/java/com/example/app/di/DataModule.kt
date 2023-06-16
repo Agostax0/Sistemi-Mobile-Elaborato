@@ -32,7 +32,7 @@ object DataModule {
     @Singleton
     @Provides
     fun provideTipoRistoranteRepository(@ApplicationContext context: Context) =
-        TipoRistoranteRepository((context.applicationContext as FoodApp).database.tipoRistoranteDAO())
+        TipoRistoranteRepository((context.applicationContext as FoodApp).database.tipoRistoranteDAO(), context)
     @Singleton
     @Provides
     fun provideFiltroConsegnaRepository(@ApplicationContext context: Context) =
