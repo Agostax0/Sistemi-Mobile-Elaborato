@@ -19,6 +19,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -30,6 +32,7 @@ import com.example.app.ui.*
 import com.example.app.ui.LoginScreen
 import com.example.app.viewModel.*
 import dagger.hilt.android.HiltAndroidApp
+import kotlinx.coroutines.launch
 
 sealed class AppScreen(val name: String){
     object Home : AppScreen("Home")
@@ -42,6 +45,7 @@ sealed class AppScreen(val name: String){
     object Profile : AppScreen("Profile")
     object Register : AppScreen("Register")
     object Filter : AppScreen("Filter")
+    object Loading : AppScreen("Loading")
 }
 const val ROOT_ROUTE = "root"
 const val AUTHENTICATION_ROUTE = "authentication"
@@ -51,6 +55,11 @@ val RESTAURANT_SCREENS = listOf<String>(
     AppScreen.RestaurantMenu.name,
     AppScreen.RestaurantScoreboard.name
 )
+
+
+
+
+
 
 @HiltAndroidApp
 class FoodApp : Application(){
@@ -158,19 +167,27 @@ fun NavigationApp(
     navController: NavHostController = rememberNavController()
 ) {
     val ristoranteViewModel = hiltViewModel<RistoranteViewModel>()
+    val utenteViewModel = hiltViewModel<UtenteViewModel>()
+
+
+
+    //var flag: Boolean = utenteViewModel.checkIfThereIsaLoggedUser()
+
+    //Log.d("SESSION_TAG FoodApp.kt", "flag for logged user is $flag")
+
+
     // Get current back stack entry
     val backStackEntry by navController.currentBackStackEntryAsState()
     // Get the name of the current screen
 
-    //val currentScreen = backStackEntry?.destination?.route ?: AppScreen.Home.name //TODO cambiare in Login
-    val currentScreen = backStackEntry?.destination?.route ?: AppScreen.Login.name
+    val currentScreen = backStackEntry?.destination?.route ?: AppScreen.Loading.name //if(flag) AppScreen.Home.name else AppScreen.Login.name
 
     Log.d("NAV_TAG", "current screen : $currentScreen")
 
     Scaffold(
         topBar = {
             //Rimuove la TopAppBar dalla pagina di Login e Register
-            if(currentScreen != AppScreen.Login.name && currentScreen != AppScreen.Register.name){
+            if(currentScreen != AppScreen.Login.name && currentScreen != AppScreen.Register.name && currentScreen != AppScreen.Loading.name){
 
                 TopAppBarFunction(
                     currentScreen = currentScreen,
@@ -217,18 +234,16 @@ private fun NavigationGraph(
     val utenteScansionaRistoranteViewModel = hiltViewModel<UtenteScansionaRistoranteViewModel>()
     val settingsViewModel = hiltViewModel<SettingsViewModel>()
 
-    val flag: Boolean = utenteViewModel.session.collectAsState(initial = "").value!=""
-
-
+    val flag: Boolean = utenteViewModel.checkIfThereIsaLoggedUser()
 
     NavHost(
         navController = navController,
         //startDestination = AppScreen.Home.name,
-        startDestination = if(flag) AppScreen.Home.name else AppScreen.Login.name,
+        startDestination = AppScreen.Loading.name,//if(flag) AppScreen.Home.name else AppScreen.Login.name,
         route = ROOT_ROUTE,
         modifier = modifier.padding(innerPadding)
     ) {
-        val NAV_TAG = "NAV_TAG "
+        val NAV_TAG = "NAV_TAG"
 
         composable(route = AppScreen.Home.name) {
             HomeScreen(
@@ -300,6 +315,8 @@ private fun NavigationGraph(
                 onSuccessfulLogin = {
                     //navController.popBackStack(AppScreen.Home.name, inclusive = true)
                     navController.navigate(AppScreen.Home.name)
+                    Log.d(NAV_TAG + "FoodApp.kt" ,"navigating to "+AppScreen.Home.name+ " after ${AppScreen.Login.name}")
+
                 },
                 onRegisterButtonClicked = {
                     navController.navigate(AppScreen.Register.name)
@@ -338,6 +355,19 @@ private fun NavigationGraph(
                     navController.navigate(AppScreen.Login.name)
                 },
                 utenteViewModel = utenteViewModel
+            )
+        }
+
+        composable(route = AppScreen.Loading.name){
+            LoadingScreen(
+                utenteViewModel = utenteViewModel,
+                navigateToLogin = {
+                    navController.navigate(AppScreen.Login.name)
+                },
+                navigateToHome = {
+                    navController.navigate(AppScreen.Home.name)
+                }
+
             )
         }
     }

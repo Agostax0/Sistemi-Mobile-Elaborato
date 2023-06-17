@@ -1,6 +1,7 @@
 package com.example.app.viewModel
 
 import android.util.Log
+import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.app.data.entity.Utente
@@ -81,5 +82,14 @@ class UtenteViewModel @Inject constructor(
 
     fun addNewUtente(utente: Utente) = viewModelScope.launch {
         repository.insertNewUtente(utente)
+    }
+
+    fun checkIfThereIsaLoggedUser():Boolean{
+        var flag:Boolean = false
+        viewModelScope.launch {
+            flag = session.first()!=""
+            Log.d("SESSION_TAG UtenteViewModel.kt","Current Logged User is \'${session.first()}\'")
+        }
+        return flag
     }
 }
