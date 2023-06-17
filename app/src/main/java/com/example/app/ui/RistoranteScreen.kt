@@ -38,6 +38,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
+import coil.compose.AsyncImage
 import com.example.app.R
 import com.example.app.data.entity.FiltroConsegna
 import com.example.app.data.entity.Ristorante
@@ -79,22 +80,13 @@ fun RistoranteMainScreen(ristoranteViewModel: RistoranteViewModel,
                 .verticalScroll(scroll)
         ) {
             Header(ristorante = selectedRistorante!!, tipoRistorante = tipo, filtriConsegna, utenteScansionaRistoranteViewModel)
-            /*AsyncImage(model = ImageRequest.Builder(LocalContext.current)
-                .data(Uri.parse(ristorante.icona))
-                .crossfade(true)
-                .build(),
-                contentDescription = "immagine ristorante",
-                modifier = Modifier
-                    .size(size = 50.dp)
-            )*/
-            Image(
-                painter = painterResource(id = R.drawable.ic_launcher_foreground),
+            AsyncImage(model = selectedRistorante.icona,
                 contentDescription = "immagine ristorante",
                 modifier = Modifier
                     .size(size = 300.dp)
                     .align(CenterHorizontally),
-                colorFilter = ColorFilter.tint(color = MaterialTheme.colorScheme.primary)
             )
+
             Text(
                 text = selectedRistorante.nome,
                 modifier = Modifier
@@ -174,24 +166,12 @@ fun Header(ristorante: Ristorante,
             .padding(top = 5.dp)
             .fillMaxWidth(),
     ) {
-        /*AsyncImage(model = ImageRequest.Builder(LocalContext.current)
-            .data(Uri.parse(tipoRistorante.icona))
-            .crossfade(true)
-            .build(),
+        AsyncImage(model = tipoRistorante.icona,
             contentDescription = "immagine tipo ristorante",
             modifier = Modifier
-                .clip(shape = CircleShape)
-                .size(size = 50.dp))
-        }*/
-        Image(
-            painter = painterResource(id = R.drawable.ic_launcher_foreground),
-            contentDescription = "immagine tipo ristorante",
-            modifier = Modifier
-                .clip(shape = CircleShape)
-                .weight(.2f)
-                .size(size = 50.dp),
-            colorFilter = ColorFilter.tint(color = MaterialTheme.colorScheme.onSecondaryContainer)
-        )
+                .size(size = 40.dp)
+                .padding(end = 5.dp))
+
         Box(modifier = Modifier.weight(1f)){
             Text(
                 text = tipoRistorante.nomeTipo,

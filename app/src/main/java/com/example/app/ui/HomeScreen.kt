@@ -1,7 +1,9 @@
 package com.example.app.ui
 
+import android.net.Uri
 import android.util.Log
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.*
 import androidx.compose.foundation.rememberScrollState
@@ -19,11 +21,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.example.app.R
 import com.example.app.data.entity.FiltroConsegna
 import com.example.app.data.entity.Ristorante
@@ -97,9 +102,7 @@ fun RistorantiList(
     val ristorantiFiltrati = filtroRistoranti(ristorantiTipati, filtriRistoranti, filtriSelezionati, ristoranteViewModel, filtriRistorante)
     val ristorantiCercati = ristorantiFiltrati.filter {ristorante -> ristorante.nome.lowercase().contains(ricerca.lowercase()) } //da cambiare per i filtri
 
-
-
-        LazyVerticalGrid(
+    LazyVerticalGrid(
         columns = GridCells.Fixed(1),
         content = {
             header {
@@ -150,22 +153,23 @@ fun RistorantiList(
                         verticalAlignment = CenterVertically,
                         modifier = Modifier.padding(top = 10.dp)
                     ) {
-                        for(index in 0 until  tipiRistorante.size) {
-                            IconButton(
-                                onClick = {
-                                    val newChar = if(tipiSelezionati[index] == '0') "1" else "0"
-                                    val newTipi = tipiSelezionati.substring(0,index) + newChar + tipiSelezionati.substring(index+1)
-                                    tipoRistoranteViewModel.saveTipi(newTipi)
-                                },
-                                modifier = Modifier.weight(1f)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Filled.Filter1, //it.icona
-                                    contentDescription = tipiRistorante[index].nomeTipo,
-                                    tint = if(tipiSelezionati[index] == '1') MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primaryContainer,
-                                    modifier = Modifier.size(30.dp)
-                                )
-                            }
+                        for(index in tipiRistorante.indices) {
+                            AsyncImage(
+                                model = tipiRistorante[index].icona,
+                                contentDescription = tipiRistorante[index].nomeTipo,
+                                alpha = if(tipiSelezionati[index] == '1') 1f else 0.3f,
+                                modifier = Modifier
+                                    .size(35.dp)
+                                    .clickable (
+                                        onClick = {
+                                            val newChar = if(tipiSelezionati[index] == '0') "1" else "0"
+                                            val newTipi = tipiSelezionati.substring(0,index) + newChar + tipiSelezionati.substring(index+1)
+                                            tipoRistoranteViewModel.saveTipi(newTipi)
+                                        },
+                                        enabled = true
+                                    )
+                                    .weight(1f)
+                            )
                         }
                     }
                 }
@@ -192,23 +196,13 @@ fun RistorantiList(
                             .align(CenterHorizontally),
                         verticalAlignment = CenterVertically
                     ) {
-                        /*AsyncImage(model = ImageRequest.Builder(LocalContext.current)
-                            .data(Uri.parse(ristorante.icona))
-                            .crossfade(true)
-                            .build(),
+                        AsyncImage(model = ristorante.icona,
                             contentDescription = "immagine ristorante",
                             modifier = Modifier
-                                .clip(shape = CircleShape)
-                                .size(size = 50.dp))
-                        }*/
-                        Image(
-                            painter = painterResource(id = R.drawable.ic_launcher_foreground),
-                            contentDescription = "immagine ristorante",
-                            modifier = Modifier
-                                .clip(shape = CircleShape)
-                                .size(size = 50.dp),
-                            colorFilter = ColorFilter.tint(color = MaterialTheme.colorScheme.onSecondaryContainer)
-                        )
+                                .size(size = 35.dp)
+                                .padding(horizontal = 5.dp)
+                                .clip(shape = CircleShape))
+
                         val scroll = rememberScrollState(0)
                         Text(
                             text = ristorante.nome,
