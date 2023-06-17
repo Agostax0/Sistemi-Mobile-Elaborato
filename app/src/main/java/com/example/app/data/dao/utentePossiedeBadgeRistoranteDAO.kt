@@ -1,6 +1,7 @@
 package com.example.app.data.dao
 
 import androidx.room.*
+import com.example.app.data.relation.UtenteBadgeRistoranteCrossRef
 import com.example.app.data.relation.UtentePossiedeBadgeRistorante
 import kotlinx.coroutines.flow.Flow
 
@@ -8,8 +9,8 @@ import kotlinx.coroutines.flow.Flow
 interface UtentePossiedeBadgeRistoranteDAO {
 
     @Transaction
-    @Query("SELECT * FROM utente")
-    fun getUtentiBadgeRistorante() : Flow<List<UtentePossiedeBadgeRistorante>>
+    @Query("SELECT * FROM UtenteBadgeRistoranteCrossRef")
+    fun getUtentiBadgeRistorante() : Flow<List<UtenteBadgeRistoranteCrossRef>>
     /*
     @Query("SELECT * FROM utente_possiede_badge_ristorante WHERE utente_possiede_badge_ristorante.ID = :userId")
     fun getBagdeRistorantiObtainedOfUtente(userId:Int) : List<UtentePossiedeBadgeRistorante>

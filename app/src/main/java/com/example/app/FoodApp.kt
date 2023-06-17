@@ -284,7 +284,9 @@ private fun NavigationGraph(
             }
             composable(route = AppScreen.RestaurantScoreboard.name) {
                 RistoranteScoreboardScreen(
-                    ristoranteViewModel = ristoranteViewModel
+                    ristoranteViewModel = ristoranteViewModel,
+                    utentePossiedeBadgeRistoranteViewModel = utentePossiedeBadgeRistoranteViewModel,
+                    utenteViewModel
                 )
             }
         }

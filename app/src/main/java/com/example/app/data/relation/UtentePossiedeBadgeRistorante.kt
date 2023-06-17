@@ -34,5 +34,5 @@ data class UtentePossiedeBadgeRistorante(
         entityColumn = "COD_BR",
         associateBy = Junction(UtenteBadgeRistoranteCrossRef::class)
     )
-    val badgeRistoranti: List<BadgeRistorante>
+    val badgeRistoranti: List<BadgeRistorante>,
 )
