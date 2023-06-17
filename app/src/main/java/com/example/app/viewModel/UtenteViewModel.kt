@@ -84,12 +84,4 @@ class UtenteViewModel @Inject constructor(
         repository.insertNewUtente(utente)
     }
 
-    fun checkIfThereIsaLoggedUser():Boolean{
-        var flag:Boolean = false
-        viewModelScope.launch {
-            flag = session.first()!=""
-            Log.d("SESSION_TAG UtenteViewModel.kt","Current Logged User is \'${session.first()}\'")
-        }
-        return flag
-    }
 }

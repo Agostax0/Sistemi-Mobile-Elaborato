@@ -170,17 +170,11 @@ fun NavigationApp(
     val utenteViewModel = hiltViewModel<UtenteViewModel>()
 
 
-
-    //var flag: Boolean = utenteViewModel.checkIfThereIsaLoggedUser()
-
-    //Log.d("SESSION_TAG FoodApp.kt", "flag for logged user is $flag")
-
-
     // Get current back stack entry
     val backStackEntry by navController.currentBackStackEntryAsState()
     // Get the name of the current screen
 
-    val currentScreen = backStackEntry?.destination?.route ?: AppScreen.Loading.name //if(flag) AppScreen.Home.name else AppScreen.Login.name
+    val currentScreen = backStackEntry?.destination?.route ?: AppScreen.Loading.name
 
     Log.d("NAV_TAG", "current screen : $currentScreen")
 
@@ -234,12 +228,9 @@ private fun NavigationGraph(
     val utenteScansionaRistoranteViewModel = hiltViewModel<UtenteScansionaRistoranteViewModel>()
     val settingsViewModel = hiltViewModel<SettingsViewModel>()
 
-    val flag: Boolean = utenteViewModel.checkIfThereIsaLoggedUser()
-
     NavHost(
         navController = navController,
-        //startDestination = AppScreen.Home.name,
-        startDestination = AppScreen.Loading.name,//if(flag) AppScreen.Home.name else AppScreen.Login.name,
+        startDestination = AppScreen.Loading.name,
         route = ROOT_ROUTE,
         modifier = modifier.padding(innerPadding)
     ) {
