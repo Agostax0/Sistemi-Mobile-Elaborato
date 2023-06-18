@@ -10,7 +10,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -26,6 +28,8 @@ fun LoadingScreen(
     navigateToHome: ()->Unit
 ){
 
+    /*var session: State<String> = utenteViewModel.session.collectAsState(initial = "default")*/
+    //TODO check se collectAsState è diverso dal valore precedentemente letto, se sì esegue la pagina altrimenti no
 
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -42,15 +46,21 @@ fun LoadingScreen(
 
 
 
-        var session_value:String = utenteViewModel.session.collectAsState(initial = "default").value
 
-        if(session_value.isNullOrEmpty()){
+
+
+
+
+        while(utenteViewModel.getSessionUsername()==0){
+
+        }
+
+        var sessionCheck = utenteViewModel.getSessionUsername()
+
+        if(sessionCheck == 1){
             navigateToLogin()
         }
-        else if(session_value == "default"){
-
-        }
-        else{
+        else if(sessionCheck  == 2 ){
             navigateToHome()
         }
 

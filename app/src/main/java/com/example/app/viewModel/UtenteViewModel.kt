@@ -8,6 +8,7 @@ import com.example.app.data.entity.Utente
 import com.example.app.data.repository.UtenteRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -78,6 +79,40 @@ class UtenteViewModel @Inject constructor(
 
     fun updateUsername(newUsername:String){
 
+    }
+
+    fun getSessionUsername():Int{
+        var return_val: Int = 0
+
+        viewModelScope.launch {
+            try{
+                val sessionUsername = session.firstOrNull {
+                    true
+                }
+
+                if (sessionUsername == null) {
+
+                    //session non ancora loaddata
+                    return_val = 0
+                }
+                else if(sessionUsername!!.isEmpty()){
+                    //session caricata ma vuota, quindi bisogna andare in login
+                    return_val = 1
+                }
+                else{
+                    //session caricata e non vuota, bisogna andare in home
+                    return_val = 2
+                }
+
+            }
+            catch (e: java.lang.Exception){
+                return@launch
+            }
+        }
+
+        Log.d("LOADING_TAG", "session state: $return_val")
+
+        return return_val
     }
 
     fun addNewUtente(utente: Utente) = viewModelScope.launch {
