@@ -186,7 +186,7 @@ fun NavigationApp(
                 TopAppBarFunction(
                     currentScreen = currentScreen,
                     canNavigateBack = navController.previousBackStackEntry != null,
-                    navigateUp = { if(!RESTAURANT_SCREENS.contains(currentScreen)) navController.navigateUp() else navController.navigate(ROOT_ROUTE) },
+                    navigateUp = { if(!RESTAURANT_SCREENS.contains(currentScreen)) navController.navigateUp() else navController.navigate(AppScreen.Home.name) },
                     onTitleButtonClicked = { navController.navigate(AppScreen.Home.name) },
                     onSettingsButtonClicked = { navController.navigate(AppScreen.Settings.name) },
                     onProfileButtonClicked = { navController.navigate(AppScreen.Profile.name) },
@@ -316,11 +316,7 @@ private fun NavigationGraph(
 
                 },
                 onRegisterButtonClicked = {
-                    navController.navigate(AppScreen.Register.name){
-                        popUpTo(navController.graph.id){
-                            inclusive = true
-                        }
-                    }
+                    navController.navigate(AppScreen.Register.name)
                 },
                 utenteViewModel = utenteViewModel
             )
@@ -361,11 +357,7 @@ private fun NavigationGraph(
                     }
                 },
                 onLoginButtonClicked = {
-                    navController.navigate(AppScreen.Login.name){
-                        popUpTo(navController.graph.id){
-                            inclusive = true
-                        }
-                    }
+                    navController.navigate(AppScreen.Login.name)
                 },
                 utenteViewModel = utenteViewModel
             )
