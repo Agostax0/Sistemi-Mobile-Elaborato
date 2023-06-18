@@ -12,6 +12,9 @@ interface UtenteScansionaRistoranteDAO{
     @Query("SELECT * FROM utente")
     fun getScansioniUtenti() : Flow<List<UtenteScansionaRistorante>>
 
+    @Query("SELECT COD_RIS FROM UtenteRistoranteCrossRef WHERE ID=:ID AND preferito = 1")
+    fun getRistorantiPreferitiPerUtente(ID: String): Flow<List<Int>>
+
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun addScansioneRistorante(vararg utenteRistoranteCrossRef: UtenteRistoranteCrossRef)
 }

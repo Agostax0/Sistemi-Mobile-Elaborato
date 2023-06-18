@@ -21,8 +21,10 @@ class FiltroConsegnaRepository(private val filtroConsegnaDAO: FiltroConsegnaDAO,
     companion object {
         private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "filtri_preferences")
         private val FILTRI_SELEZIONATI = stringPreferencesKey("filtri_selezionati")
-        //private val ORDINAMENTO = stringPreferencesKey("ordinamento")
+        private val ORDINAMENTO = stringPreferencesKey("ordinamento")
+        private val DISTANZA = stringPreferencesKey("distanza")
     }
+
 
     val preferenceFlow: Flow<String> = context.dataStore.data
         .catch {
@@ -35,7 +37,32 @@ class FiltroConsegnaRepository(private val filtroConsegnaDAO: FiltroConsegnaDAO,
         }
         .map { preferences ->
             preferences[FILTRI_SELEZIONATI]?:"1111"
-            //preferences[ORDINAMENTO]?:"0"
+        }
+
+    val sortFlow: Flow<String> = context.dataStore.data
+        .catch {
+            if (it is IOException) {
+                it.printStackTrace()
+                emit(emptyPreferences())
+            } else {
+                throw it
+            }
+        }
+        .map { preferences ->
+            preferences[ORDINAMENTO]?:"Più vicini"
+        }
+
+    val distFlow: Flow<String> = context.dataStore.data
+        .catch {
+            if (it is IOException) {
+                it.printStackTrace()
+                emit(emptyPreferences())
+            } else {
+                throw it
+            }
+        }
+        .map { preferences ->
+            preferences[DISTANZA]?:"4000"
         }
 
     suspend fun saveToDataStore(filtri: String) {
@@ -44,9 +71,15 @@ class FiltroConsegnaRepository(private val filtroConsegnaDAO: FiltroConsegnaDAO,
         }
     }
 
-    /*suspend fun saveToDataStoreOrdine(ordinamento: String) {
+    suspend fun saveToDataStoreOrdine(ordinamento: String) {
         context.dataStore.edit { preferences ->
             preferences[ORDINAMENTO] = ordinamento
         }
-    }*/
+    }
+
+    suspend fun saveToDataStoreDistanza(distanza: String) {
+        context.dataStore.edit { preferences ->
+            preferences[DISTANZA] = distanza
+        }
+    }
 }

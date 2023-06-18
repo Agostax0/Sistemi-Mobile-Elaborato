@@ -50,16 +50,11 @@ sealed class AppScreen(val name: String){
 const val ROOT_ROUTE = "root"
 const val AUTHENTICATION_ROUTE = "authentication"
 const val RESTAURANT_ROUTE = "restaurant"
-val RESTAURANT_SCREENS = listOf<String>(
+val RESTAURANT_SCREENS = listOf(
     AppScreen.RestaurantMain.name,
     AppScreen.RestaurantMenu.name,
     AppScreen.RestaurantScoreboard.name
 )
-
-
-
-
-
 
 @HiltAndroidApp
 class FoodApp : Application(){
@@ -251,7 +246,9 @@ private fun NavigationGraph(
                 filtroConsegnaViewModel = filtroConsegnaViewModel,
                 ristoranteFiltroConsegnaViewModel = ristoranteFiltroConsegnaViewModel,
                 tipoRistoranteViewModel = tipoRistoranteViewModel,
-                ristoranteTipoRistoranteViewModel = ristoranteTipoRistoranteViewModel
+                ristoranteTipoRistoranteViewModel = ristoranteTipoRistoranteViewModel,
+                utenteScansionaRistoranteViewModel = utenteScansionaRistoranteViewModel,
+                utenteViewModel = utenteViewModel
             )
         }
 

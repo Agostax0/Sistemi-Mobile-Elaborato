@@ -1,8 +1,6 @@
 package com.example.app.ui
 
-import android.net.Uri
 import android.util.Log
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.*
@@ -20,27 +18,26 @@ import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import coil.request.ImageRequest
 import com.example.app.R
 import com.example.app.data.entity.FiltroConsegna
 import com.example.app.data.entity.Ristorante
 import com.example.app.data.entity.TipoRistorante
 import com.example.app.data.relation.RistoranteFiltroConsegna
 import com.example.app.data.relation.RistoranteTipoRistorante
+import com.example.app.data.relation.UtenteRistoranteCrossRef
 import com.example.app.ui.theme.Green
 import com.example.app.viewModel.FiltroConsegnaViewModel
 import com.example.app.viewModel.RistoranteFiltroConsegnaViewModel
 import com.example.app.viewModel.RistoranteTipoRistoranteViewModel
 import com.example.app.viewModel.RistoranteViewModel
 import com.example.app.viewModel.TipoRistoranteViewModel
+import com.example.app.viewModel.UtenteScansionaRistoranteViewModel
+import com.example.app.viewModel.UtenteViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -52,6 +49,8 @@ fun HomeScreen(onMapButtonClicked: ()-> Unit,
                ristoranteFiltroConsegnaViewModel: RistoranteFiltroConsegnaViewModel,
                tipoRistoranteViewModel: TipoRistoranteViewModel,
                ristoranteTipoRistoranteViewModel: RistoranteTipoRistoranteViewModel,
+               utenteScansionaRistoranteViewModel: UtenteScansionaRistoranteViewModel,
+               utenteViewModel: UtenteViewModel,
                modifier: Modifier = Modifier
 ){
     Scaffold (
@@ -66,7 +65,16 @@ fun HomeScreen(onMapButtonClicked: ()-> Unit,
         },
     ) { innerPadding ->
         Column (modifier.padding(innerPadding)) {
-            RistorantiList(onRestaurantClicked, onFiltersClicked, ristoranteViewModel, ristoranteFiltroConsegnaViewModel, filtroConsegnaViewModel, tipoRistoranteViewModel, ristoranteTipoRistoranteViewModel)
+            RistorantiList(onRestaurantClicked,
+                onFiltersClicked,
+                ristoranteViewModel,
+                ristoranteFiltroConsegnaViewModel,
+                filtroConsegnaViewModel,
+                tipoRistoranteViewModel,
+                ristoranteTipoRistoranteViewModel,
+                utenteScansionaRistoranteViewModel,
+                utenteViewModel
+            )
         }
     }
 }
@@ -86,7 +94,9 @@ fun RistorantiList(
     ristoranteFiltroConsegnaViewModel: RistoranteFiltroConsegnaViewModel,
     filtroConsegnaViewModel: FiltroConsegnaViewModel,
     tipoRistoranteViewModel: TipoRistoranteViewModel,
-    ristoranteTipoRistoranteViewModel: RistoranteTipoRistoranteViewModel
+    ristoranteTipoRistoranteViewModel: RistoranteTipoRistoranteViewModel,
+    utenteScansionaRistoranteViewModel: UtenteScansionaRistoranteViewModel,
+    utenteViewModel: UtenteViewModel
 ) {
     val filtriRistorante = filtroConsegnaViewModel.filtriConsegna.collectAsState(initial = listOf()).value
     val filtriRistoranti = ristoranteFiltroConsegnaViewModel.filtriRistoranti.collectAsState(initial = listOf()).value
@@ -96,11 +106,17 @@ fun RistorantiList(
     val tipiRistoranti = ristoranteTipoRistoranteViewModel.tipiRistoranti.collectAsState(initial = listOf()).value
     val tipiSelezionati by tipoRistoranteViewModel.tipiSelezionati.collectAsState(initial = "")
 
+    val ordineSelezionato by filtroConsegnaViewModel.ordineSelezionato.collectAsState(initial = "")
+    val ristorantiPreferiti = utenteScansionaRistoranteViewModel.getRistorantiPreferitiPerUtente("2").collectAsState(   //TODO ALESSA
+            initial = listOf()
+        ).value
+
     var ricerca by rememberSaveable { mutableStateOf("") }
 
     val ristorantiTipati = tipoRistorante(tipiRistoranti, tipiSelezionati, tipiRistorante)
     val ristorantiFiltrati = filtroRistoranti(ristorantiTipati, filtriRistoranti, filtriSelezionati, ristoranteViewModel, filtriRistorante)
-    val ristorantiCercati = ristorantiFiltrati.filter {ristorante -> ristorante.nome.lowercase().contains(ricerca.lowercase()) } //da cambiare per i filtri
+    val ristorantiOrdinati = sortRistoranti(ristorantiFiltrati, ordineSelezionato, ristorantiPreferiti)
+    val ristorantiCercati = ristorantiOrdinati.filter {ristorante -> ristorante.nome.lowercase().contains(ricerca.lowercase()) }
 
     LazyVerticalGrid(
         columns = GridCells.Fixed(1),
@@ -160,10 +176,14 @@ fun RistorantiList(
                                 alpha = if(tipiSelezionati[index] == '1') 1f else 0.3f,
                                 modifier = Modifier
                                     .size(35.dp)
-                                    .clickable (
+                                    .clickable(
                                         onClick = {
-                                            val newChar = if(tipiSelezionati[index] == '0') "1" else "0"
-                                            val newTipi = tipiSelezionati.substring(0,index) + newChar + tipiSelezionati.substring(index+1)
+                                            val newChar =
+                                                if (tipiSelezionati[index] == '0') "1" else "0"
+                                            val newTipi = tipiSelezionati.substring(
+                                                0,
+                                                index
+                                            ) + newChar + tipiSelezionati.substring(index + 1)
                                             tipoRistoranteViewModel.saveTipi(newTipi)
                                         },
                                         enabled = true
@@ -186,7 +206,7 @@ fun RistorantiList(
                         .padding(3.dp)
                         .fillMaxWidth(),
                     colors = CardDefaults.cardColors(
-                        containerColor =  MaterialTheme.colorScheme.primaryContainer
+                        containerColor =  if(ristorantiPreferiti.contains(ristorante.COD_RIS)) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.primaryContainer
                     )
                 ) {
                     Row(
@@ -207,7 +227,7 @@ fun RistorantiList(
                         Text(
                             text = ristorante.nome,
                             fontSize = 18.sp,
-                            color = MaterialTheme.colorScheme.onSecondaryContainer,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
                             textAlign = TextAlign.Start,
                             modifier = Modifier
                                 .verticalScroll(scroll)
@@ -240,6 +260,20 @@ fun RistorantiList(
                 }
             }
         })
+}
+
+fun sortRistoranti(
+    ristorantiFiltrati: List<Ristorante>,
+    ordineSelezionato: String,
+    ristorantiPreferiti: List<Int>
+): List<Ristorante> {
+    var ristorantiOrdinati = listOf<Ristorante>()
+    when(ordineSelezionato) {
+        "Più vicini" -> ristorantiOrdinati = ristorantiFiltrati.sortedBy { it.posizione }
+        "Più amati" -> ristorantiOrdinati = ristorantiFiltrati.sortedBy { it.numeroPreferiti }.asReversed()
+        "I tuoi preferiti" -> ristorantiOrdinati = ristorantiFiltrati.sortedBy { ristorantiPreferiti.contains(it.COD_RIS) }.asReversed()
+    }
+    return ristorantiOrdinati
 }
 
 fun tipoRistorante(tipiRistoranti: List<RistoranteTipoRistorante>, filtriSelezionati: String, tipiRistorante: List<TipoRistorante>): List<Ristorante> {

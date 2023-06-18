@@ -16,9 +16,26 @@ class FiltroConsegnaViewModel @Inject constructor(
 
     val filtriSelezionati = repository.preferenceFlow
 
+    val ordinamenti = listOf("Più vicini", "Più amati", "I tuoi preferiti")
+    val ordineSelezionato = repository.sortFlow
+
+    val distanza = repository.distFlow
+
     fun saveFiltri(filtri:String) {
         viewModelScope.launch {
             repository.saveToDataStore(filtri)
+        }
+    }
+
+    fun saveOrdine(ordine:String) {
+        viewModelScope.launch {
+            repository.saveToDataStoreOrdine(ordine)
+        }
+    }
+
+    fun saveDistanza(distanza: Float) {
+        viewModelScope.launch {
+            repository.saveToDataStoreDistanza(distanza.toString())
         }
     }
 }
