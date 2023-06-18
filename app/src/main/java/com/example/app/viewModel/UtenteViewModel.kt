@@ -39,10 +39,6 @@ class UtenteViewModel @Inject constructor(
     val statoLogin
         get() = _statoLogin
 
-    private lateinit var _utenteLoggato:Utente
-    val utenteLoggato
-        get() = _utenteLoggato
-
     fun login(username:String, password:String){
 
         Log.d("LOGIN_TAG","attemping login with $username and $password")
@@ -63,17 +59,21 @@ class UtenteViewModel @Inject constructor(
 
     }
 
-    fun getUtenteLoggatoInfo(){
+    fun getUtenteLoggatoInfo():Utente{
+        var utenteLoggato : Utente? = null
+
         viewModelScope.launch {
             try{
                 val getInfoResponse = repository.getUtenteFromUsername(session.first())
 
-                _utenteLoggato = getInfoResponse
+                utenteLoggato = getInfoResponse
             }
             catch (e: java.lang.Exception){
                 return@launch
             }
         }
+
+        return utenteLoggato!!
     }
 
 
