@@ -307,12 +307,12 @@ private fun NavigationGraph(
             LoginScreen(
                 onSuccessfulLogin = {
                     //navController.popBackStack(AppScreen.Home.name, inclusive = true)
-                    navController.navigate(AppScreen.Home.name)
+                    navController.popBackStack(AppScreen.Home.name, inclusive = true)
                     Log.d(NAV_TAG + "FoodApp.kt" ,"navigating to "+AppScreen.Home.name+ " after ${AppScreen.Login.name}")
 
                 },
                 onRegisterButtonClicked = {
-                    navController.navigate(AppScreen.Register.name)
+                    navController.popBackStack(AppScreen.Register.name, inclusive = true)
                 },
                 utenteViewModel = utenteViewModel
             )
@@ -323,7 +323,7 @@ private fun NavigationGraph(
             SettingsScreen(
                 onLogoutButtonClicked = {
                     //logout
-                    navController.navigate(AppScreen.Login.name)
+                    navController.popBackStack(AppScreen.Login.name, inclusive = true)
                 },
                 settingsViewModel = settingsViewModel,
                 utenteViewModel = utenteViewModel
@@ -342,10 +342,10 @@ private fun NavigationGraph(
 
             RegisterScreen(
                 onSuccessfulRegister = {
-                    navController.navigate(AppScreen.Home.name)
+                    navController.popBackStack(AppScreen.Home.name, inclusive = true)
                 },
                 onLoginButtonClicked = {
-                    navController.navigate(AppScreen.Login.name)
+                    navController.popBackStack(AppScreen.Login.name, inclusive = true)
                 },
                 utenteViewModel = utenteViewModel
             )
@@ -355,10 +355,11 @@ private fun NavigationGraph(
             LoadingScreen(
                 utenteViewModel = utenteViewModel,
                 navigateToLogin = {
-                    navController.navigate(AppScreen.Login.name)
+                    navController.popBackStack(AppScreen.Login.name, inclusive = true)
+                    //navController.navigate(AppScreen.Login.name)
                 },
                 navigateToHome = {
-                    navController.navigate(AppScreen.Home.name)
+                    navController.popBackStack(AppScreen.Home.name, inclusive = true)
                 }
 
             )
