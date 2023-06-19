@@ -1,5 +1,6 @@
 package com.example.app.data.dao
 
+import androidx.annotation.WorkerThread
 import androidx.room.*
 import com.example.app.data.relation.UtenteRistoranteCrossRef
 import com.example.app.data.relation.UtenteScansionaRistorante
@@ -17,4 +18,7 @@ interface UtenteScansionaRistoranteDAO{
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun addScansioneRistorante(vararg utenteRistoranteCrossRef: UtenteRistoranteCrossRef)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun updatePreferito(vararg utenteRistoranteCrossRef: UtenteRistoranteCrossRef)
 }

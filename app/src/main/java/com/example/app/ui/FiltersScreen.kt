@@ -32,7 +32,6 @@ fun FiltersScreen(filtroConsegnaViewModel: FiltroConsegnaViewModel,
     val ordineSelezionato by filtroConsegnaViewModel.ordineSelezionato.collectAsState(initial = "")
 
     val distanza by filtroConsegnaViewModel.distanza.collectAsState(initial = "")
-    Log.d("DISTANZA", distanza)
 
     Scaffold (
         floatingActionButton = {
@@ -105,7 +104,6 @@ fun FiltersScreen(filtroConsegnaViewModel: FiltroConsegnaViewModel,
             )
             if(distanza != "") {
                 var sliderPosition by remember { mutableStateOf(distanza.toFloat()) }
-                Log.d("slider", sliderPosition.toString())
                 Text(text = sliderPosition.toString())
                 Slider(value = (sliderPosition - 300) / 14700, onValueChange = {
                     sliderPosition = 300 + it*14700

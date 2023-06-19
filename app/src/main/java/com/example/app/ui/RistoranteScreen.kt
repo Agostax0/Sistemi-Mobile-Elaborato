@@ -6,12 +6,10 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -29,25 +27,26 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import coil.compose.AsyncImage
-import com.example.app.R
 import com.example.app.data.entity.FiltroConsegna
 import com.example.app.data.entity.Ristorante
 import com.example.app.data.entity.TipoRistorante
+import com.example.app.data.entity.Utente
+import com.example.app.data.relation.UtenteBadgeRistoranteCrossRef
+import com.example.app.data.relation.UtenteRistoranteCrossRef
 import com.example.app.ui.theme.Green
 import com.example.app.viewModel.RistoranteFiltroConsegnaViewModel
 import com.example.app.viewModel.RistoranteTipoRistoranteViewModel
 import com.example.app.viewModel.RistoranteViewModel
+import com.example.app.viewModel.UtentePossiedeBadgeRistoranteViewModel
 import com.example.app.viewModel.UtenteScansionaRistoranteViewModel
+import com.example.app.viewModel.UtenteViewModel
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
 import java.util.Calendar
@@ -57,7 +56,9 @@ fun RistoranteMainScreen(ristoranteViewModel: RistoranteViewModel,
                          modifier: Modifier = Modifier,
                          ristoranteTipoRistoranteViewModel: RistoranteTipoRistoranteViewModel,
                          ristoranteFiltroConsegnaViewModel: RistoranteFiltroConsegnaViewModel,
-                         utenteScansionaRistoranteViewModel: UtenteScansionaRistoranteViewModel
+                         utenteScansionaRistoranteViewModel: UtenteScansionaRistoranteViewModel,
+                         utentePossiedeBadgeRistoranteViewModel: UtentePossiedeBadgeRistoranteViewModel,
+                         utenteViewModel: UtenteViewModel
 ) {
     val context = LocalContext.current
 
@@ -66,6 +67,14 @@ fun RistoranteMainScreen(ristoranteViewModel: RistoranteViewModel,
     val tipoRistorante = tipiRistoranti.find { it.ristorante == selectedRistorante }
     val filtriRistoranti = ristoranteFiltroConsegnaViewModel.filtriRistoranti.collectAsState(initial = listOf()).value
     val filtriSelectedRistorante = filtriRistoranti.find { it.ristorante == selectedRistorante }
+    val utentiBadgeRistorante = utentePossiedeBadgeRistoranteViewModel.utentiBadgeRistorante.collectAsState(initial = listOf()).value
+    val utenteLoggato = utenteViewModel.utenteLoggato!!
+    val badgeUtenteLoggato = utentiBadgeRistorante.filter {
+        it.COD_BR == selectedRistorante!!.COD_BR && it.ID == utenteLoggato.ID
+    }
+    val isPreferito = utenteScansionaRistoranteViewModel.getRistorantiPreferitiPerUtente(utenteLoggato.ID.toString()).collectAsState(
+        initial = listOf()
+    ).value.filter { it == selectedRistorante!!.COD_RIS }
 
     val openDialog = remember { mutableStateOf(false)  }
     val scroll = rememberScrollState(0)
@@ -79,7 +88,13 @@ fun RistoranteMainScreen(ristoranteViewModel: RistoranteViewModel,
                 .padding(horizontal = 10.dp)
                 .verticalScroll(scroll)
         ) {
-            Header(ristorante = selectedRistorante!!, tipoRistorante = tipo, filtriConsegna, utenteScansionaRistoranteViewModel)
+            Header(ristorante = selectedRistorante!!,
+                tipoRistorante = tipo,
+                filtriConsegna,
+                utenteScansionaRistoranteViewModel,
+                isPreferito,
+                utenteLoggato!!
+            )
             AsyncImage(model = selectedRistorante.icona,
                 contentDescription = "immagine ristorante",
                 modifier = Modifier
@@ -93,7 +108,7 @@ fun RistoranteMainScreen(ristoranteViewModel: RistoranteViewModel,
                     .padding(bottom = 20.dp)
             )
 
-            ZonaUtente(ristorante = selectedRistorante, utenteScansionaRistoranteViewModel, context)
+            ZonaUtente(ristorante = selectedRistorante, utenteScansionaRistoranteViewModel, context, badgeUtenteLoggato)
             ZonaInfo(ristorante = selectedRistorante,
                 ristoranteViewModel,
                 { openDialog.value = !openDialog.value },
@@ -148,18 +163,19 @@ fun RistoranteMainScreen(ristoranteViewModel: RistoranteViewModel,
 }
 
 @Composable
-fun Header(ristorante: Ristorante,
-           tipoRistorante: TipoRistorante,
-           filtriConsegna: List<FiltroConsegna>,
-           utenteScansionaRistoranteViewModel: UtenteScansionaRistoranteViewModel
+fun Header(
+    ristorante: Ristorante,
+    tipoRistorante: TipoRistorante,
+    filtriConsegna: List<FiltroConsegna>,
+    utenteScansionaRistoranteViewModel: UtenteScansionaRistoranteViewModel,
+    isPreferito: List<Int>,
+    utenteLoggato: Utente
 ){
     var filtriText = ""
     filtriConsegna.forEach{
         filtriText += it.filtro + " / "
     }
     filtriText = filtriText.removeSuffix(" / ")
-    val scansioniUtenti = utenteScansionaRistoranteViewModel.scansioniUtenti.collectAsState(initial = listOf()).value
-    //val scansioniUtente = scansioniUtenti.find { it.utente.ID == 1 }
 
     Row(
         modifier = Modifier
@@ -190,7 +206,16 @@ fun Header(ristorante: Ristorante,
             )
         }
         IconButton(
-            onClick = { /*TODO aggiunge preferito*/ },
+            onClick = {
+                val newPreferito = isPreferito.isEmpty()
+                utenteScansionaRistoranteViewModel.updatePreferito(
+                    UtenteRistoranteCrossRef(
+                        ID = utenteLoggato.ID,
+                        COD_RIS = ristorante.COD_RIS,
+                        preferito = newPreferito
+                    )
+                )
+            },
             modifier = Modifier
                 .weight(.3f)
                 .border(
@@ -201,7 +226,7 @@ fun Header(ristorante: Ristorante,
             Icon(imageVector = Icons.Filled.Star,
                 contentDescription = "Preferiti",
                 modifier = Modifier.padding(end = 25.dp),
-                tint = MaterialTheme.colorScheme.primary //if(isPreferito) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primaryContainer
+                tint = if(!isPreferito.isEmpty()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primaryContainer
             )
             Text(text = ristorante.numeroPreferiti.toString(),
                 modifier = Modifier.padding(start = 25.dp)
@@ -214,16 +239,23 @@ fun Header(ristorante: Ristorante,
 fun ZonaUtente(
     ristorante: Ristorante,
     utenteScansionaRistoranteViewModel: UtenteScansionaRistoranteViewModel,
-    context: Context
+    context: Context,
+    badgeUtenteLoggato: List<UtenteBadgeRistoranteCrossRef>
 ) {
     val options = ScanOptions()
     options.setOrientationLocked(false)
 
+    var badge = UtenteBadgeRistoranteCrossRef(0,0,"0",0)
+
+    if(!badgeUtenteLoggato.isEmpty()) {
+        badge = badgeUtenteLoggato.get(0)
+    }
+
     val barcodeLauncher = rememberLauncherForActivityResult(contract = ScanContract()) { result ->
         if(result.getContents() == null) {
-            Toast.makeText(context, "Cancelled", Toast.LENGTH_LONG).show();
+            Toast.makeText(context, "Cancelled", Toast.LENGTH_LONG).show()
         } else {
-            Toast.makeText(context, "Scanned: " + result.getContents(), Toast.LENGTH_LONG).show();
+            Toast.makeText(context, "Scanned: " + result.getContents(), Toast.LENGTH_LONG).show()
         }
     }
 
@@ -240,7 +272,7 @@ fun ZonaUtente(
     Row(modifier = Modifier
         .fillMaxWidth()
     ) {
-        Text(text = "Livello 3",
+        Text(text = "Livello " + (badge.esperienzaBadge / 100).toString(),
             modifier = Modifier.weight(1f)
         )
         IconButton(
@@ -267,7 +299,7 @@ fun ZonaUtente(
             )
         }
     }
-    LinearProgressIndicator(progress = 0.7f) //da regolare con l'esperienza
+    LinearProgressIndicator(progress = (badge.esperienzaBadge % 100f)/100)
 }
 
 @Composable

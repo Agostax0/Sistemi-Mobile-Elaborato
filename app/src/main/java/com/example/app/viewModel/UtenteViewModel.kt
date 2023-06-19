@@ -4,11 +4,14 @@ import android.util.Log
 import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.app.data.entity.Ristorante
 import com.example.app.data.entity.Utente
 import com.example.app.data.repository.UtenteRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -22,7 +25,6 @@ class UtenteViewModel @Inject constructor(
         viewModelScope.launch {
             repository.saveToDataStore(User)
         }
-
         Log.d("DATASTORE_TAG", "added ${User.username} into Datastore")
     }
 
@@ -32,8 +34,23 @@ class UtenteViewModel @Inject constructor(
         }
     }
 
+    fun stopCoroutines() {
+        viewModelScope.cancel()
+    }
+
+    fun isActive(): Boolean {
+        return viewModelScope.isActive
+    }
 
     val utenti = repository.utenti
+
+    private var _utenteLoggato: Utente? = null
+    val utenteLoggato
+        get() = _utenteLoggato
+
+    fun selectutente(utente: Utente) {
+        _utenteLoggato = utente
+    }
 
     private var _statoLogin:Utente? = null
     val statoLogin
@@ -58,24 +75,6 @@ class UtenteViewModel @Inject constructor(
         Log.d("LOGIN_TAG","login: ${_statoLogin!=null}")
 
     }
-
-    fun getUtenteLoggatoInfo():Utente{
-        var utenteLoggato : Utente? = null
-
-        viewModelScope.launch {
-            try{
-                val getInfoResponse = repository.getUtenteFromUsername(session.first())
-
-                utenteLoggato = getInfoResponse
-            }
-            catch (e: java.lang.Exception){
-                return@launch
-            }
-        }
-
-        return utenteLoggato!!
-    }
-
 
     fun updateUsername(newUsername:String){
 

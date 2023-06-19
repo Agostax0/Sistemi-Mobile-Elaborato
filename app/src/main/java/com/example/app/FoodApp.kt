@@ -261,7 +261,9 @@ private fun NavigationGraph(
                     ristoranteViewModel = ristoranteViewModel,
                     ristoranteTipoRistoranteViewModel = ristoranteTipoRistoranteViewModel,
                     ristoranteFiltroConsegnaViewModel = ristoranteFiltroConsegnaViewModel,
-                    utenteScansionaRistoranteViewModel = utenteScansionaRistoranteViewModel
+                    utenteScansionaRistoranteViewModel = utenteScansionaRistoranteViewModel,
+                    utentePossiedeBadgeRistoranteViewModel = utentePossiedeBadgeRistoranteViewModel,
+                    utenteViewModel = utenteViewModel
                 )
             }
             composable(route = AppScreen.RestaurantMenu.name) {

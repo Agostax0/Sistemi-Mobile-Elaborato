@@ -19,6 +19,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.app.viewModel.UtenteViewModel
+import kotlinx.coroutines.flow.collect
 import okhttp3.internal.wait
 
 @Composable
@@ -27,44 +28,38 @@ fun LoadingScreen(
     navigateToLogin: ()->Unit,
     navigateToHome: ()->Unit
 ){
+    val session = utenteViewModel.session.collectAsState(initial = "default").takeIf { utenteViewModel.isActive() }?.value
 
-    /*var session: State<String> = utenteViewModel.session.collectAsState(initial = "default")*/
-    //TODO check se collectAsState è diverso dal valore precedentemente letto, se sì esegue la pagina altrimenti no
+    val utenti = utenteViewModel.utenti.collectAsState(initial = listOf()).takeIf { utenteViewModel.isActive() }?.value
 
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        AsyncImage(model = "https://cdn.discordapp.com/attachments/336170905912737792/1119636309506535454/iu.png",
-                    contentDescription = "App Logo",
-                    modifier = Modifier
-                        .size(size = 50.dp)
-                        .padding(horizontal = 5.dp)
-                        .clip(shape = CircleShape))
-
-
-
-
-
-
-
-
-
-        while(utenteViewModel.getSessionUsername()==0){
-
-        }
-
-        var sessionCheck = utenteViewModel.getSessionUsername()
-
-        if(sessionCheck == 1){
+    if(session != "default") {
+        if(session == "") {
             navigateToLogin()
         }
-        else if(sessionCheck  == 2 ){
-            navigateToHome()
+        else {
+            val queriedUser = utenti?.find { utente -> utente.username == session }
+            if(!utenti.isNullOrEmpty() && queriedUser != null) {
+                utenteViewModel.selectutente(queriedUser)
+                utenteViewModel.stopCoroutines()
+                navigateToHome()
+            }
         }
-
     }
-
+    else {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            AsyncImage(
+                model = "https://cdn.discordapp.com/attachments/336170905912737792/1119636309506535454/iu.png",
+                contentDescription = "App Logo",
+                modifier = Modifier
+                    .size(size = 50.dp)
+                    .padding(horizontal = 5.dp)
+                    .clip(shape = CircleShape)
+            )
+        }
+    }
 
 }

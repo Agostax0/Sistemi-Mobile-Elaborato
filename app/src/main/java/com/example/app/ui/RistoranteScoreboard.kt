@@ -34,10 +34,7 @@ fun RistoranteScoreboardScreen(
 
     val utentiScelti = utentiBadgeRistorante.filter {
         it.COD_BR == selectedRistorante!!.COD_BR
-    }.sortedBy { it.esperienzaBadge }
-
-    Log.d("BADGES", utentiBadgeRistorante.toString())
-    Log.d("UTENTI", utentiScelti.toString())
+    }.sortedBy { it.esperienzaBadge }.asReversed()
 
     Column(
         Modifier

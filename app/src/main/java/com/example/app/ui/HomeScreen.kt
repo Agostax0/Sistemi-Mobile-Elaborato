@@ -107,7 +107,7 @@ fun RistorantiList(
     val tipiSelezionati by tipoRistoranteViewModel.tipiSelezionati.collectAsState(initial = "")
 
     val ordineSelezionato by filtroConsegnaViewModel.ordineSelezionato.collectAsState(initial = "")
-    val ristorantiPreferiti = utenteScansionaRistoranteViewModel.getRistorantiPreferitiPerUtente("2").collectAsState(   //TODO ALESSA
+    val ristorantiPreferiti = utenteScansionaRistoranteViewModel.getRistorantiPreferitiPerUtente(utenteViewModel.utenteLoggato!!.ID.toString()).collectAsState(
             initial = listOf()
         ).value
 
