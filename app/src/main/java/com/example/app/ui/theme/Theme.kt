@@ -26,6 +26,8 @@ private val DarkColorScheme = darkColorScheme(
     onPrimaryContainer = White,
     secondaryContainer = Light_Orange,
     onSecondaryContainer = White,
+    tertiaryContainer = White,
+    onTertiaryContainer =  Black,
     error = Red
 )
 
@@ -38,6 +40,8 @@ private val LightColorScheme = lightColorScheme(
     onPrimaryContainer = Black,
     secondaryContainer = Light_Orange,
     onSecondaryContainer = Black,
+    tertiaryContainer = White,
+    onTertiaryContainer = Black,
     error = Red
 
     /* Other default colors to override
