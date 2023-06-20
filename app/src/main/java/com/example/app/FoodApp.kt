@@ -13,14 +13,11 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -159,6 +156,7 @@ fun BottomAppBarFunc(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NavigationApp(
+    session: String,
     navController: NavHostController = rememberNavController()
 ) {
     val ristoranteViewModel = hiltViewModel<RistoranteViewModel>()
@@ -198,7 +196,7 @@ fun NavigationApp(
             }
         }
     ) { innerPadding ->
-        NavigationGraph(navController, innerPadding)
+        NavigationGraph(navController, innerPadding, session)
     }
 }
 
@@ -206,6 +204,7 @@ fun NavigationApp(
 private fun NavigationGraph(
     navController: NavHostController,
     innerPadding: PaddingValues,
+    session: String,
     modifier: Modifier = Modifier
 ) {
     val utenteViewModel = hiltViewModel<UtenteViewModel>()
@@ -225,7 +224,7 @@ private fun NavigationGraph(
 
     NavHost(
         navController = navController,
-        startDestination = AppScreen.Loading.name,
+        startDestination = if(session == "default") AppScreen.Loading.name else if(session == "") AppScreen.Login.name else AppScreen.Home.name,
         route = ROOT_ROUTE,
         modifier = modifier.padding(innerPadding)
     ) {
@@ -248,7 +247,8 @@ private fun NavigationGraph(
                 tipoRistoranteViewModel = tipoRistoranteViewModel,
                 ristoranteTipoRistoranteViewModel = ristoranteTipoRistoranteViewModel,
                 utenteScansionaRistoranteViewModel = utenteScansionaRistoranteViewModel,
-                utenteViewModel = utenteViewModel
+                utenteViewModel = utenteViewModel,
+                session = session
             )
         }
 
@@ -263,7 +263,8 @@ private fun NavigationGraph(
                     ristoranteFiltroConsegnaViewModel = ristoranteFiltroConsegnaViewModel,
                     utenteScansionaRistoranteViewModel = utenteScansionaRistoranteViewModel,
                     utentePossiedeBadgeRistoranteViewModel = utentePossiedeBadgeRistoranteViewModel,
-                    utenteViewModel = utenteViewModel
+                    utenteViewModel = utenteViewModel,
+                    session = session
                 )
             }
             composable(route = AppScreen.RestaurantMenu.name) {
@@ -364,19 +365,12 @@ private fun NavigationGraph(
 
         composable(route = AppScreen.Loading.name){
             LoadingScreen(
-                utenteViewModel = utenteViewModel,
                 navigateToLogin = {
-
-                    //navController.navigate(AppScreen.Login.name)
-                    //navController.popBackStack(AppScreen.Login.name, inclusive = true)
-
                     navController.navigate(AppScreen.Login.name){
                         popUpTo(navController.graph.id){
                             inclusive = true
                         }
                     }
-
-                    //navController.navigate(AppScreen.Login.name)
                 },
                 navigateToHome = {
                     navController.navigate(AppScreen.Home.name){
@@ -384,8 +378,8 @@ private fun NavigationGraph(
                             inclusive = true
                         }
                     }
-                }
-
+                },
+                session
             )
         }
     }

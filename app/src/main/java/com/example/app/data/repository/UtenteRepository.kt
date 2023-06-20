@@ -1,6 +1,7 @@
 package com.example.app.data.repository
 
 import android.content.Context
+import android.util.Log
 import androidx.annotation.WorkerThread
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
@@ -39,8 +40,7 @@ class UtenteRepository(private val utenteDAO:UtenteDAO, private val context: Con
 
     suspend fun saveToDataStore(User: Utente) {
         context.dataStore.edit { preferences ->
-
-            preferences[SESSION_INFO]= User.username
+            preferences[SESSION_INFO] = User.username
         }
     }
 
@@ -49,13 +49,6 @@ class UtenteRepository(private val utenteDAO:UtenteDAO, private val context: Con
                 preferences -> preferences[SESSION_INFO] = ""
         }
     }
-
-
-    suspend fun getUtenteFromUsername(username:String): Utente{
-        return utenteDAO.getUtenteFromUsername(username)
-    }
-
-    fun checkUserLogin(username: String, password: String)=utenteDAO.checkLoginCredentials(username, password)
 
     @WorkerThread
     suspend fun insertNewUtente(utente: Utente) {

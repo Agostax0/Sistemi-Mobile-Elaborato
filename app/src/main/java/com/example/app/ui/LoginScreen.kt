@@ -8,6 +8,8 @@ import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -35,9 +37,8 @@ fun LoginScreen(
     onRegisterButtonClicked: ()->Unit,
     utenteViewModel: UtenteViewModel,
 ) {
-
     val context = LocalContext.current
-
+    val utenti by utenteViewModel.utenti.collectAsState(initial = listOf())
 
     Box(modifier = Modifier.fillMaxSize()) {
         ClickableText(
@@ -60,7 +61,6 @@ fun LoginScreen(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-
         val username = remember { mutableStateOf(TextFieldValue()) }
         val password = remember { mutableStateOf(TextFieldValue()) }
 
@@ -85,28 +85,18 @@ fun LoginScreen(
         Box(modifier = Modifier.padding(40.dp, 0.dp, 40.dp, 0.dp)) {
             Button(
                 onClick = {
-                            if(username.value.text != "" && password.value.text != ""){
-
-                                //TODO add wake up call for DB
-
-                                utenteViewModel.login(username.value.text, password.value.text)
-
-                                if(utenteViewModel.statoLogin!=null){
-                                    Log.d("LOGIN_TAG " + "LoginScreen.kt","successful Login ")
-
-                                    utenteViewModel.startSession(utenteViewModel.statoLogin!!)
-
-                                    onSuccessfulLogin()
-                                }
-                                else{
-                                    Toast.makeText(context, "Username e/o Password incorretti", Toast.LENGTH_SHORT)
-                                    Log.d("LOGIN_TAG " + "LoginScreen.kt","failed Login")
-                                }
-                            }
-                            else{
-                                Toast.makeText(context, "Username e/o Password vuoti", Toast.LENGTH_SHORT)
-                            }
-                          },
+                    val utenteLoggato = utenti.find { it.username == username.value.text && it.password == password.value.text }
+                    if(utenteLoggato != null) {
+                        Log.d("LOGIN_TAG " + "LoginScreen.kt","successful Login ")
+                        utenteViewModel.startSession(utenteLoggato)
+                        utenteViewModel.selectutente(utenteLoggato)
+                        onSuccessfulLogin()
+                    }
+                    else {
+                        Toast.makeText(context, "Username e/o Password incorretti", Toast.LENGTH_SHORT).show()
+                        Log.d("LOGIN_TAG " + "LoginScreen.kt","failed Login")
+                    }
+                  },
                 shape = RoundedCornerShape(50.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Orange),
                 modifier = Modifier
@@ -116,7 +106,6 @@ fun LoginScreen(
                 Text(text = "LOGIN", color = White)
             }
         }
-
         Spacer(modifier = Modifier.height(20.dp))
         ClickableText(
             text = AnnotatedString("Forgot password?"),
@@ -127,11 +116,5 @@ fun LoginScreen(
             ),
             modifier = Modifier.align(Alignment.CenterHorizontally)
         )
-
-
-
     }
-
-
-
 }

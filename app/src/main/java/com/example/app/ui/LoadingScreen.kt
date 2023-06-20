@@ -1,16 +1,13 @@
 package com.example.app.ui
 
 import android.util.Log
-import androidx.annotation.MainThread
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -18,34 +15,31 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.example.app.data.entity.Utente
 import com.example.app.viewModel.UtenteViewModel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.collect
-import okhttp3.internal.wait
+import kotlinx.coroutines.flow.flatMapConcat
+import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 @Composable
 fun LoadingScreen(
-    utenteViewModel: UtenteViewModel,
-    navigateToLogin: ()->Unit,
-    navigateToHome: ()->Unit
-){
-    val session = utenteViewModel.session.collectAsState(initial = "default").takeIf { utenteViewModel.isActive() }?.value
+    navigateToLogin: () -> Unit,
+    navigateToHome: () -> Unit,
+    session: String
+) {
 
-    val utenti = utenteViewModel.utenti.collectAsState(initial = listOf()).takeIf { utenteViewModel.isActive() }?.value
-
-    if(session != "default") {
-        if(session == "") {
+    if (session != "default") {
+        if (session == "") {
             navigateToLogin()
+        } else {
+            navigateToHome()
+
         }
-        else {
-            val queriedUser = utenti?.find { utente -> utente.username == session }
-            if(!utenti.isNullOrEmpty() && queriedUser != null) {
-                utenteViewModel.selectutente(queriedUser)
-                utenteViewModel.stopCoroutines()
-                navigateToHome()
-            }
-        }
-    }
-    else {
+    } else {
         Column(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.Center,
@@ -61,5 +55,4 @@ fun LoadingScreen(
             )
         }
     }
-
 }

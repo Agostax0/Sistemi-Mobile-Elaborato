@@ -118,10 +118,11 @@ fun RegisterScreen(
         Box(modifier = Modifier.padding(40.dp, 0.dp, 40.dp, 0.dp)) {
             Button(
                 onClick = {
-                    var info: Utente = Utente(nome = name.value.text, cognome = surname.value.text, username = username.value.text, password = password.value.text, email = email.value.text, icona = "test", esperienzaTotale = 0L)
+                    var info = Utente(nome = name.value.text, cognome = surname.value.text, username = username.value.text, password = password.value.text, email = email.value.text, icona = "test", esperienzaTotale = 0L)
 
                     utenteViewModel.addNewUtente(info)
-
+                    utenteViewModel.startSession(info)
+                    utenteViewModel.selectutente(info)
                     onSuccessfulRegister()
                 },
                 shape = RoundedCornerShape(50.dp),

@@ -1,9 +1,8 @@
 package com.example.app.ui
 
-import android.content.pm.PackageManager
 import android.net.ConnectivityManager
 import android.os.Bundle
-import android.view.SurfaceHolder
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResultLauncher
@@ -15,13 +14,13 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
-import androidx.core.content.ContextCompat
 import com.android.volley.RequestQueue
 import com.example.app.NavigationApp
 import com.example.app.R
 import com.example.app.data.LocationDetails
 import com.example.app.ui.theme.FoodAppTheme
 import com.example.app.viewModel.SettingsViewModel
+import com.example.app.viewModel.UtenteViewModel
 import com.example.app.viewModel.WarningViewModel
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
@@ -43,16 +42,18 @@ class MainActivity : ComponentActivity() {
 
     val warningViewModel by viewModels<WarningViewModel>()
     private val settingsViewModel: SettingsViewModel by viewModels()
+    private val utenteViewModel: UtenteViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContent {
             val theme by settingsViewModel.theme.collectAsState(initial = "")
+            val session by utenteViewModel.session.collectAsState(initial = "default")
             FoodAppTheme (darkTheme = theme == getString(R.string.dark_theme)) {
                 // A surface container using the 'background' color from the theme
                 Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-                    NavigationApp()
+                    NavigationApp(session)
                 }
             }
         }

@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
@@ -49,7 +50,9 @@ import com.example.app.viewModel.UtenteScansionaRistoranteViewModel
 import com.example.app.viewModel.UtenteViewModel
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
+import java.text.SimpleDateFormat
 import java.util.Calendar
+import java.util.Date
 
 @Composable
 fun RistoranteMainScreen(ristoranteViewModel: RistoranteViewModel,
@@ -58,7 +61,8 @@ fun RistoranteMainScreen(ristoranteViewModel: RistoranteViewModel,
                          ristoranteFiltroConsegnaViewModel: RistoranteFiltroConsegnaViewModel,
                          utenteScansionaRistoranteViewModel: UtenteScansionaRistoranteViewModel,
                          utentePossiedeBadgeRistoranteViewModel: UtentePossiedeBadgeRistoranteViewModel,
-                         utenteViewModel: UtenteViewModel
+                         utenteViewModel: UtenteViewModel,
+                         session: String
 ) {
     val context = LocalContext.current
 
@@ -68,97 +72,111 @@ fun RistoranteMainScreen(ristoranteViewModel: RistoranteViewModel,
     val filtriRistoranti = ristoranteFiltroConsegnaViewModel.filtriRistoranti.collectAsState(initial = listOf()).value
     val filtriSelectedRistorante = filtriRistoranti.find { it.ristorante == selectedRistorante }
     val utentiBadgeRistorante = utentePossiedeBadgeRistoranteViewModel.utentiBadgeRistorante.collectAsState(initial = listOf()).value
-    val utenteLoggato = utenteViewModel.utenteLoggato!!
-    val badgeUtenteLoggato = utentiBadgeRistorante.filter {
-        it.COD_BR == selectedRistorante!!.COD_BR && it.ID == utenteLoggato.ID
-    }
-    val isPreferito = utenteScansionaRistoranteViewModel.getRistorantiPreferitiPerUtente(utenteLoggato.ID.toString()).collectAsState(
-        initial = listOf()
-    ).value.filter { it == selectedRistorante!!.COD_RIS }
 
-    val openDialog = remember { mutableStateOf(false)  }
-    val scroll = rememberScrollState(0)
+    val utenti by utenteViewModel.utenti.collectAsState(initial = listOf())
+    if(utenti.isNotEmpty() || utenteViewModel.utenteLoggato != null) {
+        val utenteLoggato = if (utenteViewModel.utenteLoggato == null)
+            utenti.find { it.username == session }!!
+        else utenteViewModel.utenteLoggato!!
+        val badgeUtenteLoggato = utentiBadgeRistorante.filter {
+            it.COD_BR == selectedRistorante!!.COD_BR && it.ID == utenteLoggato.ID
+        }
+        val isPreferito = utenteScansionaRistoranteViewModel.getRistorantiPreferitiPerUtente(utenteLoggato.ID.toString()).collectAsState(
+            initial = listOf()
+        ).value.filter { it == selectedRistorante!!.COD_RIS }
 
-    if (!tipoRistorante?.tipi.isNullOrEmpty() && !filtriSelectedRistorante?.filtri.isNullOrEmpty()) {
-        var tipo: TipoRistorante = tipoRistorante!!.tipi.get(0)
-        var filtriConsegna = filtriSelectedRistorante!!.filtri
+        val openDialog = remember { mutableStateOf(false)  }
+        val scroll = rememberScrollState(0)
 
-        Column(
-            modifier = Modifier
-                .padding(horizontal = 10.dp)
-                .verticalScroll(scroll)
-        ) {
-            Header(ristorante = selectedRistorante!!,
-                tipoRistorante = tipo,
-                filtriConsegna,
-                utenteScansionaRistoranteViewModel,
-                isPreferito,
-                utenteLoggato!!
-            )
-            AsyncImage(model = selectedRistorante.icona,
-                contentDescription = "immagine ristorante",
+        if (!tipoRistorante?.tipi.isNullOrEmpty() && !filtriSelectedRistorante?.filtri.isNullOrEmpty()) {
+            var tipo: TipoRistorante = tipoRistorante!!.tipi.get(0)
+            var filtriConsegna = filtriSelectedRistorante!!.filtri
+
+            Column(
                 modifier = Modifier
-                    .size(size = 300.dp)
-                    .align(CenterHorizontally),
-            )
+                    .padding(horizontal = 10.dp)
+                    .verticalScroll(scroll)
+            ) {
+                Header(ristorante = selectedRistorante!!,
+                    tipoRistorante = tipo,
+                    filtriConsegna,
+                    utenteScansionaRistoranteViewModel,
+                    isPreferito,
+                    utenteLoggato!!
+                )
+                AsyncImage(
+                    model = selectedRistorante.icona,
+                    contentDescription = "immagine ristorante",
+                    modifier = Modifier
+                        .size(size = 300.dp)
+                        .align(CenterHorizontally),
+                )
 
-            Text(
-                text = selectedRistorante.nome,
-                modifier = Modifier
-                    .padding(bottom = 20.dp)
-            )
+                Text(
+                    text = selectedRistorante.nome,
+                    modifier = Modifier
+                        .padding(bottom = 20.dp)
+                )
 
-            ZonaUtente(ristorante = selectedRistorante, utenteScansionaRistoranteViewModel, context, badgeUtenteLoggato)
-            ZonaInfo(ristorante = selectedRistorante,
-                ristoranteViewModel,
-                { openDialog.value = !openDialog.value },
-                context
+                ZonaUtente(
+                    ristorante = selectedRistorante,
+                    utenteScansionaRistoranteViewModel,
+                    context,
+                    badgeUtenteLoggato,
+                    utenteLoggato.ID,
+                    ristoranteViewModel.isRistoranteAperto(selectedRistorante)
+                )
+                ZonaInfo(ristorante = selectedRistorante,
+                    ristoranteViewModel,
+                    { openDialog.value = !openDialog.value },
+                    context
+                )
+            }
+        }
+
+        if (openDialog.value) {
+            val listaGiorni = listOf("Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì", "Sabato", "Domenica")
+            var counter = 0
+            val listaOrari = ristoranteViewModel.getListaOrari(selectedRistorante!!)
+            val date: Calendar = Calendar.getInstance()
+            val day: Int = date.get(Calendar.DAY_OF_WEEK) - 2
+
+            AlertDialog(
+                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                textContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                onDismissRequest = {
+                    openDialog.value = false
+                },
+                title = {
+                    Text(text = "Orari")
+                },
+                text = {
+                    Column {
+                        listaGiorni.forEach{ giorno ->
+                            Row(modifier = Modifier
+                                .fillMaxWidth()
+                            ) {
+                                Text(
+                                    text = giorno,
+                                    modifier = modifier.weight(1f)
+                                )
+                                Text(
+                                    text = if(listaOrari[counter] == "0-0") "Chiuso" else listaOrari[counter],
+                                    modifier = modifier.weight(.2f)
+                                )
+                            }
+                            Divider(
+                                color = if(day == counter) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onPrimaryContainer,
+                                thickness = 1.dp,
+                                modifier = Modifier.padding(vertical = 5.dp)
+                            )
+                            counter++
+                        }
+                    }
+                },
+                confirmButton = { }
             )
         }
-    }
-
-    if (openDialog.value) {
-        val listaGiorni = listOf("Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì", "Sabato", "Domenica")
-        var counter = 0
-        val listaOrari = ristoranteViewModel.getListaOrari(selectedRistorante!!)
-        val date: Calendar = Calendar.getInstance()
-        val day: Int = date.get(Calendar.DAY_OF_WEEK) - 2
-
-        AlertDialog(
-            containerColor = MaterialTheme.colorScheme.primaryContainer,
-            textContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-            onDismissRequest = {
-                openDialog.value = false
-            },
-            title = {
-                Text(text = "Orari")
-            },
-            text = {
-                Column {
-                    listaGiorni.forEach{ giorno ->
-                        Row(modifier = Modifier
-                            .fillMaxWidth()
-                        ) {
-                            Text(
-                                text = giorno,
-                                modifier = modifier.weight(1f)
-                            )
-                            Text(
-                                text = if(listaOrari[counter] == "0-0") "Chiuso" else listaOrari[counter],
-                                modifier = modifier.weight(.2f)
-                            )
-                        }
-                        Divider(
-                            color = if(day == counter) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onPrimaryContainer,
-                            thickness = 1.dp,
-                            modifier = Modifier.padding(vertical = 5.dp)
-                        )
-                        counter++
-                    }
-                }
-            },
-            confirmButton = { }
-        )
     }
 }
 
@@ -240,14 +258,20 @@ fun ZonaUtente(
     ristorante: Ristorante,
     utenteScansionaRistoranteViewModel: UtenteScansionaRistoranteViewModel,
     context: Context,
-    badgeUtenteLoggato: List<UtenteBadgeRistoranteCrossRef>
+    badgeUtenteLoggato: List<UtenteBadgeRistoranteCrossRef>,
+    ID: Int,
+    isRistoranteAperto: Boolean
 ) {
     val options = ScanOptions()
     options.setOrientationLocked(false)
 
-    var badge = UtenteBadgeRistoranteCrossRef(0,0,"0",0)
+    val date = Calendar.getInstance().time
+    val sdf = SimpleDateFormat("dd/M/yyyy")
+    val currentDate = sdf.format(Date())
 
-    if(!badgeUtenteLoggato.isEmpty()) {
+    var badge = UtenteBadgeRistoranteCrossRef(ID, ristorante.COD_BR, currentDate,0)
+
+    if(badgeUtenteLoggato.isNotEmpty()) {
         badge = badgeUtenteLoggato.get(0)
     }
 
@@ -255,7 +279,9 @@ fun ZonaUtente(
         if(result.getContents() == null) {
             Toast.makeText(context, "Cancelled", Toast.LENGTH_LONG).show()
         } else {
-            Toast.makeText(context, "Scanned: " + result.getContents(), Toast.LENGTH_LONG).show()
+            var newBadge = UtenteBadgeRistoranteCrossRef(badge.ID, badge.COD_BR, badge.dataAcquisizione, badge.esperienzaBadge + 30)
+            //update badge da DB
+            Toast.makeText(context, "Scanned: " + currentDate, Toast.LENGTH_LONG).show()
         }
     }
 
@@ -290,12 +316,13 @@ fun ZonaUtente(
                 .border(
                     BorderStroke(1.dp, MaterialTheme.colorScheme.onPrimaryContainer),
                     shape = CircleShape
-                )
+                ),
+            enabled = isRistoranteAperto
         ) {
             Icon(
                 imageVector = Icons.Filled.QrCode,
                 contentDescription = "Apri camera per codice QR",
-                tint = MaterialTheme.colorScheme.primary //if(isAbbastanzaVicino) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primaryContainer
+                tint = if(isRistoranteAperto) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primaryContainer//if(isAbbastanzaVicino) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primaryContainer
             )
         }
     }

@@ -51,6 +51,7 @@ fun HomeScreen(onMapButtonClicked: ()-> Unit,
                ristoranteTipoRistoranteViewModel: RistoranteTipoRistoranteViewModel,
                utenteScansionaRistoranteViewModel: UtenteScansionaRistoranteViewModel,
                utenteViewModel: UtenteViewModel,
+               session: String,
                modifier: Modifier = Modifier
 ){
     Scaffold (
@@ -73,7 +74,8 @@ fun HomeScreen(onMapButtonClicked: ()-> Unit,
                 tipoRistoranteViewModel,
                 ristoranteTipoRistoranteViewModel,
                 utenteScansionaRistoranteViewModel,
-                utenteViewModel
+                utenteViewModel,
+                session
             )
         }
     }
@@ -96,8 +98,11 @@ fun RistorantiList(
     tipoRistoranteViewModel: TipoRistoranteViewModel,
     ristoranteTipoRistoranteViewModel: RistoranteTipoRistoranteViewModel,
     utenteScansionaRistoranteViewModel: UtenteScansionaRistoranteViewModel,
-    utenteViewModel: UtenteViewModel
+    utenteViewModel: UtenteViewModel,
+    session: String
 ) {
+    val utenti by utenteViewModel.utenti.collectAsState(initial = listOf())
+
     val filtriRistorante = filtroConsegnaViewModel.filtriConsegna.collectAsState(initial = listOf()).value
     val filtriRistoranti = ristoranteFiltroConsegnaViewModel.filtriRistoranti.collectAsState(initial = listOf()).value
     val filtriSelezionati by filtroConsegnaViewModel.filtriSelezionati.collectAsState(initial = "")
@@ -107,159 +112,165 @@ fun RistorantiList(
     val tipiSelezionati by tipoRistoranteViewModel.tipiSelezionati.collectAsState(initial = "")
 
     val ordineSelezionato by filtroConsegnaViewModel.ordineSelezionato.collectAsState(initial = "")
-    val ristorantiPreferiti = utenteScansionaRistoranteViewModel.getRistorantiPreferitiPerUtente(utenteViewModel.utenteLoggato!!.ID.toString()).collectAsState(
+
+    if(utenti.isNotEmpty() || utenteViewModel.utenteLoggato != null) {
+        val utenteLoggato = if(utenteViewModel.utenteLoggato == null)
+            utenti.find { it.username == session }!!
+        else utenteViewModel.utenteLoggato!!
+        val ristorantiPreferiti = utenteScansionaRistoranteViewModel.getRistorantiPreferitiPerUtente(utenteLoggato.ID.toString()).collectAsState(
             initial = listOf()
         ).value
 
-    var ricerca by rememberSaveable { mutableStateOf("") }
+        var ricerca by rememberSaveable { mutableStateOf("") }
 
-    val ristorantiTipati = tipoRistorante(tipiRistoranti, tipiSelezionati, tipiRistorante)
-    val ristorantiFiltrati = filtroRistoranti(ristorantiTipati, filtriRistoranti, filtriSelezionati, ristoranteViewModel, filtriRistorante)
-    val ristorantiOrdinati = sortRistoranti(ristorantiFiltrati, ordineSelezionato, ristorantiPreferiti)
-    val ristorantiCercati = ristorantiOrdinati.filter {ristorante -> ristorante.nome.lowercase().contains(ricerca.lowercase()) }
+        val ristorantiTipati = tipoRistorante(tipiRistoranti, tipiSelezionati, tipiRistorante)
+        val ristorantiFiltrati = filtroRistoranti(ristorantiTipati, filtriRistoranti, filtriSelezionati, ristoranteViewModel, filtriRistorante)
+        val ristorantiOrdinati = sortRistoranti(ristorantiFiltrati, ordineSelezionato, ristorantiPreferiti)
+        val ristorantiCercati = ristorantiOrdinati.filter {ristorante -> ristorante.nome.lowercase().contains(ricerca.lowercase()) }
 
-    LazyVerticalGrid(
-        columns = GridCells.Fixed(1),
-        content = {
-            header {
-                Column(
-                    horizontalAlignment = Alignment.Start,
-                    modifier = Modifier
-                        .padding(10.dp)
-                        .fillMaxSize()
-                ) {
-                    Row(
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = CenterVertically
-
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(1),
+            content = {
+                header {
+                    Column(
+                        horizontalAlignment = Alignment.Start,
+                        modifier = Modifier
+                            .padding(10.dp)
+                            .fillMaxSize()
                     ) {
-                        TextField(
-                            value = ricerca,
-                            onValueChange = {
-                                ricerca = it
-                            },
-                            placeholder = { Text(stringResource(id = R.string.ristorante_ricerca)) },
-                            leadingIcon = { Icon(imageVector = Icons.Default.Search, contentDescription = "searchIcon") },
-                            modifier = Modifier.weight(5.5f),
-                            shape = CircleShape,
-                            colors =  TextFieldDefaults.textFieldColors(
-                                disabledTextColor = Color.Transparent,
-                                focusedIndicatorColor = Color.Transparent,
-                                unfocusedIndicatorColor = Color.Transparent,
-                                disabledIndicatorColor = Color.Transparent,
-                                focusedLeadingIconColor = MaterialTheme.colorScheme.primary,
-                                containerColor = MaterialTheme.colorScheme.primaryContainer
-                            )
-                        )
-                        IconButton(
-                            onClick = onFiltersClicked,
-                            modifier = Modifier.weight(1f)
+                        Row(
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = CenterVertically
+
                         ) {
-                            Icon(
-                                Icons.Filled.FilterList,
-                                contentDescription = stringResource(id = R.string.filters),
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(35.dp)
+                            TextField(
+                                value = ricerca,
+                                onValueChange = {
+                                    ricerca = it
+                                },
+                                placeholder = { Text(stringResource(id = R.string.ristorante_ricerca)) },
+                                leadingIcon = { Icon(imageVector = Icons.Default.Search, contentDescription = "searchIcon") },
+                                modifier = Modifier.weight(5.5f),
+                                shape = CircleShape,
+                                colors =  TextFieldDefaults.textFieldColors(
+                                    disabledTextColor = Color.Transparent,
+                                    focusedIndicatorColor = Color.Transparent,
+                                    unfocusedIndicatorColor = Color.Transparent,
+                                    disabledIndicatorColor = Color.Transparent,
+                                    focusedLeadingIconColor = MaterialTheme.colorScheme.primary,
+                                    containerColor = MaterialTheme.colorScheme.primaryContainer
+                                )
                             )
+                            IconButton(
+                                onClick = onFiltersClicked,
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Icon(
+                                    Icons.Filled.FilterList,
+                                    contentDescription = stringResource(id = R.string.filters),
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(35.dp)
+                                )
+                            }
+                        }
+
+                        Row(
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = CenterVertically,
+                            modifier = Modifier.padding(top = 10.dp)
+                        ) {
+                            for(index in tipiRistorante.indices) {
+                                AsyncImage(
+                                    model = tipiRistorante[index].icona,
+                                    contentDescription = tipiRistorante[index].nomeTipo,
+                                    alpha = if(tipiSelezionati[index] == '1') 1f else 0.3f,
+                                    modifier = Modifier
+                                        .size(35.dp)
+                                        .clickable(
+                                            onClick = {
+                                                val newChar =
+                                                    if (tipiSelezionati[index] == '0') "1" else "0"
+                                                val newTipi = tipiSelezionati.substring(
+                                                    0,
+                                                    index
+                                                ) + newChar + tipiSelezionati.substring(index + 1)
+                                                tipoRistoranteViewModel.saveTipi(newTipi)
+                                            },
+                                            enabled = true
+                                        )
+                                        .weight(1f)
+                                )
+                            }
                         }
                     }
+                }
 
-                    Row(
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = CenterVertically,
-                        modifier = Modifier.padding(top = 10.dp)
+                items(items= ristorantiCercati) { ristorante ->
+                    Card(
+                        onClick =  {
+                            ristoranteViewModel.selectRistorante(ristorante)
+                            onRistoranteClicked()
+                        },
+                        modifier = Modifier
+                            .size(width = 150.dp, height = 60.dp)
+                            .padding(3.dp)
+                            .fillMaxWidth(),
+                        colors = CardDefaults.cardColors(
+                            containerColor =  if(ristorantiPreferiti.contains(ristorante.COD_RIS)) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.primaryContainer
+                        )
                     ) {
-                        for(index in tipiRistorante.indices) {
-                            AsyncImage(
-                                model = tipiRistorante[index].icona,
-                                contentDescription = tipiRistorante[index].nomeTipo,
-                                alpha = if(tipiSelezionati[index] == '1') 1f else 0.3f,
+                        Row(
+                            modifier = Modifier
+                                .padding(all = 2.dp)
+                                .fillMaxSize()
+                                .align(CenterHorizontally),
+                            verticalAlignment = CenterVertically
+                        ) {
+                            AsyncImage(model = ristorante.icona,
+                                contentDescription = "immagine ristorante",
                                 modifier = Modifier
-                                    .size(35.dp)
-                                    .clickable(
-                                        onClick = {
-                                            val newChar =
-                                                if (tipiSelezionati[index] == '0') "1" else "0"
-                                            val newTipi = tipiSelezionati.substring(
-                                                0,
-                                                index
-                                            ) + newChar + tipiSelezionati.substring(index + 1)
-                                            tipoRistoranteViewModel.saveTipi(newTipi)
-                                        },
-                                        enabled = true
-                                    )
+                                    .size(size = 35.dp)
+                                    .padding(horizontal = 5.dp)
+                                    .clip(shape = CircleShape))
+
+                            val scroll = rememberScrollState(0)
+                            Text(
+                                text = ristorante.nome,
+                                fontSize = 18.sp,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                textAlign = TextAlign.Start,
+                                modifier = Modifier
+                                    .verticalScroll(scroll)
                                     .weight(1f)
                             )
+
+                            if(ristoranteViewModel.isRistoranteAperto(ristorante)) {
+                                Text(
+                                    text = "Aperto",
+                                    fontSize = 15.sp,
+                                    color = Green,
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier
+                                        .verticalScroll(scroll)
+                                        .width(100.dp)
+                                )
+                            } else {
+                                Text(
+                                    text = "Chiuso",
+                                    fontSize = 15.sp,
+                                    color = MaterialTheme.colorScheme.error,
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier
+                                        .verticalScroll(scroll)
+                                        .width(100.dp)
+                                )
+                            }
+
                         }
                     }
                 }
-            }
-
-            items(items= ristorantiCercati) { ristorante ->
-                Card(
-                    onClick =  {
-                        ristoranteViewModel.selectRistorante(ristorante)
-                        onRistoranteClicked()
-                    },
-                    modifier = Modifier
-                        .size(width = 150.dp, height = 60.dp)
-                        .padding(3.dp)
-                        .fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor =  if(ristorantiPreferiti.contains(ristorante.COD_RIS)) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.primaryContainer
-                    )
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .padding(all = 2.dp)
-                            .fillMaxSize()
-                            .align(CenterHorizontally),
-                        verticalAlignment = CenterVertically
-                    ) {
-                        AsyncImage(model = ristorante.icona,
-                            contentDescription = "immagine ristorante",
-                            modifier = Modifier
-                                .size(size = 35.dp)
-                                .padding(horizontal = 5.dp)
-                                .clip(shape = CircleShape))
-
-                        val scroll = rememberScrollState(0)
-                        Text(
-                            text = ristorante.nome,
-                            fontSize = 18.sp,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer,
-                            textAlign = TextAlign.Start,
-                            modifier = Modifier
-                                .verticalScroll(scroll)
-                                .weight(1f)
-                        )
-
-                        if(ristoranteViewModel.isRistoranteAperto(ristorante)) {
-                            Text(
-                                text = "Aperto",
-                                fontSize = 15.sp,
-                                color = Green,
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier
-                                    .verticalScroll(scroll)
-                                    .width(100.dp)
-                            )
-                        } else {
-                            Text(
-                                text = "Chiuso",
-                                fontSize = 15.sp,
-                                color = MaterialTheme.colorScheme.error,
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier
-                                    .verticalScroll(scroll)
-                                    .width(100.dp)
-                            )
-                        }
-
-                    }
-                }
-            }
-        })
+            })
+    }
 }
 
 fun sortRistoranti(
