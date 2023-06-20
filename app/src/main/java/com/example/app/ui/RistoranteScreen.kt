@@ -109,7 +109,8 @@ fun RistoranteMainScreen(ristoranteViewModel: RistoranteViewModel,
                     contentDescription = "immagine ristorante",
                     modifier = Modifier
                         .size(size = 300.dp)
-                        .align(CenterHorizontally),
+                        .align(CenterHorizontally)
+                        .padding(vertical = 10.dp),
                 )
 
                 Text(
@@ -120,7 +121,7 @@ fun RistoranteMainScreen(ristoranteViewModel: RistoranteViewModel,
 
                 ZonaUtente(
                     ristorante = selectedRistorante,
-                    utenteScansionaRistoranteViewModel,
+                    utentePossiedeBadgeRistoranteViewModel,
                     context,
                     badgeUtenteLoggato,
                     utenteLoggato.ID,
@@ -244,7 +245,7 @@ fun Header(
             Icon(imageVector = Icons.Filled.Star,
                 contentDescription = "Preferiti",
                 modifier = Modifier.padding(end = 25.dp),
-                tint = if(!isPreferito.isEmpty()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primaryContainer
+                tint = if(isPreferito.isNotEmpty()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primaryContainer
             )
             Text(text = ristorante.numeroPreferiti.toString(),
                 modifier = Modifier.padding(start = 25.dp)
@@ -256,7 +257,7 @@ fun Header(
 @Composable
 fun ZonaUtente(
     ristorante: Ristorante,
-    utenteScansionaRistoranteViewModel: UtenteScansionaRistoranteViewModel,
+    utentePossiedeBadgeRistoranteViewModel: UtentePossiedeBadgeRistoranteViewModel,
     context: Context,
     badgeUtenteLoggato: List<UtenteBadgeRistoranteCrossRef>,
     ID: Int,
@@ -267,21 +268,22 @@ fun ZonaUtente(
 
     val date = Calendar.getInstance().time
     val sdf = SimpleDateFormat("dd/M/yyyy")
-    val currentDate = sdf.format(Date())
+    val currentDate = sdf.format(date)
 
     var badge = UtenteBadgeRistoranteCrossRef(ID, ristorante.COD_BR, currentDate,0)
 
     if(badgeUtenteLoggato.isNotEmpty()) {
-        badge = badgeUtenteLoggato.get(0)
+        badge = badgeUtenteLoggato[0]
     }
 
     val barcodeLauncher = rememberLauncherForActivityResult(contract = ScanContract()) { result ->
         if(result.getContents() == null) {
             Toast.makeText(context, "Cancelled", Toast.LENGTH_LONG).show()
         } else {
-            var newBadge = UtenteBadgeRistoranteCrossRef(badge.ID, badge.COD_BR, badge.dataAcquisizione, badge.esperienzaBadge + 30)
-            //update badge da DB
-            Toast.makeText(context, "Scanned: " + currentDate, Toast.LENGTH_LONG).show()
+            val esperienza = badge.esperienzaBadge + 30
+            val newBadge = UtenteBadgeRistoranteCrossRef(badge.ID, badge.COD_BR, currentDate, esperienza)
+            utentePossiedeBadgeRistoranteViewModel.newScansione(newBadge)
+            Toast.makeText(context, "+$esperienza Esperienza", Toast.LENGTH_LONG).show()
         }
     }
 
@@ -298,7 +300,9 @@ fun ZonaUtente(
     Row(modifier = Modifier
         .fillMaxWidth()
     ) {
-        Text(text = "Livello " + (badge.esperienzaBadge / 100).toString(),
+        val isScanButtonEnabled = isRistoranteAperto && if(badgeUtenteLoggato.isNotEmpty()) badgeUtenteLoggato[0].dataAcquisizione != currentDate else true  //&& isAbbastanzaVicino
+        Text(text = "Livello " + (badge.esperienzaBadge / 100).toString() +
+                " (" + badge.esperienzaBadge + "/" + ((badge.esperienzaBadge - badge.esperienzaBadge%100) + 100).toString() + ")",
             modifier = Modifier.weight(1f)
         )
         IconButton(
@@ -317,12 +321,12 @@ fun ZonaUtente(
                     BorderStroke(1.dp, MaterialTheme.colorScheme.onPrimaryContainer),
                     shape = CircleShape
                 ),
-            enabled = isRistoranteAperto
+            enabled = isScanButtonEnabled
         ) {
             Icon(
                 imageVector = Icons.Filled.QrCode,
                 contentDescription = "Apri camera per codice QR",
-                tint = if(isRistoranteAperto) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primaryContainer//if(isAbbastanzaVicino) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primaryContainer
+                tint = if(isScanButtonEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primaryContainer
             )
         }
     }

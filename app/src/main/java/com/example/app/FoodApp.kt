@@ -78,7 +78,7 @@ fun TopAppBarFunction(
                 fontWeight = FontWeight.Medium,
                 color = MaterialTheme.colorScheme.onSecondary,
                 modifier = Modifier
-                    .clickable( onClick =  onTitleButtonClicked)
+                    .clickable(onClick = onTitleButtonClicked)
             )
         },
         modifier = modifier,
@@ -96,14 +96,14 @@ fun TopAppBarFunction(
         },
         actions = {
                 if (currentScreen == AppScreen.Profile.name) {
-                    IconButton(onClick = onSettingsButtonClicked ) {
+                    IconButton(onClick = onSettingsButtonClicked) {
                         Icon(
                             Icons.Filled.Settings,
                             contentDescription = stringResource(id = R.string.settings),
                             tint = MaterialTheme.colorScheme.onSecondary
                         )}
                 }
-                else {
+                else if(currentScreen != AppScreen.Settings.name) {
                     IconButton(onClick = onProfileButtonClicked) {
                         Icon(
                             Icons.Filled.Person,
@@ -125,7 +125,7 @@ fun BottomAppBarFunc(
     navController: NavHostController
 ) {
     var text = ""
-    var isSelected = false
+    var isSelected: Boolean
     BottomNavigation(
         backgroundColor = MaterialTheme.colorScheme.background
     ) {
