@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.BottomNavigation
 import androidx.compose.material.BottomNavigationItem
 import androidx.compose.material.icons.Icons
@@ -13,10 +14,14 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -24,6 +29,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navigation
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.example.app.data.FoodAppDB
 import com.example.app.ui.*
 import com.example.app.ui.LoginScreen
@@ -69,32 +76,39 @@ fun TopAppBarFunction(
     onTitleButtonClicked: () -> Unit,
     onSettingsButtonClicked: () -> Unit,
     onProfileButtonClicked: () -> Unit,
-    ristoranteViewModel: RistoranteViewModel
+    ristoranteViewModel: RistoranteViewModel,
+    utenteViewModel: UtenteViewModel,
+    session: String
 ) {
-    CenterAlignedTopAppBar(
-        title = {
-            Text(
-                text = (if(RESTAURANT_SCREENS.contains(currentScreen)) ristoranteViewModel.ristoranteSelected?.nome else stringResource(id = R.string.app_name))!!,
-                fontWeight = FontWeight.Medium,
-                color = MaterialTheme.colorScheme.onSecondary,
-                modifier = Modifier
-                    .clickable(onClick = onTitleButtonClicked)
-            )
-        },
-        modifier = modifier,
-        navigationIcon = {
-            //se si può navigare indietro (non home screen) allora appare la freccetta
-            if (canNavigateBack && currentScreen != AppScreen.Home.name) {
-                IconButton(onClick = navigateUp) {
-                    Icon(
-                        imageVector = Icons.Filled.ArrowBack,
-                        contentDescription = "Back button",
-                        tint = MaterialTheme.colorScheme.onSecondary
-                    )
+    val context = LocalContext.current
+    val utenti by utenteViewModel.utenti.collectAsState(initial = listOf())
+    if(utenti.isNotEmpty() || utenteViewModel.utenteLoggato != null) {
+        val utenteLoggato = if (utenteViewModel.utenteLoggato == null)
+            utenti.find { it.username == session }!! else utenteViewModel.utenteLoggato!!
+        CenterAlignedTopAppBar(
+            title = {
+                Text(
+                    text = (if(RESTAURANT_SCREENS.contains(currentScreen)) ristoranteViewModel.ristoranteSelected?.nome else stringResource(id = R.string.app_name))!!,
+                    fontWeight = FontWeight.Medium,
+                    color = MaterialTheme.colorScheme.onSecondary,
+                    modifier = Modifier
+                        .clickable(onClick = onTitleButtonClicked)
+                )
+            },
+            modifier = modifier,
+            navigationIcon = {
+                //se si può navigare indietro (non home screen) allora appare la freccetta
+                if (canNavigateBack && currentScreen != AppScreen.Home.name) {
+                    IconButton(onClick = navigateUp) {
+                        Icon(
+                            imageVector = Icons.Filled.ArrowBack,
+                            contentDescription = "Back button",
+                            tint = MaterialTheme.colorScheme.onSecondary
+                        )
+                    }
                 }
-            }
-        },
-        actions = {
+            },
+            actions = {
                 if (currentScreen == AppScreen.Profile.name) {
                     IconButton(onClick = onSettingsButtonClicked) {
                         Icon(
@@ -105,18 +119,24 @@ fun TopAppBarFunction(
                 }
                 else if(currentScreen != AppScreen.Settings.name) {
                     IconButton(onClick = onProfileButtonClicked) {
-                        Icon(
-                            Icons.Filled.Person,
-                            contentDescription = stringResource(id = R.string.profile),
-                            tint = MaterialTheme.colorScheme.onSecondary
+                        AsyncImage(
+                            model = ImageRequest
+                                .Builder(context)
+                                .data(utenteLoggato.icona)
+                                .crossfade(true)
+                                .build(),
+                            contentDescription = "foto profilo",
+                            modifier = Modifier.clip(shape = RoundedCornerShape(50.dp))
                         )
                     }
                 }
-        },
-        colors = TopAppBarDefaults.smallTopAppBarColors(
-            containerColor = MaterialTheme.colorScheme.secondary
+            },
+            colors = TopAppBarDefaults.smallTopAppBarColors(
+                containerColor = MaterialTheme.colorScheme.secondary
+            )
         )
-    )
+    }
+
 }
 
 @Composable
@@ -174,8 +194,7 @@ fun NavigationApp(
     Scaffold(
         topBar = {
             //Rimuove la TopAppBar dalla pagina di Login e Register
-            if(currentScreen != AppScreen.Login.name && currentScreen != AppScreen.Register.name && currentScreen != AppScreen.Loading.name){
-
+            if(currentScreen != AppScreen.Login.name && currentScreen != AppScreen.Register.name && currentScreen != AppScreen.Loading.name) {
                 TopAppBarFunction(
                     currentScreen = currentScreen,
                     canNavigateBack = navController.previousBackStackEntry != null,
@@ -183,7 +202,9 @@ fun NavigationApp(
                     onTitleButtonClicked = { navController.navigate(AppScreen.Home.name) },
                     onSettingsButtonClicked = { navController.navigate(AppScreen.Settings.name) },
                     onProfileButtonClicked = { navController.navigate(AppScreen.Profile.name) },
-                    ristoranteViewModel = ristoranteViewModel
+                    ristoranteViewModel = ristoranteViewModel,
+                    utenteViewModel = utenteViewModel,
+                    session = session
                 )
             }
         },
@@ -338,10 +359,9 @@ private fun NavigationGraph(
             )
         }
         composable(route = AppScreen.Profile.name){
-
             ProfileScreen(
-
-                utenteViewModel = utenteViewModel
+                utenteViewModel = utenteViewModel,
+                session = session
             )
         }
 

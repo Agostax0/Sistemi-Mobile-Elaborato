@@ -89,8 +89,8 @@ fun RistoranteMainScreen(ristoranteViewModel: RistoranteViewModel,
         val scroll = rememberScrollState(0)
 
         if (!tipoRistorante?.tipi.isNullOrEmpty() && !filtriSelectedRistorante?.filtri.isNullOrEmpty()) {
-            var tipo: TipoRistorante = tipoRistorante!!.tipi.get(0)
-            var filtriConsegna = filtriSelectedRistorante!!.filtri
+            val tipo: TipoRistorante = tipoRistorante!!.tipi.get(0)
+            val filtriConsegna = filtriSelectedRistorante!!.filtri
 
             Column(
                 modifier = Modifier
