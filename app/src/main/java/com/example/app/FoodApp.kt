@@ -177,7 +177,8 @@ fun BottomAppBarFunc(
 @Composable
 fun NavigationApp(
     session: String,
-    navController: NavHostController = rememberNavController()
+    navController: NavHostController = rememberNavController(),
+    startLocationUpdates: ()->Unit
 ) {
     val ristoranteViewModel = hiltViewModel<RistoranteViewModel>()
     val utenteViewModel = hiltViewModel<UtenteViewModel>()
@@ -217,7 +218,7 @@ fun NavigationApp(
             }
         }
     ) { innerPadding ->
-        NavigationGraph(navController, innerPadding, session)
+        NavigationGraph(navController, innerPadding, session= session, startLocationUpdates = startLocationUpdates)
     }
 }
 
@@ -226,7 +227,8 @@ private fun NavigationGraph(
     navController: NavHostController,
     innerPadding: PaddingValues,
     session: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    startLocationUpdates: () -> Unit
 ) {
     val utenteViewModel = hiltViewModel<UtenteViewModel>()
     val ristoranteViewModel = hiltViewModel<RistoranteViewModel>()
@@ -242,6 +244,7 @@ private fun NavigationGraph(
     val utentePossiedeBadgeUtenteViewModel = hiltViewModel<UtentePossiedeBadgeUtenteViewModel>()
     val utenteScansionaRistoranteViewModel = hiltViewModel<UtenteScansionaRistoranteViewModel>()
     val settingsViewModel = hiltViewModel<SettingsViewModel>()
+    val locationViewModel = hiltViewModel<LocationViewModel>()
 
     NavHost(
         navController = navController,
@@ -310,15 +313,7 @@ private fun NavigationGraph(
 
             Log.d(NAV_TAG + "FoodApp.kt" ,"navigating "+AppScreen.Map.name)
 
-            MapScreen(
-                //MapScreen
-                onRestaurantTickClicked = {
-                    //carica il ristorante
-                    navController.navigate(RESTAURANT_ROUTE)
-                   //navController.popBackStack(AppScreen.Restaurant.name, inclusive = false)
-                },
-                //placesViewModel = placesViewModel
-            )
+            MapScreen(startLocationUpdates, locationViewModel)
         }
 
         composable(route = AppScreen.Login.name) {
