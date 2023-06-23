@@ -19,7 +19,7 @@ class RistoranteViewModel @Inject constructor(
     val ristoranteSelected
         get() = _ristoranteSelected
 
-    fun selectRistorante(ristorante: Ristorante) {
+    fun selectRistorante(ristorante: Ristorante?) {
         _ristoranteSelected = ristorante
     }
 

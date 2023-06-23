@@ -12,6 +12,10 @@ class WarningViewModel: ViewModel() {
     val showGPSAlertDialog
         get() = _showGPSAlertDialog
 
+    private var _showConnectivitySnackBar = mutableStateOf(false)
+    val showConnectivitySnackBar
+        get() = _showConnectivitySnackBar
+
 
     fun setPermissionSnackBarVisibility(visible: Boolean) {
         _showPermissionSnackBar.value = visible
@@ -19,5 +23,9 @@ class WarningViewModel: ViewModel() {
 
     fun setGPSAlertDialogVisibility(visible: Boolean) {
         _showGPSAlertDialog.value = visible
+    }
+
+    fun setConnectivitySnackBarVisibility(visible: Boolean) {
+        _showConnectivitySnackBar.value = visible
     }
 }

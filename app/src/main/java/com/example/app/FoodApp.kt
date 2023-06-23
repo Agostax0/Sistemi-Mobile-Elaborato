@@ -16,6 +16,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
@@ -178,11 +179,11 @@ fun BottomAppBarFunc(
 fun NavigationApp(
     session: String,
     navController: NavHostController = rememberNavController(),
-    startLocationUpdates: ()->Unit
+    startLocationUpdates: () -> Unit,
+    warningViewModel: WarningViewModel
 ) {
     val ristoranteViewModel = hiltViewModel<RistoranteViewModel>()
     val utenteViewModel = hiltViewModel<UtenteViewModel>()
-
 
     // Get current back stack entry
     val backStackEntry by navController.currentBackStackEntryAsState()
@@ -192,7 +193,9 @@ fun NavigationApp(
 
     Log.d("NAV_TAG", "current screen : $currentScreen")
 
+    val snackbarHostState = remember { SnackbarHostState() }
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             //Rimuove la TopAppBar dalla pagina di Login e Register
             if(currentScreen != AppScreen.Login.name && currentScreen != AppScreen.Register.name && currentScreen != AppScreen.Loading.name) {
@@ -219,6 +222,20 @@ fun NavigationApp(
         }
     ) { innerPadding ->
         NavigationGraph(navController, innerPadding, session= session, startLocationUpdates = startLocationUpdates)
+        val context = LocalContext.current
+        if (warningViewModel.showPermissionSnackBar.value) {
+            PermissionSnackBarComposable(snackbarHostState, context, warningViewModel)
+        }
+        if (warningViewModel.showGPSAlertDialog.value) {
+            GPSAlertDialogComposable(context, warningViewModel)
+        }
+        if (warningViewModel.showConnectivitySnackBar.value) {
+            ConnectivitySnackBarComposable(
+                snackbarHostState,
+                context,
+                warningViewModel
+            )
+        }
     }
 }
 
@@ -272,6 +289,7 @@ private fun NavigationGraph(
                 ristoranteTipoRistoranteViewModel = ristoranteTipoRistoranteViewModel,
                 utenteScansionaRistoranteViewModel = utenteScansionaRistoranteViewModel,
                 utenteViewModel = utenteViewModel,
+                locationViewModel = locationViewModel,
                 session = session
             )
         }
@@ -313,7 +331,17 @@ private fun NavigationGraph(
 
             Log.d(NAV_TAG + "FoodApp.kt" ,"navigating "+AppScreen.Map.name)
 
-            MapScreen(startLocationUpdates, locationViewModel)
+            MapScreen(startLocationUpdates,
+                locationViewModel,
+                ristoranteViewModel,
+                onRestaurantClicked = {
+                    navController.navigate(RESTAURANT_ROUTE)
+                },
+                tipoRistoranteViewModel = ristoranteTipoRistoranteViewModel,
+                session = session,
+                utenteViewModel = utenteViewModel,
+                utenteScansionaRistoranteViewModel = utenteScansionaRistoranteViewModel
+            )
         }
 
         composable(route = AppScreen.Login.name) {
@@ -394,6 +422,7 @@ private fun NavigationGraph(
                         }
                     }
                 },
+                startLocationUpdates,
                 session
             )
         }

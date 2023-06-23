@@ -105,8 +105,8 @@ fun FiltersScreen(filtroConsegnaViewModel: FiltroConsegnaViewModel,
             if(distanza != "") {
                 var sliderPosition by remember { mutableStateOf(distanza.toFloat()) }
                 Text(text = sliderPosition.toString())
-                Slider(value = (sliderPosition - 300) / 14700, onValueChange = {
-                    sliderPosition = 300 + it*14700
+                Slider(value = (sliderPosition - 300) / 24700, onValueChange = {
+                    sliderPosition = 300 + it*24700
                     filtroConsegnaViewModel.saveDistanza(sliderPosition)
                 })
             }

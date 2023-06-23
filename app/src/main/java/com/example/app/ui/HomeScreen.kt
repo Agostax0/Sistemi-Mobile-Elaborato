@@ -24,20 +24,25 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.app.R
+import com.example.app.data.LocationDetails
 import com.example.app.data.entity.FiltroConsegna
 import com.example.app.data.entity.Ristorante
 import com.example.app.data.entity.TipoRistorante
 import com.example.app.data.relation.RistoranteFiltroConsegna
 import com.example.app.data.relation.RistoranteTipoRistorante
-import com.example.app.data.relation.UtenteRistoranteCrossRef
 import com.example.app.ui.theme.Green
 import com.example.app.viewModel.FiltroConsegnaViewModel
+import com.example.app.viewModel.LocationViewModel
 import com.example.app.viewModel.RistoranteFiltroConsegnaViewModel
 import com.example.app.viewModel.RistoranteTipoRistoranteViewModel
 import com.example.app.viewModel.RistoranteViewModel
 import com.example.app.viewModel.TipoRistoranteViewModel
 import com.example.app.viewModel.UtenteScansionaRistoranteViewModel
 import com.example.app.viewModel.UtenteViewModel
+import kotlin.math.PI
+import kotlin.math.acos
+import kotlin.math.cos
+import kotlin.math.sin
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -51,6 +56,7 @@ fun HomeScreen(onMapButtonClicked: ()-> Unit,
                ristoranteTipoRistoranteViewModel: RistoranteTipoRistoranteViewModel,
                utenteScansionaRistoranteViewModel: UtenteScansionaRistoranteViewModel,
                utenteViewModel: UtenteViewModel,
+               locationViewModel: LocationViewModel,
                session: String,
                modifier: Modifier = Modifier
 ){
@@ -75,6 +81,7 @@ fun HomeScreen(onMapButtonClicked: ()-> Unit,
                 ristoranteTipoRistoranteViewModel,
                 utenteScansionaRistoranteViewModel,
                 utenteViewModel,
+                locationViewModel,
                 session
             )
         }
@@ -99,6 +106,7 @@ fun RistorantiList(
     ristoranteTipoRistoranteViewModel: RistoranteTipoRistoranteViewModel,
     utenteScansionaRistoranteViewModel: UtenteScansionaRistoranteViewModel,
     utenteViewModel: UtenteViewModel,
+    locationViewModel: LocationViewModel,
     session: String
 ) {
     val utenti by utenteViewModel.utenti.collectAsState(initial = listOf())
@@ -122,10 +130,12 @@ fun RistorantiList(
         ).value
 
         var ricerca by rememberSaveable { mutableStateOf("") }
+        val posUtente = locationViewModel.location
+        val distanza by filtroConsegnaViewModel.distanza.collectAsState(initial = "4000f")
 
-        val ristorantiTipati = tipoRistorante(tipiRistoranti, tipiSelezionati, tipiRistorante)
+        val ristorantiTipati = tipoRistorante(tipiRistoranti, tipiSelezionati, tipiRistorante, posUtente, distanza.toFloat())
         val ristorantiFiltrati = filtroRistoranti(ristorantiTipati, filtriRistoranti, filtriSelezionati, ristoranteViewModel, filtriRistorante)
-        val ristorantiOrdinati = sortRistoranti(ristorantiFiltrati, ordineSelezionato, ristorantiPreferiti)
+        val ristorantiOrdinati = sortRistoranti(ristorantiFiltrati, ordineSelezionato, ristorantiPreferiti, posUtente)
         val ristorantiCercati = ristorantiOrdinati.filter {ristorante -> ristorante.nome.lowercase().contains(ricerca.lowercase()) }
 
         LazyVerticalGrid(
@@ -276,22 +286,43 @@ fun RistorantiList(
 fun sortRistoranti(
     ristorantiFiltrati: List<Ristorante>,
     ordineSelezionato: String,
-    ristorantiPreferiti: List<Int>
+    ristorantiPreferiti: List<Int>,
+    posUtente: MutableState<LocationDetails>
 ): List<Ristorante> {
     var ristorantiOrdinati = listOf<Ristorante>()
+    val posizioneUtente = posUtente.value
+
     when(ordineSelezionato) {
-        "Più vicini" -> ristorantiOrdinati = ristorantiFiltrati.sortedBy { it.posizione }
+        "Più vicini" -> ristorantiOrdinati = ristorantiFiltrati.sortedBy {
+            getDistanceFromLatLonInKm(it.posizione.split(";")[0].toDouble(), it.posizione.split(";")[1].toDouble(), posizioneUtente.latitude, posizioneUtente.longitude)
+        }
         "Più amati" -> ristorantiOrdinati = ristorantiFiltrati.sortedBy { it.numeroPreferiti }.asReversed()
         "I tuoi preferiti" -> ristorantiOrdinati = ristorantiFiltrati.sortedBy { ristorantiPreferiti.contains(it.COD_RIS) }.asReversed()
     }
     return ristorantiOrdinati
 }
 
-fun tipoRistorante(tipiRistoranti: List<RistoranteTipoRistorante>, filtriSelezionati: String, tipiRistorante: List<TipoRistorante>): List<Ristorante> {
+fun tipoRistorante(
+    tipiRistoranti: List<RistoranteTipoRistorante>,
+    filtriSelezionati: String,
+    tipiRistorante: List<TipoRistorante>,
+    posUtente: MutableState<LocationDetails>,
+    distanzaFiltro: Float
+): List<Ristorante> {
     val ristorantiFiltrati = mutableListOf<Ristorante>()
+    val posizioneUtente = posUtente.value
+
     tipiRistoranti.forEach{ pair ->
-        if(checkTipi(filtriSelezionati, pair.tipi.get(0), tipiRistorante)) {
-            ristorantiFiltrati.add(pair.ristorante)
+        val posizioneRistorante = pair.ristorante.posizione.split(";")
+        val latR = posizioneRistorante[0].toDouble()
+        val longR = posizioneRistorante[1].toDouble()
+
+        val distanzaRistoranteUtente = getDistanceFromLatLonInKm(latR, longR, posizioneUtente.latitude, posizioneUtente.longitude)
+        Log.d("DIST", distanzaRistoranteUtente.toString())
+        if(distanzaRistoranteUtente <= (distanzaFiltro/1000)) {
+            if(checkTipi(filtriSelezionati, pair.tipi.get(0), tipiRistorante)) {
+                ristorantiFiltrati.add(pair.ristorante)
+            }
         }
     }
     return ristorantiFiltrati
@@ -354,4 +385,22 @@ fun checkFiltri(
         }
     }
     return flag
+}
+
+fun getDistanceFromLatLonInKm(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Double {
+    val R = 6371 // Radius of the earth in km
+    val dLat = deg2rad(lat2-lat1)  // deg2rad below
+    val dLon = deg2rad(lon2-lon1)
+    val a =
+        sin(dLat/2) * sin(dLat/2) +
+                cos(deg2rad(lat1)) * cos(deg2rad(lat2)) *
+                sin(dLon/2) * sin(dLon/2)
+
+    val c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))
+    val d = R * c // Distance in km
+    return d
+}
+
+fun deg2rad(deg: Double): Double {
+    return deg * (PI/180)
 }

@@ -283,6 +283,7 @@ fun ZonaUtente(
             val esperienza = badge.esperienzaBadge + 30
             val newBadge = UtenteBadgeRistoranteCrossRef(badge.ID, badge.COD_BR, currentDate, esperienza)
             utentePossiedeBadgeRistoranteViewModel.newScansione(newBadge)
+            //TODO da aumentare anche l'esperienza totale
             Toast.makeText(context, "+$esperienza Esperienza", Toast.LENGTH_LONG).show()
         }
     }

@@ -5,6 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
@@ -23,10 +24,10 @@ internal fun GPSAlertDialogComposable(
             warningViewModel.setGPSAlertDialogVisibility(false)
         },
         title = {
-            Text(text = "GPS disabled")
+            Text(text = "GPS non attivo")
         },
         text = {
-            Text(text = "GPS is turned off but is needed to get the coordinates")
+            Text(text = "L'app ha bisogno di conoscere la tua posizione in tempo reale")
         },
         confirmButton = {
             TextButton(
@@ -38,14 +39,7 @@ internal fun GPSAlertDialogComposable(
                     warningViewModel.setGPSAlertDialogVisibility(false)
                 }
             ) {
-                Text("Turned on the GPS")
-            }
-        },
-        dismissButton = {
-            TextButton(
-                onClick = { warningViewModel.setGPSAlertDialogVisibility(false)  }
-            ) {
-                Text("Dismiss")
+                Text("Attiva il GPS")
             }
         }
     )
@@ -59,8 +53,8 @@ internal fun PermissionSnackBarComposable(
 ) {
     LaunchedEffect(snackbarHostState) {
         val result = snackbarHostState.showSnackbar(
-            message = "Permission are needed to get your position",
-            actionLabel = "Go to settings"
+            message = "Abilita i permessi di localizzazione",
+            actionLabel = "Vai alle impostazioni"
         )
         when (result) {
             SnackbarResult.ActionPerformed -> {
@@ -73,6 +67,34 @@ internal fun PermissionSnackBarComposable(
             }
             SnackbarResult.Dismissed -> {
                 warningViewModel.setPermissionSnackBarVisibility(false)
+            }
+        }
+    }
+}
+
+@Composable
+fun ConnectivitySnackBarComposable(
+    snackbarHostState: SnackbarHostState,
+    applicationContext: Context,
+    warningViewModel: WarningViewModel
+) {
+    LaunchedEffect(snackbarHostState) {
+        val result = snackbarHostState.showSnackbar(
+            message = "Internet non disponibile",
+            actionLabel = "Vai alle impostazioni",
+            duration = SnackbarDuration.Indefinite
+        )
+        when (result) {
+            SnackbarResult.ActionPerformed -> {
+                val intent = Intent(Settings.ACTION_WIRELESS_SETTINGS).apply {
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                }
+                if (intent.resolveActivity(applicationContext.packageManager) != null) {
+                    applicationContext.startActivity(intent)
+                }
+            }
+            SnackbarResult.Dismissed -> {
+                warningViewModel.setConnectivitySnackBarVisibility(false)
             }
         }
     }

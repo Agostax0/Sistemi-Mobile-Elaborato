@@ -54,6 +54,7 @@ import kotlinx.coroutines.runBlocking
 fun LoadingScreen(
     navigateToLogin: () -> Unit,
     navigateToHome: () -> Unit,
+    startLocationUpdates: () -> Unit,
     session: String
 ) {
 
@@ -62,7 +63,6 @@ fun LoadingScreen(
             navigateToLogin()
         } else {
             navigateToHome()
-
         }
     } else {
         Column(

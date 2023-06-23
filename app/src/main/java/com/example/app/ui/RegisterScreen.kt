@@ -356,7 +356,6 @@ fun RegisterScreen(
                 } else {
                     Toast.makeText(context, "Completa tutti i campi", Toast.LENGTH_LONG).show()
                 }
-
             },
             shape = RoundedCornerShape(50.dp),
             colors = ButtonDefaults.buttonColors(containerColor = Orange),
