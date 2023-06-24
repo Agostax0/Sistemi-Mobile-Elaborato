@@ -11,4 +11,6 @@ class UtentePossiedeBadgeUtenteViewModel @Inject constructor(
 ) : ViewModel() {
 
     val utentiBadgeUtente = repository.utentiBadgeUtente
+
+    val utentiBadgeUtenteRef = repository.utenteBadgeUtenteRef
 }
