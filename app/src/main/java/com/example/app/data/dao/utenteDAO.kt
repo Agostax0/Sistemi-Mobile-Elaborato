@@ -16,15 +16,17 @@ interface UtenteDAO{
     @Query("SELECT * FROM utente WHERE username=:username AND password=:password")
     fun checkLoginCredentials(username: String,password:String) : Flow<Utente?>
     
-    @Query("SELECT * FROM utente WHERE utente.username = (:username)")
+    @Query("SELECT * FROM utente WHERE utente.username=:username")
     fun getUtenteFromUsername(username: String) : Utente
 
-    @Query("UPDATE utente SET username = :newUsername WHERE utente.ID = :userId")
+    @Query("UPDATE utente SET username=:newUsername WHERE utente.ID=:userId")
     suspend fun changeUsernameFromId(userId: Int, newUsername: String)
 
-    //TODO update icona
+    @Query("UPDATE utente SET icona=:newIcona WHERE utente.ID=:userId")
+    suspend fun changeIconaFromId(userId: Int, newIcona: String)
 
-    //TODO update esperienza
+    @Query("UPDATE utente SET esperienzaTotale=:newExp WHERE utente.ID=:userId")
+    suspend fun updateExpFromId(userId: Int, newExp: String)
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insert(vararg utente: Utente)

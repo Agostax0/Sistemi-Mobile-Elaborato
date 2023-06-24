@@ -51,6 +51,16 @@ class UtenteRepository(private val utenteDAO:UtenteDAO, private val context: Con
     }
 
     @WorkerThread
+    suspend fun changeIconaFromId(ID: Int, newIcona: String) {
+        utenteDAO.changeIconaFromId(ID, newIcona)
+    }
+
+    @WorkerThread
+    suspend fun updateExpFromId(ID: Int, newExp: String) {
+        utenteDAO.updateExpFromId(ID, newExp)
+    }
+
+    @WorkerThread
     suspend fun insertNewUtente(utente: Utente) {
         utenteDAO.insert(utente)
     }

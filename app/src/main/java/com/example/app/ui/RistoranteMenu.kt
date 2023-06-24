@@ -1,30 +1,29 @@
 package com.example.app.ui
 
-import android.util.Log
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ArrowDropUp
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material3.*
+import androidx.compose.material3.Divider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.app.data.entity.Cibo
 import com.example.app.data.entity.Ristorante
-import com.example.app.data.relation.RistoranteMenuRistorante
 import com.example.app.viewModel.RistoranteMenuRistoranteViewModel
 import com.example.app.viewModel.RistoranteViewModel
 
@@ -39,10 +38,10 @@ fun RistoranteMenuScreen(
     val menuSelectedRistorante = menuRistoranti.find { it.ristorante == selectedRistorante }
 
     if (!menuSelectedRistorante?.menu.isNullOrEmpty()) {
-        var menu = menuSelectedRistorante!!.menu.groupBy { it.gruppo }
-        var lista = mutableListOf<CollapsableSection>()
+        val menu = menuSelectedRistorante!!.menu.groupBy { it.gruppo }
+        val lista = mutableListOf<CollapsableSection>()
         menu.keys.forEach { gruppo ->
-            lista.add(CollapsableSection(gruppo, menu.get(gruppo)!!.map { cibo -> cibo.nomeCibo }))
+            lista.add(CollapsableSection(gruppo, menu[gruppo]!!.map { cibo -> cibo.nomeCibo }))
         }
         CollapsableLazyColumn(
             sections = lista
@@ -66,11 +65,13 @@ fun CollapsableLazyColumn(
                         .clickable {
                             collapsedState[i] = !collapsed
                         }
+                        .padding(5.dp)
                 ) {
                     Text(
                         dataItem.title,
                         fontWeight = FontWeight.Bold,
                         fontSize = 22.sp,
+                        color = if(collapsed) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.primary,
                         modifier = Modifier
                             .padding(vertical = 10.dp, horizontal = 7.dp)
                             .weight(1f)

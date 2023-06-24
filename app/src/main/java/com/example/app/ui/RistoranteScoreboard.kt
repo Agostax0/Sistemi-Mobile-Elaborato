@@ -33,7 +33,7 @@ fun RistoranteScoreboardScreen(
         it.COD_BR == selectedRistorante!!.COD_BR
     }.sortedBy { it.esperienzaBadge }.asReversed()
 
-    val colors = listOf(Color(0xFFFFD700), Color(0xffc0c0c0), Color(0xffcd7f32), Color.Cyan, Color.Cyan)
+    val colors = listOf(Color(0xFFF1CB00), Color(0xFFD3CACA), Color(0xFFD5883B), Color.Cyan, Color.Cyan)
     val barList = mutableListOf<BarChartData.Bar>()
     if(utentiScelti.isNotEmpty()) {
         for (index in utentiScelti.indices) {
