@@ -1,38 +1,379 @@
 package com.example.app.ui
 
+import android.R
+import android.graphics.Paint.Align
+import android.graphics.drawable.shapes.OvalShape
 import android.util.Log
+import android.widget.GridLayout
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.ClickableText
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.Star
+import androidx.compose.material3.Divider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import com.example.app.data.entity.BadgeUtente
+import com.example.app.data.relation.UtenteBadgeUtenteCrossRef
+import com.example.app.viewModel.RistoranteViewModel
+import com.example.app.viewModel.UtentePossiedeBadgeRistoranteViewModel
+import com.example.app.viewModel.UtenteScansionaRistoranteViewModel
 import com.example.app.viewModel.UtenteViewModel
+
+import com.example.app.ui.theme.Gold
+import com.example.app.ui.theme.Silver
+import com.example.app.ui.theme.Copper
+import com.example.app.viewModel.BadgeUtenteViewModel
+import com.example.app.viewModel.UtentePossiedeBadgeUtenteViewModel
+import java.text.SimpleDateFormat
+import java.util.Collections
+import java.util.Date
+
+
+private const val LEVEL_THRESHOLD = 100
 
 @Composable
 fun ProfileScreen(
     utenteViewModel: UtenteViewModel,
-    session: String
+    session: String,
+    utenteScansionaRistoranteViewModel : UtenteScansionaRistoranteViewModel,
+    utentePossiedeBadgeRistoranteViewModel: UtentePossiedeBadgeRistoranteViewModel,
+    utentePossiedeBadgeUtenteViewModel: UtentePossiedeBadgeUtenteViewModel,
+    ristoranteViewModel: RistoranteViewModel,
+    badgeUtenteViewModel: BadgeUtenteViewModel,
+    onFavoriteRestaurantsClicked: ()->Unit,
+    onRestaurantBadgesClicked: ()->Unit,
+    onUserBadgesClicked: ()->Unit,
 ) {
     val context = LocalContext.current
     val utenti by utenteViewModel.utenti.collectAsState(initial = listOf())
-    Column() {
-        Text(text = utenteViewModel.session.collectAsState(initial = "default").value)
+    Column(
+        modifier = Modifier.fillMaxSize()
+    ) {
+
         if(utenti.isNotEmpty() || utenteViewModel.utenteLoggato != null) {
             val utenteLoggato = if (utenteViewModel.utenteLoggato == null)
                 utenti.find { it.username == session }!! else utenteViewModel.utenteLoggato!!
 
-            AsyncImage(
-                model = ImageRequest
-                    .Builder(context)
-                    .data(utenteLoggato.icona)
-                    .crossfade(true)
-                    .build(),
-                contentDescription = "foto profilo"
-            )
+
+            /**
+             * Ristoranti preferiti
+             */
+            val ristorantiPreferiti = utenteScansionaRistoranteViewModel.getRistorantiPreferitiPerUtente(utenteLoggato.ID.toString()).collectAsState(
+                initial = listOf()
+            ).value
+
+            /**
+             * Lista dei badgeUtente con ID e BADGE_ID
+             */
+            val badgeUtenteRef = utentePossiedeBadgeUtenteViewModel.utentiBadgeUtenteRef.collectAsState(
+                initial = listOf()
+            ).value
+
+            /**
+             * Lista dei codici ristorante dei badge posseduti
+             */
+            val ristorantiVisitatiCrossRef = utentePossiedeBadgeRistoranteViewModel.utentiBadgeRistorante.collectAsState(initial = listOf())
+                .value.filter { it.ID == utenteLoggato.ID }.map { crossRef -> crossRef.COD_BR }
+
+            val badgesUtenteLoggatoCrossRef = utentePossiedeBadgeUtenteViewModel.utentiBadgeUtente.collectAsState(
+                initial = listOf()
+            ).value.filter { it.utente.ID == utenteLoggato.ID }
+
+            val badgePossedutiDaUtenteLoggato: List<BadgeUtente> = if(badgesUtenteLoggatoCrossRef.isEmpty()) listOf() else badgesUtenteLoggatoCrossRef[0].badgeUtenti
+
+            val badgesRari = if(badgePossedutiDaUtenteLoggato.isEmpty()) listOf() else badgePossedutiDaUtenteLoggato.sortedByDescending { it.livello }.take(4)
+
+            val numberOfBadgesObtained = badgePossedutiDaUtenteLoggato.size
+
+            val numberOfFavoriteRestaurants = ristorantiPreferiti.size
+
+            /**
+             * lista di 3 elementi con 3 ristoranti tra quelli con cui si ha un badge ristorante
+             */
+            val ristorantiVisitati = ristoranteViewModel.ristoranti.collectAsState(initial = listOf()).value.filter {ristorantiVisitatiCrossRef.contains(it.COD_BR)}.take(4)
+
+            val sdf = SimpleDateFormat("dd/M/yyyy")
+
+            /**
+             * riferimento al badge ottenuti recentemente
+             */
+            val badgeRecentiRef = badgeUtenteRef.filter { it.ID == utenteLoggato.ID }.sortedByDescending { sdf.parse(it.dataAcquisizione)!! }.take(4)
+
+            val badgeRecenti = ArrayList<Pair<BadgeUtente, UtenteBadgeUtenteCrossRef>>()
+
+            if(badgeRecentiRef.isNotEmpty() && badgePossedutiDaUtenteLoggato.isNotEmpty()){
+                for(badge in badgeRecentiRef){
+                    val badgeInfo = badgePossedutiDaUtenteLoggato.first { it.COD_BU == badge.COD_BU }
+                    badgeRecenti.add(Pair(badgeInfo, badge))
+                }
+            }
+
+
+
+            val currentLevel = (utenteLoggato.esperienzaTotale / LEVEL_THRESHOLD) // a 2002 exp user is level 20
+            val currentProgressToNextLevel = utenteLoggato.esperienzaTotale % LEVEL_THRESHOLD //ranges from 0 to 100
+            val experienceForNextLevel = ((utenteLoggato.esperienzaTotale / 100) + 1 ) * 100
+
+            Row(){
+                AsyncImage(
+                    model = ImageRequest
+                        .Builder(context)
+                        .data(utenteLoggato.icona)
+                        .crossfade(true)
+                        .build(),
+                    contentDescription = "foto profilo",
+                    modifier = Modifier
+                        .padding(10.dp)
+                        .size(height = 120.dp, width = 80.dp)
+                        .clip(RoundedCornerShape(14.dp))
+
+                )
+
+                Column(
+                    horizontalAlignment = Alignment.Start,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(10.dp)
+                ) {
+                        Text(
+                            text=utenteLoggato.username,
+                            style= TextStyle(fontSize = 20.sp,
+                                fontWeight = FontWeight.Bold),
+                            modifier = Modifier.padding(top = 25.dp, bottom = 7.dp)
+                        )
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 15.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween
+
+                    ){
+
+                        Text("LIVELLO: $currentLevel")
+
+                        Text("ESP: ${utenteLoggato.esperienzaTotale}/${experienceForNextLevel}")
+                    }
+
+                    LinearProgressIndicator(
+                        modifier = Modifier.fillMaxWidth(),
+                        color = MaterialTheme.colorScheme.primary,
+                        trackColor = MaterialTheme.colorScheme.primaryContainer,
+                        progress = currentProgressToNextLevel.toFloat()
+                    )
+
+                }
+
+            }
+
+            Column(verticalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth().padding(vertical = 10.dp)) {
+                Row(horizontalArrangement = Arrangement.SpaceEvenly, verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+                    Icon(Icons.Outlined.Star, contentDescription = "Ristoranti Preferiti", tint = MaterialTheme.colorScheme.primary)
+
+                    Text("Ristoranti Preferiti")
+
+                    ClickableText(text=AnnotatedString(text = numberOfFavoriteRestaurants.toString()) , style = TextStyle(color = Color.Blue), onClick = {onFavoriteRestaurantsClicked()})
+                }
+
+            }
+
+            Header("BADGE RARI: $numberOfBadgesObtained", "Tutti", sideTextOnClick = {onUserBadgesClicked()})
+
+            Log.d("PROFILE_TAG", "badgeRari $badgesRari")
+
+            Row(horizontalArrangement = Arrangement.SpaceEvenly){
+
+                badgesRari.forEach{ badge-> BadgeIcon(
+                    iconURL = badge.icona,
+                    iconDescription = badge.descrizione,
+                    rarity = badge.livello
+                ){}}
+            }
+
+
+            Header(mainText = "BADGE RISTORANTI: ${ristorantiVisitatiCrossRef.size}", sideText = "Tutti", sideTextOnClick = {onRestaurantBadgesClicked()})
+
+            Log.d("PROFILE_TAG", "badgeRistorante $ristorantiVisitati")
+
+            Row(horizontalArrangement = Arrangement.SpaceEvenly){
+
+                ristorantiVisitati.forEach{ badge-> BadgeIcon(
+                    iconURL = badge.icona,
+                    iconDescription = badge.descrizione,
+                    rarity = 0,
+                    onClick = {
+
+                    }
+                )}
+            }
+
+
+
+            Header(mainText = "BADGE RECENTI", sideText = "", sideTextOnClick = {null})
+
+            Log.d("PROFILE_TAG", "badgeRecenti $badgeRecenti")
+
+            Column(horizontalAlignment = Alignment.Start){
+
+                badgeRecenti.forEach{ badge-> RecentBadge(
+                    iconURL = badge.first.icona,
+                    description = badge.first.nome,
+                    date = badge.second.dataAcquisizione
+                    )
+                }
+            }
+
+
+
         }
     }
+}
+@Composable
+fun Header(mainText:String, sideText:String, sideTextOnClick:()->Unit){
+    Column(
+        modifier = Modifier
+            .fillMaxWidth(),
+        verticalArrangement = Arrangement.Center
+            ){
+
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(color = MaterialTheme.colorScheme.secondaryContainer)
+                .padding(vertical = 5.dp)
+
+        ){
+
+            Text(mainText,
+                Modifier
+                    .padding(horizontal = 10.dp))
+
+
+            if(sideText.isNotEmpty()){
+
+                ClickableText(
+                    text=AnnotatedString(text = sideText) ,
+                    style = TextStyle(color = Color.Blue),
+                    onClick = {sideTextOnClick()},
+                    modifier = Modifier
+                        .padding(horizontal = 10.dp)
+                )
+
+            }
+        }
+
+
+        Divider(
+            color = MaterialTheme.colorScheme.primaryContainer,
+            thickness = 2.dp,
+            modifier = Modifier
+                .fillMaxWidth()
+        )
+    }
+}
+
+@Composable
+fun BadgeIcon(iconURL: String,iconDescription: String, rarity:Int = 0, onClick:()->Unit = {}){
+    Box() {
+        AsyncImage(
+            model = iconURL,
+            contentDescription = iconDescription,
+            modifier = Modifier
+                .clip(CircleShape)
+                .size(100.dp)
+                .padding(10.dp)
+                .align(Alignment.Center)
+                .clickable { onClick() },
+        )
+
+        if(rarity != 0){
+            Icon(
+                imageVector = Icons.Filled.Check,
+                contentDescription = "Rarity Level",
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .size(30.dp),
+                tint = when(rarity){ 3-> Gold 2-> Silver else -> Copper}
+            )
+        }
+
+
+    }
+}
+
+@Composable
+fun RecentBadge(iconURL: String, description: String, date: String){
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(5.dp)
+        ){
+
+            Row(modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(40.dp))
+                .background(MaterialTheme.colorScheme.primaryContainer),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ){
+
+                AsyncImage(model = iconURL, contentDescription = description, modifier = Modifier
+                    .clip(CircleShape)
+                    .size(70.dp)
+                )
+
+                Text(text = description, style = TextStyle(fontSize = 15.sp,
+                    fontWeight = FontWeight.Bold)
+                )
+
+                Text(text = date, modifier = Modifier.padding(top= 50.dp).padding(end = 16.dp))
+            }
+
+
+
+        }
 }
