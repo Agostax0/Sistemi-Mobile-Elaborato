@@ -125,7 +125,9 @@ fun RistoranteMainScreen(ristoranteViewModel: RistoranteViewModel,
                     context,
                     badgeUtenteLoggato,
                     utenteLoggato.ID,
-                    ristoranteViewModel.isRistoranteAperto(selectedRistorante)
+                    ristoranteViewModel.isRistoranteAperto(selectedRistorante),
+                    utenteLoggato,
+                    utenteViewModel
                 )
                 ZonaInfo(ristorante = selectedRistorante,
                     ristoranteViewModel,
@@ -261,7 +263,9 @@ fun ZonaUtente(
     context: Context,
     badgeUtenteLoggato: List<UtenteBadgeRistoranteCrossRef>,
     ID: Int,
-    isRistoranteAperto: Boolean
+    isRistoranteAperto: Boolean,
+    utenteLoggato: Utente,
+    utenteViewModel: UtenteViewModel
 ) {
     val options = ScanOptions()
     options.setOrientationLocked(false)
@@ -283,8 +287,9 @@ fun ZonaUtente(
             val esperienza = badge.esperienzaBadge + 30
             val newBadge = UtenteBadgeRistoranteCrossRef(badge.ID, badge.COD_BR, currentDate, esperienza)
             utentePossiedeBadgeRistoranteViewModel.newScansione(newBadge)
-            //TODO da aumentare anche l'esperienza totale
-            Toast.makeText(context, "+$esperienza Esperienza", Toast.LENGTH_LONG).show()
+            val expTot = utenteLoggato.esperienzaTotale + 30
+            utenteViewModel.updateExp(utenteLoggato.ID, expTot.toString())
+            Toast.makeText(context, "+30 Esperienza", Toast.LENGTH_LONG).show()
         }
     }
 

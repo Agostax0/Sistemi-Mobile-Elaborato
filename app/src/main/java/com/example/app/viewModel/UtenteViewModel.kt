@@ -61,6 +61,14 @@ class UtenteViewModel @Inject constructor(
         _utenteLoggato = utente
     }
 
+    fun changeIcona(ID: Int, newIcona: String) = viewModelScope.launch {
+        repository.changeIconaFromId(ID, newIcona)
+    }
+
+    fun updateExp(ID: Int, newExp: String) = viewModelScope.launch {
+        repository.updateExpFromId(ID, newExp)
+    }
+
     fun addNewUtente(utente: Utente) = viewModelScope.launch {
         repository.insertNewUtente(utente)
     }

@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -51,10 +53,13 @@ fun FiltersScreen(filtroConsegnaViewModel: FiltroConsegnaViewModel,
         },
         floatingActionButtonPosition = FabPosition.Center,
     ) { innerPadding ->
+        val scroll = rememberScrollState(0)
         Column (
             modifier
                 .padding(innerPadding)
-                .padding(5.dp)) {
+                .padding(5.dp)
+                .verticalScroll(scroll)
+        ) {
             Text(
                 text = "Filtra:",
                 fontWeight = FontWeight.Bold,
