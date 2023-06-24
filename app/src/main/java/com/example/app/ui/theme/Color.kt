@@ -20,3 +20,7 @@ val Dark_Gray = Color(0xFF3C3C3C)
 val Red = Color(0xF7FF0000)
 val Green = Color(0xF725F700)
 val Light_Orange = Color(0x7CFDDEBA)
+
+val Gold = Color(0xFFFFD700)
+val Silver = Color(0xffc0c0c0)
+val Bronze = Color(0xffcd7f32)
