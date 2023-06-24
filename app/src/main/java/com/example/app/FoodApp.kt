@@ -384,7 +384,15 @@ private fun NavigationGraph(
         composable(route = AppScreen.Profile.name){
             ProfileScreen(
                 utenteViewModel = utenteViewModel,
-                session = session
+                session = session,
+                utenteScansionaRistoranteViewModel =  utenteScansionaRistoranteViewModel,
+                utentePossiedeBadgeRistoranteViewModel =  utentePossiedeBadgeRistoranteViewModel,
+                ristoranteViewModel = ristoranteViewModel,
+                utentePossiedeBadgeUtenteViewModel = utentePossiedeBadgeUtenteViewModel,
+                badgeUtenteViewModel = badgeUtenteViewModel,
+                onFavoriteRestaurantsClicked = {}, //TODO
+                onUserBadgesClicked = {}, //TODO
+                onRestaurantBadgesClicked = {}, //TODO
             )
         }
 
