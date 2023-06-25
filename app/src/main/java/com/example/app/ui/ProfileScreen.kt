@@ -133,20 +133,6 @@ fun ProfileScreen(
 
         val sdf = SimpleDateFormat("dd/M/yyyy")
 
-        /**
-         * riferimento al badge ottenuti recentemente
-         */
-        val badgeRecentiRef = badgeUtenteRef.filter { it.ID == utenteLoggato.ID }.sortedByDescending { sdf.parse(it.dataAcquisizione)!! }.take(4)
-
-        val badgeRecenti = ArrayList<Pair<BadgeUtente, UtenteBadgeUtenteCrossRef>>()
-
-        if(badgeRecentiRef.isNotEmpty() && badgePossedutiDaUtenteLoggato.isNotEmpty()){
-            for(badge in badgeRecentiRef){
-                val badgeInfo = badgePossedutiDaUtenteLoggato.first { it.COD_BU == badge.COD_BU }
-                badgeRecenti.add(Pair(badgeInfo, badge))
-            }
-        }
-
 
 
         val currentLevel = (utenteLoggato.esperienzaTotale / LEVEL_THRESHOLD) // a 2002 exp user is level 20
@@ -247,20 +233,6 @@ fun ProfileScreen(
                     }
                 )}
             }
-
-
-
-            Header(mainText = "BADGE RECENTI", sideText = "", sideTextOnClick = {null})
-
-            Column(horizontalAlignment = Alignment.Start){
-
-                badgeRecenti.forEach{ badge-> RecentBadge(
-                    iconURL = badge.first.icona,
-                    description = badge.first.nome,
-                    date = badge.second.dataAcquisizione
-                )
-                }
-            }
         }
     }
 }
@@ -336,39 +308,4 @@ fun BadgeIcon(iconURL: String,iconDescription: String, rarity:Int = 0, onClick:(
 
 
     }
-}
-
-@Composable
-fun RecentBadge(iconURL: String, description: String, date: String){
-
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(5.dp)
-        ){
-
-            Row(modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(40.dp))
-                .background(MaterialTheme.colorScheme.primaryContainer),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ){
-
-                AsyncImage(model = iconURL, contentDescription = description, modifier = Modifier
-                    .clip(CircleShape)
-                    .size(70.dp)
-                )
-
-                Text(text = description, style = TextStyle(fontSize = 15.sp,
-                    fontWeight = FontWeight.Bold)
-                )
-
-                Text(text = date, modifier = Modifier.padding(top= 50.dp).padding(end = 16.dp))
-            }
-
-
-
-        }
 }
