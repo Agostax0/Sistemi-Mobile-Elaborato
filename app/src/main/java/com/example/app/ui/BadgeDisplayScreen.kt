@@ -38,6 +38,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.BlurredEdgeTreatment
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.shadow
@@ -46,6 +49,8 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.geometry.center
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.LinearGradientShader
 import androidx.compose.ui.graphics.Outline
@@ -75,6 +80,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.app.R
+import com.example.app.data.entity.BadgeUtente
+import com.example.app.data.entity.Ristorante
 import java.lang.Math.min
 import java.lang.Math.sqrt
 
@@ -82,6 +89,11 @@ import com.example.app.ui.theme.*
 import com.example.app.viewModel.SettingsViewModel
 
 import com.example.app.ui.Header
+import com.example.app.viewModel.BadgeUtenteViewModel
+import com.example.app.viewModel.RistoranteViewModel
+import com.example.app.viewModel.UtentePossiedeBadgeRistoranteViewModel
+import com.example.app.viewModel.UtentePossiedeBadgeUtenteViewModel
+import com.example.app.viewModel.UtenteScansionaRistoranteViewModel
 import com.example.app.viewModel.UtenteViewModel
 
 val rainbowBrush = Brush.sweepGradient(
@@ -143,68 +155,232 @@ fun BadgeDisplayScreen(
     settingsViewModel: SettingsViewModel,
     utenteViewModel: UtenteViewModel,
     session :String,
+    utenteScansionaRistoranteViewModel: UtenteScansionaRistoranteViewModel,
+    utentePossiedeBadgeRistoranteViewModel : UtentePossiedeBadgeRistoranteViewModel,
+    ristoranteViewModel: RistoranteViewModel,
+    utentePossiedeBadgeUtenteViewModel : UtentePossiedeBadgeUtenteViewModel,
+    badgeUtenteViewModel: BadgeUtenteViewModel,
+    navigateToRestaurant: ()->Unit,
 ){
     val context = LocalContext.current
     val utenti by utenteViewModel.utenti.collectAsState(initial = listOf())
+    val currentTheme = settingsViewModel.theme.collectAsState(initial = "").value
 
     if(utenti.isNotEmpty() || utenteViewModel.utenteLoggato != null) {
         val utenteLoggato = if (utenteViewModel.utenteLoggato == null)
             utenti.find { it.username == session }!! else utenteViewModel.utenteLoggato!!
 
-
-    }
-
-    val currentTheme = settingsViewModel.theme.collectAsState(initial = "").value
-
-    val scroll = rememberScrollState(0)
-
-    Column(modifier = Modifier
-        .fillMaxSize()
-        .verticalScroll(scroll)){
-
-        Header(mainText = "Badge Ottenuti", sideText = "", sideTextOnClick = {})
-
-        LazyVerticalGrid(columns = GridCells.Adaptive(minSize = 72.dp)){
-            items(badges){badge->
+        /**
+         * Lista dei badgeUtente con ID e BADGE_ID, data ed esp dell'utente loggato
+         */
+        val badgeUtenteRef = utentePossiedeBadgeUtenteViewModel.utentiBadgeUtenteRef.collectAsState(
+            initial = listOf()
+        ).value.filter { it-> it.ID == utenteLoggato.ID }
 
 
-                Column(horizontalAlignment = Alignment.Start, modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(5.dp)){
+        val ristoranti: List<Ristorante> = ristoranteViewModel.ristoranti.collectAsState(initial = listOf()).value
 
-                    Text("+"+badge.experienceObtained.toString(), style = TextStyle(fontSize = 15.sp, color = MaterialTheme.colorScheme.primary), textAlign = TextAlign.Start)
+        /**
+         * Lista del ristoranteRef dei badge ristoranti posseduti
+         */
+        val ristorantiVisitatiCrossRef = utentePossiedeBadgeRistoranteViewModel.utentiBadgeRistorante.collectAsState(initial = listOf())
+            .value.filter { it.ID == utenteLoggato.ID }
 
-                    AsyncImage(
-                        model = badge.badgeURL,
-                        contentDescription = badge.badgeDescription,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .size(72.dp)
-                            .clickable { badge.onBadgeClick }
-                            .clip(HexagonShape())
-                            .border(
-                                width = 8.dp,
-                                CustomBrush2(
-                                    badge.rarity,
-                                    MaterialTheme.colorScheme.primaryContainer,
-                                    currentTheme
-                                ),
-                                HexagonShape()
-                            )
-                            .padding(bottom = 5.dp)
-                    )
+        /**
+         * alla pos [0] c'è una lista di BadgeUtente
+         */
+        val badgesUtenteLoggatoCrossRef = utentePossiedeBadgeUtenteViewModel.utentiBadgeUtente.collectAsState(
+            initial = listOf()
+        ).value.filter { it.utente.ID == utenteLoggato.ID }
 
-                    Text(badge.acquisitionDate, style = TextStyle(fontSize = 12.sp), textAlign = TextAlign.End, modifier = Modifier.fillMaxWidth())
+        val badgeUtente: ArrayList<BadgeInfo> = ArrayList<BadgeInfo>()
 
-                }
+        if(badgesUtenteLoggatoCrossRef.isNotEmpty() && badgeUtenteRef.isNotEmpty()){
+            badgesUtenteLoggatoCrossRef[0].badgeUtenti.forEach { badge ->
+                    val crossRefInfo = badgeUtenteRef.filter { it -> it.COD_BU == badge.COD_BU }.first()
+
+                    badgeUtente.add(
+                        BadgeInfo(
+                            badgeURL = badge.icona,
+                            badgeDescription = badge.descrizione,
+                            badgeName = badge.nome,
+                            rarity = badge.livello,
+                            experienceObtained = crossRefInfo.esperienzaBadge,
+                            acquisitionDate = crossRefInfo.dataAcquisizione,
+                            onBadgeClick = {  }) //TODO
+                        )
             }
         }
 
-        Header(mainText = "Badge Non Ottenuti", sideText = "", sideTextOnClick = {})
+        var badgeUtenteMancanti: ArrayList<BadgeInfo> = ArrayList<BadgeInfo>()
+
+        val tuttiIBadge = badgeUtenteViewModel.badgeUtenti.collectAsState(initial = listOf()).value
+
+        if(tuttiIBadge.isNotEmpty() && badgesUtenteLoggatoCrossRef.isNotEmpty()){
+            val badgePossedutiDaUtente = badgesUtenteLoggatoCrossRef[0].badgeUtenti
+
+            Log.d("BADGE_TAG","all badge: ${tuttiIBadge.isNotEmpty()} - ${tuttiIBadge.size} \t badgeLogRef: ${badgesUtenteLoggatoCrossRef.isNotEmpty()}")
+
+            badgeUtenteMancanti = tuttiIBadge.filter { !badgePossedutiDaUtente.contains(it) }.map { BadgeInfo(
+                badgeURL = it.icona,
+                badgeName = it.nome,
+                badgeDescription = it.descrizione,
+                onBadgeClick = {},
+                rarity = it.livello,
+                acquisitionDate = "",
+                experienceObtained = 0,
+            )} as ArrayList<BadgeInfo>
 
 
+
+        }
+
+        val badgeRistoranti: ArrayList<BadgeInfo> = ArrayList<BadgeInfo>()
+
+        if(ristorantiVisitatiCrossRef.isNotEmpty() && ristoranti.isNotEmpty()){
+
+            for(ristoranteRef in ristorantiVisitatiCrossRef){
+                val ristInfo = ristoranti.filter { it.COD_BR == ristoranteRef.COD_BR }.first()
+
+                badgeRistoranti.add(
+                    BadgeInfo(
+                    badgeURL = ristInfo.icona,
+                    badgeName = ristInfo.nome,
+                        badgeDescription = "placeholder",
+                        rarity = 0,
+                        acquisitionDate = ristoranteRef.dataAcquisizione,
+                        experienceObtained = ristoranteRef.esperienzaBadge,
+                        onBadgeClick = {
+                            ristoranteViewModel.selectRistorante(ristInfo)
+                            navigateToRestaurant()
+                        }
+                )
+                )
+            }
+        }
+
+
+
+
+
+
+
+
+
+
+        Column(modifier = Modifier
+            .fillMaxWidth()
+        ){
+
+            Header(mainText = "Badge Ottenuti", sideText = "", sideTextOnClick = {})
+
+            LazyVerticalGrid(columns = GridCells.Adaptive(minSize = 72.dp), modifier = Modifier.padding(bottom = 9.dp, top=3.dp)){
+                items(badgeUtente){badge->
+
+
+                    Column(horizontalAlignment = Alignment.Start, modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(5.dp)){
+
+                        Text("+"+badge.experienceObtained.toString(), style = TextStyle(fontSize = 15.sp, color = MaterialTheme.colorScheme.primary), textAlign = TextAlign.Start)
+
+                        AsyncImage(
+                            model = badge.badgeURL,
+                            contentDescription = badge.badgeDescription,
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .size(72.dp)
+                                .clickable { badge.onBadgeClick() }
+                                .clip(HexagonShape())
+                                .border(
+                                    width = 8.dp,
+
+                                    if (badge.rarity == 0) rainbowBrush else
+                                        CustomBrush2(
+                                            badge.rarity,
+                                            MaterialTheme.colorScheme.primaryContainer,
+                                            currentTheme
+                                        ),
+                                    HexagonShape()
+                                )
+                                .padding(bottom = 5.dp)
+                        )
+
+                        Text(badge.acquisitionDate, style = TextStyle(fontSize = 12.sp), textAlign = TextAlign.End, modifier = Modifier.fillMaxWidth())
+
+                    }
+                }
+            }
+
+            Header(mainText = "Badge Ristoranti", sideText = "", sideTextOnClick = {})
+
+            LazyVerticalGrid(columns = GridCells.Adaptive(minSize = 72.dp),modifier = Modifier.padding(bottom = 9.dp, top=3.dp)){
+                items(badgeRistoranti){badge->
+
+
+                    Column(horizontalAlignment = Alignment.Start, modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(5.dp)){
+
+                        Text("+"+badge.experienceObtained.toString(), style = TextStyle(fontSize = 15.sp, color = MaterialTheme.colorScheme.primary), textAlign = TextAlign.Start)
+
+                        AsyncImage(
+                            model = badge.badgeURL,
+                            contentDescription = badge.badgeDescription,
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .size(72.dp)
+                                .clickable { badge.onBadgeClick() }
+                                .clip(HexagonShape())
+                                .padding(bottom = 5.dp)
+                        )
+
+                        Text(badge.acquisitionDate, style = TextStyle(fontSize = 12.sp), textAlign = TextAlign.End, modifier = Modifier.fillMaxWidth())
+
+                    }
+                }
+            }
+
+            Header(mainText = "Badge Non Ottenuti", sideText = "", sideTextOnClick = {})
+
+            LazyVerticalGrid(columns = GridCells.Adaptive(minSize = 72.dp),modifier = Modifier.padding(bottom = 9.dp, top=3.dp)){
+                items(badgeUtenteMancanti){badge->
+
+                    Column(horizontalAlignment = Alignment.Start, modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(5.dp)){
+                        AsyncImage(
+                            model = badge.badgeURL,
+                            contentDescription = badge.badgeDescription,
+                            contentScale = ContentScale.Crop,
+                            colorFilter = ColorFilter.colorMatrix(ColorMatrix().apply{setToSaturation(0f)}),
+                            modifier = Modifier
+                                .size(72.dp)
+                                .clip(HexagonShape())
+                                .border(
+                                    width = 8.dp,
+
+                                    if (badge.rarity == 0) rainbowBrush else
+                                        CustomBrush2(
+                                            badge.rarity,
+                                            MaterialTheme.colorScheme.primaryContainer,
+                                            currentTheme
+                                        ),
+                                    HexagonShape())
+                                .alpha(0.3f)
+
+                                .clickable { badge.onBadgeClick() }
+                                .padding(bottom = 5.dp)
+                        )
+
+                    }
+                }
+            }
+
+        }
 
     }
+
 }
 
 class HexagonShape: Shape{
@@ -231,4 +407,8 @@ class HexagonShape: Shape{
     })
 }
 
-class BadgeInfo(val badgeURL:String,val rarity: Int, val badgeDescription: String, val badgeName: String, val acquisitionDate: String, val experienceObtained: Int, val onBadgeClick: ()->Unit)
+class BadgeInfo(val badgeURL:String,val rarity: Int, val badgeDescription: String, val badgeName: String, val acquisitionDate: String, val experienceObtained: Int, val onBadgeClick: ()->Unit){
+    override fun toString(): String {
+        return badgeURL+","+rarity+","+badgeDescription+","+badgeName+","+acquisitionDate+","+experienceObtained
+    }
+}
