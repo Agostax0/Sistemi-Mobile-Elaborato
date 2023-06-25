@@ -10,7 +10,6 @@ import androidx.compose.material.BottomNavigation
 import androidx.compose.material.BottomNavigationItem
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -37,7 +36,6 @@ import com.example.app.ui.*
 import com.example.app.ui.LoginScreen
 import com.example.app.viewModel.*
 import dagger.hilt.android.HiltAndroidApp
-import kotlinx.coroutines.launch
 
 sealed class AppScreen(val name: String){
     object Home : AppScreen("Home")
@@ -47,13 +45,20 @@ sealed class AppScreen(val name: String){
     object RestaurantMenu : AppScreen("RestaurantMenu")
     object RestaurantScoreboard : AppScreen("RestaurantScoreboard")
     object Map : AppScreen("Map")
-    object Profile : AppScreen("Profile")
+    object ProfileMain : AppScreen("ProfileMain")
+    object ProfileAllBadges : AppScreen("ProfileAllUserBadges")
+    object ProfileStatistics : AppScreen("ProfileStatistics")
     object Register : AppScreen("Register")
     object Filter : AppScreen("Filter")
     object Loading : AppScreen("Loading")
 }
 const val ROOT_ROUTE = "root"
-const val AUTHENTICATION_ROUTE = "authentication"
+const val PROFILE_ROUTE = "profile"
+val PROFILE_SCREENS = listOf(
+    AppScreen.ProfileMain.name,
+    AppScreen.ProfileAllBadges.name,
+    AppScreen.ProfileStatistics.name
+)
 const val RESTAURANT_ROUTE = "restaurant"
 val RESTAURANT_SCREENS = listOf(
     AppScreen.RestaurantMain.name,
@@ -110,7 +115,7 @@ fun TopAppBarFunction(
                 }
             },
             actions = {
-                if (currentScreen == AppScreen.Profile.name) {
+                if (PROFILE_SCREENS.contains(currentScreen)) {
                     IconButton(onClick = onSettingsButtonClicked) {
                         Icon(
                             Icons.Filled.Settings,
@@ -174,6 +179,40 @@ fun BottomAppBarFunc(
     }
 }
 
+@Composable
+fun ProfileNavigationBottomBar(
+    currentScreen: String,
+    navController: NavHostController
+) {
+    var text = ""
+    var isSelected: Boolean
+    BottomNavigation(
+        backgroundColor = MaterialTheme.colorScheme.background
+    ) {
+        PROFILE_SCREENS.forEach { item ->
+            when (item) {
+                AppScreen.ProfileMain.name -> text = "Profilo"
+                AppScreen.ProfileAllBadges.name -> text = "Badge"
+                AppScreen.ProfileStatistics.name -> text = "Statistiche"
+            }
+            isSelected = currentScreen == item
+            BottomNavigationItem(
+                icon = {
+                    Text(
+                        text = text,
+                        color = if(isSelected) MaterialTheme.colorScheme.primary
+                        else MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                },
+                selectedContentColor = MaterialTheme.colorScheme.primary,
+                unselectedContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                selected = isSelected,
+                onClick = { navController.navigate(item) }
+            )
+        }
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NavigationApp(
@@ -202,10 +241,15 @@ fun NavigationApp(
                 TopAppBarFunction(
                     currentScreen = currentScreen,
                     canNavigateBack = navController.previousBackStackEntry != null,
-                    navigateUp = { if(!RESTAURANT_SCREENS.contains(currentScreen)) navController.navigateUp() else navController.navigate(AppScreen.Home.name) },
+                    navigateUp = {
+                        if(!RESTAURANT_SCREENS.contains(currentScreen) || !PROFILE_SCREENS.contains(currentScreen))
+                            navController.navigateUp()
+                        else
+                            navController.navigate(AppScreen.Home.name)
+                    },
                     onTitleButtonClicked = { navController.navigate(AppScreen.Home.name) },
                     onSettingsButtonClicked = { navController.navigate(AppScreen.Settings.name) },
-                    onProfileButtonClicked = { navController.navigate(AppScreen.Profile.name) },
+                    onProfileButtonClicked = { navController.navigate(AppScreen.ProfileMain.name) },
                     ristoranteViewModel = ristoranteViewModel,
                     utenteViewModel = utenteViewModel,
                     session = session
@@ -218,6 +262,9 @@ fun NavigationApp(
                     currentScreen = currentScreen,
                     navController
                 )
+            }
+            else if(PROFILE_SCREENS.contains(currentScreen)){
+                ProfileNavigationBottomBar(currentScreen = currentScreen, navController = navController)
             }
         }
     ) { innerPadding ->
@@ -381,20 +428,45 @@ private fun NavigationGraph(
                 utenteViewModel = utenteViewModel
             )
         }
-        composable(route = AppScreen.Profile.name){
-            ProfileScreen(
-                utenteViewModel = utenteViewModel,
-                session = session,
-                utenteScansionaRistoranteViewModel =  utenteScansionaRistoranteViewModel,
-                utentePossiedeBadgeRistoranteViewModel =  utentePossiedeBadgeRistoranteViewModel,
-                ristoranteViewModel = ristoranteViewModel,
-                utentePossiedeBadgeUtenteViewModel = utentePossiedeBadgeUtenteViewModel,
-                badgeUtenteViewModel = badgeUtenteViewModel,
-                onFavoriteRestaurantsClicked = {}, //TODO
-                onUserBadgesClicked = {}, //TODO
-                onRestaurantBadgesClicked = {}, //TODO
-            )
+
+        navigation(
+            startDestination = AppScreen.ProfileMain.name,
+            route = PROFILE_ROUTE
+        ){
+            composable(route = AppScreen.ProfileMain.name){
+                ProfileScreen(
+                    utenteViewModel = utenteViewModel,
+                    session = session,
+                    utenteScansionaRistoranteViewModel =  utenteScansionaRistoranteViewModel,
+                    utentePossiedeBadgeRistoranteViewModel =  utentePossiedeBadgeRistoranteViewModel,
+                    ristoranteViewModel = ristoranteViewModel,
+                    utentePossiedeBadgeUtenteViewModel = utentePossiedeBadgeUtenteViewModel,
+                    badgeUtenteViewModel = badgeUtenteViewModel,
+                    navigateToRestaurant = {navController.navigate(RESTAURANT_ROUTE)}
+                )
+
+            }
+
+            composable(route = AppScreen.ProfileAllBadges.name){
+                BadgeDisplayScreen(
+                    settingsViewModel = settingsViewModel,
+                    utenteViewModel = utenteViewModel,
+                    session = session,
+                    utenteScansionaRistoranteViewModel =  utenteScansionaRistoranteViewModel,
+                    utentePossiedeBadgeRistoranteViewModel =  utentePossiedeBadgeRistoranteViewModel,
+                    ristoranteViewModel = ristoranteViewModel,
+                    utentePossiedeBadgeUtenteViewModel = utentePossiedeBadgeUtenteViewModel,
+                    badgeUtenteViewModel = badgeUtenteViewModel,
+                    navigateToRestaurant = {navController.navigate(RESTAURANT_ROUTE)}
+                )
+            }
+
+            composable(route = AppScreen.ProfileStatistics.name){
+                ProfileStatisticsScreen()
+            }
+
         }
+
 
         composable(route = AppScreen.Register.name){
             Log.d(NAV_TAG + "FoodApp.kt" ,"navigating "+AppScreen.Register.name)
