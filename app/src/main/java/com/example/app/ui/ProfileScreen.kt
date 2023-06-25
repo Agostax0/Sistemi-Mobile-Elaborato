@@ -81,80 +81,83 @@ fun ProfileScreen(
     utentePossiedeBadgeUtenteViewModel: UtentePossiedeBadgeUtenteViewModel,
     ristoranteViewModel: RistoranteViewModel,
     badgeUtenteViewModel: BadgeUtenteViewModel,
-    onFavoriteRestaurantsClicked: ()->Unit,
-    onRestaurantBadgesClicked: ()->Unit,
-    onUserBadgesClicked: ()->Unit,
+    //onFavoriteRestaurantsClicked: ()->Unit,
+    //onRestaurantBadgesClicked: ()->Unit,
+    //onUserBadgesClicked: ()->Unit,
+    navigateToRestaurant: ()->Unit,
 ) {
     val context = LocalContext.current
     val utenti by utenteViewModel.utenti.collectAsState(initial = listOf())
-    Column(
-        modifier = Modifier.fillMaxSize()
-    ) {
 
-        if(utenti.isNotEmpty() || utenteViewModel.utenteLoggato != null) {
-            val utenteLoggato = if (utenteViewModel.utenteLoggato == null)
-                utenti.find { it.username == session }!! else utenteViewModel.utenteLoggato!!
+    if(utenti.isNotEmpty() || utenteViewModel.utenteLoggato != null) {
+        val utenteLoggato = if (utenteViewModel.utenteLoggato == null)
+            utenti.find { it.username == session }!! else utenteViewModel.utenteLoggato!!
 
 
-            /**
-             * Ristoranti preferiti
-             */
-            val ristorantiPreferiti = utenteScansionaRistoranteViewModel.getRistorantiPreferitiPerUtente(utenteLoggato.ID.toString()).collectAsState(
-                initial = listOf()
-            ).value
+        /**
+         * Ristoranti preferiti
+         */
+        val ristorantiPreferiti = utenteScansionaRistoranteViewModel.getRistorantiPreferitiPerUtente(utenteLoggato.ID.toString()).collectAsState(
+            initial = listOf()
+        ).value
 
-            /**
-             * Lista dei badgeUtente con ID e BADGE_ID
-             */
-            val badgeUtenteRef = utentePossiedeBadgeUtenteViewModel.utentiBadgeUtenteRef.collectAsState(
-                initial = listOf()
-            ).value
+        /**
+         * Lista dei badgeUtente con ID e BADGE_ID
+         */
+        val badgeUtenteRef = utentePossiedeBadgeUtenteViewModel.utentiBadgeUtenteRef.collectAsState(
+            initial = listOf()
+        ).value
 
-            /**
-             * Lista dei codici ristorante dei badge posseduti
-             */
-            val ristorantiVisitatiCrossRef = utentePossiedeBadgeRistoranteViewModel.utentiBadgeRistorante.collectAsState(initial = listOf())
-                .value.filter { it.ID == utenteLoggato.ID }.map { crossRef -> crossRef.COD_BR }
+        /**
+         * Lista dei codici ristorante dei badge posseduti
+         */
+        val ristorantiVisitatiCrossRef = utentePossiedeBadgeRistoranteViewModel.utentiBadgeRistorante.collectAsState(initial = listOf())
+            .value.filter { it.ID == utenteLoggato.ID }.map { crossRef -> crossRef.COD_BR }
 
-            val badgesUtenteLoggatoCrossRef = utentePossiedeBadgeUtenteViewModel.utentiBadgeUtente.collectAsState(
-                initial = listOf()
-            ).value.filter { it.utente.ID == utenteLoggato.ID }
+        val badgesUtenteLoggatoCrossRef = utentePossiedeBadgeUtenteViewModel.utentiBadgeUtente.collectAsState(
+            initial = listOf()
+        ).value.filter { it.utente.ID == utenteLoggato.ID }
 
-            val badgePossedutiDaUtenteLoggato: List<BadgeUtente> = if(badgesUtenteLoggatoCrossRef.isEmpty()) listOf() else badgesUtenteLoggatoCrossRef[0].badgeUtenti
+        val badgePossedutiDaUtenteLoggato: List<BadgeUtente> = if(badgesUtenteLoggatoCrossRef.isEmpty()) listOf() else badgesUtenteLoggatoCrossRef[0].badgeUtenti
 
-            val badgesRari = if(badgePossedutiDaUtenteLoggato.isEmpty()) listOf() else badgePossedutiDaUtenteLoggato.sortedByDescending { it.livello }.take(4)
+        val badgesRari = if(badgePossedutiDaUtenteLoggato.isEmpty()) listOf() else badgePossedutiDaUtenteLoggato.sortedByDescending { it.livello }.take(4)
 
-            val numberOfBadgesObtained = badgePossedutiDaUtenteLoggato.size
+        val numberOfBadgesObtained = badgePossedutiDaUtenteLoggato.size
 
-            val numberOfFavoriteRestaurants = ristorantiPreferiti.size
+        val numberOfFavoriteRestaurants = ristorantiPreferiti.size
 
-            /**
-             * lista di 3 elementi con 3 ristoranti tra quelli con cui si ha un badge ristorante
-             */
-            val ristorantiVisitati = ristoranteViewModel.ristoranti.collectAsState(initial = listOf()).value.filter {ristorantiVisitatiCrossRef.contains(it.COD_BR)}.take(4)
+        /**
+         * lista di 3 elementi con 3 ristoranti tra quelli con cui si ha un badge ristorante
+         */
+        val ristorantiVisitati = ristoranteViewModel.ristoranti.collectAsState(initial = listOf()).value.filter {ristorantiVisitatiCrossRef.contains(it.COD_BR)}.take(4)
 
-            val sdf = SimpleDateFormat("dd/M/yyyy")
+        val sdf = SimpleDateFormat("dd/M/yyyy")
 
-            /**
-             * riferimento al badge ottenuti recentemente
-             */
-            val badgeRecentiRef = badgeUtenteRef.filter { it.ID == utenteLoggato.ID }.sortedByDescending { sdf.parse(it.dataAcquisizione)!! }.take(4)
+        /**
+         * riferimento al badge ottenuti recentemente
+         */
+        val badgeRecentiRef = badgeUtenteRef.filter { it.ID == utenteLoggato.ID }.sortedByDescending { sdf.parse(it.dataAcquisizione)!! }.take(4)
 
-            val badgeRecenti = ArrayList<Pair<BadgeUtente, UtenteBadgeUtenteCrossRef>>()
+        val badgeRecenti = ArrayList<Pair<BadgeUtente, UtenteBadgeUtenteCrossRef>>()
 
-            if(badgeRecentiRef.isNotEmpty() && badgePossedutiDaUtenteLoggato.isNotEmpty()){
-                for(badge in badgeRecentiRef){
-                    val badgeInfo = badgePossedutiDaUtenteLoggato.first { it.COD_BU == badge.COD_BU }
-                    badgeRecenti.add(Pair(badgeInfo, badge))
-                }
+        if(badgeRecentiRef.isNotEmpty() && badgePossedutiDaUtenteLoggato.isNotEmpty()){
+            for(badge in badgeRecentiRef){
+                val badgeInfo = badgePossedutiDaUtenteLoggato.first { it.COD_BU == badge.COD_BU }
+                badgeRecenti.add(Pair(badgeInfo, badge))
             }
+        }
 
 
 
-            val currentLevel = (utenteLoggato.esperienzaTotale / LEVEL_THRESHOLD) // a 2002 exp user is level 20
-            val currentProgressToNextLevel = utenteLoggato.esperienzaTotale % LEVEL_THRESHOLD //ranges from 0 to 100
-            val experienceForNextLevel = ((utenteLoggato.esperienzaTotale / 100) + 1 ) * 100
+        val currentLevel = (utenteLoggato.esperienzaTotale / LEVEL_THRESHOLD) // a 2002 exp user is level 20
+        val currentProgressToNextLevel = utenteLoggato.esperienzaTotale % LEVEL_THRESHOLD //ranges from 0 to 100
+        val experienceForNextLevel = ((utenteLoggato.esperienzaTotale / 100) + 1 ) * 100
 
+
+
+        Column(
+            modifier = Modifier.fillMaxSize()
+        ) {
             Row(){
                 AsyncImage(
                     model = ImageRequest
@@ -176,12 +179,12 @@ fun ProfileScreen(
                         .fillMaxWidth()
                         .padding(10.dp)
                 ) {
-                        Text(
-                            text=utenteLoggato.username,
-                            style= TextStyle(fontSize = 20.sp,
-                                fontWeight = FontWeight.Bold),
-                            modifier = Modifier.padding(top = 25.dp, bottom = 7.dp)
-                        )
+                    Text(
+                        text=utenteLoggato.username,
+                        style= TextStyle(fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold),
+                        modifier = Modifier.padding(top = 25.dp, bottom = 7.dp)
+                    )
 
                     Row(
                         modifier = Modifier
@@ -213,14 +216,12 @@ fun ProfileScreen(
 
                     Text("Ristoranti Preferiti")
 
-                    ClickableText(text=AnnotatedString(text = numberOfFavoriteRestaurants.toString()) , style = TextStyle(color = Color.Blue), onClick = {onFavoriteRestaurantsClicked()})
+                    ClickableText(text=AnnotatedString(text = numberOfFavoriteRestaurants.toString()) , style = TextStyle(color = Color.Blue), onClick = {})
                 }
 
             }
 
-            Header("BADGE RARI: $numberOfBadgesObtained", "Tutti", sideTextOnClick = {onUserBadgesClicked()})
-
-            Log.d("PROFILE_TAG", "badgeRari $badgesRari")
+            Header("BADGE RARI: $numberOfBadgesObtained", "", sideTextOnClick = {})
 
             Row(horizontalArrangement = Arrangement.SpaceEvenly){
 
@@ -232,18 +233,17 @@ fun ProfileScreen(
             }
 
 
-            Header(mainText = "BADGE RISTORANTI: ${ristorantiVisitatiCrossRef.size}", sideText = "Tutti", sideTextOnClick = {onRestaurantBadgesClicked()})
-
-            Log.d("PROFILE_TAG", "badgeRistorante $ristorantiVisitati")
+            Header(mainText = "BADGE RISTORANTI: ${ristorantiVisitatiCrossRef.size}", sideText = "", sideTextOnClick = {})
 
             Row(horizontalArrangement = Arrangement.SpaceEvenly){
 
-                ristorantiVisitati.forEach{ badge-> BadgeIcon(
-                    iconURL = badge.icona,
-                    iconDescription = badge.descrizione,
+                ristorantiVisitati.forEach{ ristorante-> BadgeIcon(
+                    iconURL = ristorante.icona,
+                    iconDescription = ristorante.descrizione,
                     rarity = 0,
                     onClick = {
-
+                        ristoranteViewModel.selectRistorante(ristorante)
+                        navigateToRestaurant()
                     }
                 )}
             }
@@ -252,20 +252,15 @@ fun ProfileScreen(
 
             Header(mainText = "BADGE RECENTI", sideText = "", sideTextOnClick = {null})
 
-            Log.d("PROFILE_TAG", "badgeRecenti $badgeRecenti")
-
             Column(horizontalAlignment = Alignment.Start){
 
                 badgeRecenti.forEach{ badge-> RecentBadge(
                     iconURL = badge.first.icona,
                     description = badge.first.nome,
                     date = badge.second.dataAcquisizione
-                    )
+                )
                 }
             }
-
-
-
         }
     }
 }
