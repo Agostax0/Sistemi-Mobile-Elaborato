@@ -352,6 +352,7 @@ private fun NavigationGraph(
                     utentePossiedeBadgeUtenteViewModel = utentePossiedeBadgeUtenteViewModel,
                     utentePossiedeBadgeRistoranteViewModel = utentePossiedeBadgeRistoranteViewModel,
                     utenteViewModel = utenteViewModel,
+                    locationViewModel = locationViewModel,
                     session = session
                 )
             }

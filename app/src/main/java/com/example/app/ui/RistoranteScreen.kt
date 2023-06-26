@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.QrCode
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -37,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import coil.compose.AsyncImage
+import com.example.app.data.LocationDetails
 import com.example.app.data.entity.FiltroConsegna
 import com.example.app.data.entity.Ristorante
 import com.example.app.data.entity.TipoRistorante
@@ -45,6 +47,7 @@ import com.example.app.data.relation.UtenteBadgeRistoranteCrossRef
 import com.example.app.data.relation.UtenteBadgeUtenteCrossRef
 import com.example.app.data.relation.UtenteRistoranteCrossRef
 import com.example.app.ui.theme.Green
+import com.example.app.viewModel.LocationViewModel
 import com.example.app.viewModel.RistoranteFiltroConsegnaViewModel
 import com.example.app.viewModel.RistoranteTipoRistoranteViewModel
 import com.example.app.viewModel.RistoranteViewModel
@@ -66,10 +69,12 @@ fun RistoranteMainScreen(ristoranteViewModel: RistoranteViewModel,
                          utentePossiedeBadgeRistoranteViewModel: UtentePossiedeBadgeRistoranteViewModel,
                          utentePossiedeBadgeUtenteViewModel: UtentePossiedeBadgeUtenteViewModel,
                          utenteViewModel: UtenteViewModel,
+                         locationViewModel: LocationViewModel,
                          session: String
 ) {
     val context = LocalContext.current
 
+    val location = locationViewModel.location
     val selectedRistorante = ristoranteViewModel.ristoranteSelected
     val tipiRistoranti = ristoranteTipoRistoranteViewModel.tipiRistoranti.collectAsState(initial = listOf()).value
     val tipoRistorante = tipiRistoranti.find { it.ristorante == selectedRistorante }
@@ -137,7 +142,8 @@ fun RistoranteMainScreen(ristoranteViewModel: RistoranteViewModel,
                     ristoranteViewModel.isRistoranteAperto(selectedRistorante),
                     utenteLoggato,
                     utenteViewModel,
-                    utentePossiedeBadgeUtenteViewModel
+                    utentePossiedeBadgeUtenteViewModel,
+                    location
                 )
                 ZonaInfo(ristorante = selectedRistorante,
                     ristoranteViewModel,
@@ -290,11 +296,13 @@ fun ZonaUtente(
     isRistoranteAperto: Boolean,
     utenteLoggato: Utente,
     utenteViewModel: UtenteViewModel,
-    utentePossiedeBadgeUtenteViewModel: UtentePossiedeBadgeUtenteViewModel
+    utentePossiedeBadgeUtenteViewModel: UtentePossiedeBadgeUtenteViewModel,
+    location: MutableState<LocationDetails>
 ) {
     val options = ScanOptions()
     options.setOrientationLocked(false)
 
+    val locationValue = location.value
     val date = Calendar.getInstance().time
     val sdf = SimpleDateFormat("dd/M/yyyy")
     val currentDate = sdf.format(date)
@@ -353,7 +361,10 @@ fun ZonaUtente(
     Row(modifier = Modifier
         .fillMaxWidth()
     ) {
-        val isScanButtonEnabled = isRistoranteAperto && if(badgeUtenteLoggatoRistoranteSelected.isNotEmpty()) badgeUtenteLoggatoRistoranteSelected[0].dataAcquisizione != currentDate else true  //&& isAbbastanzaVicino
+        val isScanButtonEnabled =
+            isRistoranteAperto &&
+                    getDistanceFromLatLonInKm(ristorante.posizione.split(";")[0].toDouble(), ristorante.posizione.split(";")[1].toDouble(), locationValue.latitude, locationValue.longitude) < 1
+                    && if(badgeUtenteLoggatoRistoranteSelected.isNotEmpty()) badgeUtenteLoggatoRistoranteSelected[0].dataAcquisizione != currentDate else true  //&& isAbbastanzaVicino
         Text(text = "Livello " + (badge.esperienzaBadge / 100).toString() +
                 " (" + badge.esperienzaBadge + "/" + ((badge.esperienzaBadge - badge.esperienzaBadge%100) + 100).toString() + ")",
             modifier = Modifier.weight(1f)
