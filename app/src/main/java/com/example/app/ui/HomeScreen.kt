@@ -1,5 +1,6 @@
 package com.example.app.ui
 
+import android.app.Activity
 import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -18,6 +19,7 @@ import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -40,9 +42,10 @@ import com.example.app.viewModel.TipoRistoranteViewModel
 import com.example.app.viewModel.UtenteScansionaRistoranteViewModel
 import com.example.app.viewModel.UtenteViewModel
 import kotlin.math.PI
-import kotlin.math.acos
+import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.sin
+import kotlin.math.sqrt
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -110,6 +113,7 @@ fun RistorantiList(
     session: String
 ) {
     val utenti by utenteViewModel.utenti.collectAsState(initial = listOf())
+    val context = LocalContext.current
 
     val filtriRistorante = filtroConsegnaViewModel.filtriConsegna.collectAsState(initial = listOf()).value
     val filtriRistoranti = ristoranteFiltroConsegnaViewModel.filtriRistoranti.collectAsState(initial = listOf()).value
@@ -320,7 +324,7 @@ fun tipoRistorante(
         val distanzaRistoranteUtente = getDistanceFromLatLonInKm(latR, longR, posizioneUtente.latitude, posizioneUtente.longitude)
         Log.d("DIST", distanzaRistoranteUtente.toString())
         if(distanzaRistoranteUtente <= (distanzaFiltro/1000)) {
-            if(checkTipi(filtriSelezionati, pair.tipi.get(0), tipiRistorante)) {
+            if(checkTipi(filtriSelezionati, pair.tipi[0], tipiRistorante)) {
                 ristorantiFiltrati.add(pair.ristorante)
             }
         }
@@ -334,7 +338,7 @@ fun checkTipi(
     tipiRistorante: List<TipoRistorante>
 ): Boolean {
     var flag = true
-    for(index in 0 until tipiRistorante.size) {
+    for(index in tipiRistorante.indices) {
         if(filtriSelezionati[index] == '0') {
             Log.d("TIPI", "RISTORANTE= " + tipoRistorante.nomeTipo + " / FILTRI= " + filtriSelezionati + " / FILTRO= " + tipiRistorante[index].nomeTipo)
             if (tipoRistorante.nomeTipo == tipiRistorante[index].nomeTipo) {
@@ -388,17 +392,16 @@ fun checkFiltri(
 }
 
 fun getDistanceFromLatLonInKm(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Double {
-    val R = 6371 // Radius of the earth in km
-    val dLat = deg2rad(lat2-lat1)  // deg2rad below
-    val dLon = deg2rad(lon2-lon1)
+    val raggio = 6371 // Radius of the earth in km
+    val dLat = deg2rad(lat2 - lat1)  // deg2rad below
+    val dLon = deg2rad(lon2 - lon1)
     val a =
-        sin(dLat/2) * sin(dLat/2) +
+        sin(dLat / 2) * sin(dLat / 2) +
                 cos(deg2rad(lat1)) * cos(deg2rad(lat2)) *
-                sin(dLon/2) * sin(dLon/2)
+                sin(dLon / 2) * sin(dLon / 2)
 
-    val c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))
-    val d = R * c // Distance in km
-    return d
+    val c = 2 * atan2(sqrt(a), sqrt(1 - a))
+    return raggio * c
 }
 
 fun deg2rad(deg: Double): Double {

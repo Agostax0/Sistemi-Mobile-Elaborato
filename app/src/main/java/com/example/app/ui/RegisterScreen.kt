@@ -1,10 +1,8 @@
 package com.example.app.ui
 
 import android.Manifest
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
-import android.provider.MediaStore
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -53,8 +51,6 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.app.ActivityCompat
-import androidx.core.app.ActivityCompat.startActivityForResult
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import coil.compose.AsyncImage
@@ -62,10 +58,14 @@ import coil.request.ImageRequest
 import com.example.app.R
 import com.example.app.createImageFile
 import com.example.app.data.entity.Utente
+import com.example.app.data.relation.UtenteBadgeUtenteCrossRef
 import com.example.app.saveImage
 import com.example.app.ui.theme.Orange
 import com.example.app.ui.theme.White
+import com.example.app.viewModel.UtentePossiedeBadgeUtenteViewModel
 import com.example.app.viewModel.UtenteViewModel
+import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Objects
 
 
@@ -74,7 +74,8 @@ import java.util.Objects
 fun RegisterScreen(
     onSuccessfulRegister: ()->Unit,
     onLoginButtonClicked: ()->Unit,
-    utenteViewModel: UtenteViewModel
+    utenteViewModel: UtenteViewModel,
+    utentePossiedeBadgeUtenteViewModel: UtentePossiedeBadgeUtenteViewModel
 ) {
     val utenti by utenteViewModel.utenti.collectAsState(initial = listOf())
     var username by remember { mutableStateOf("") }
@@ -347,11 +348,18 @@ fun RegisterScreen(
             onClick = {
                 if(name != "" && surname != "" && username != "" && password != "" && email != "") {
                     if(utenti.find { it.username == username } == null) {
-                        val info = Utente(nome = name, cognome = surname, username = username, password = password, email = email, icona = icona, esperienzaTotale = 0L)
+                        val info = Utente(ID = (10..10000).random(),nome = name, cognome = surname, username = username, password = password, email = email, icona = icona, esperienzaTotale = 0L)
 
                         utenteViewModel.addNewUtente(info)
                         utenteViewModel.startSession(info)
                         utenteViewModel.selectutente(info)
+                        //BADGE ISCRIZIONE
+                        val date = Calendar.getInstance().time
+                        val sdf = SimpleDateFormat("dd/M/yyyy")
+                        val currentDate = sdf.format(date)
+                        val newBadge = UtenteBadgeUtenteCrossRef(info.ID, 1, currentDate, 1)
+                        utentePossiedeBadgeUtenteViewModel.newBadgeUtente(newBadge)
+
                         onSuccessfulRegister()
                     } else {
                         Toast.makeText(context, "Nome utente non disponibile", Toast.LENGTH_LONG).show()

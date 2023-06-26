@@ -31,14 +31,13 @@ import com.google.maps.android.compose.rememberCameraPositionState
 
 @Composable
 fun MapScreen(
-    startLocationUpdate: ()->Unit,
     locationViewModel: LocationViewModel,
     ristoranteViewModel: RistoranteViewModel,
     tipoRistoranteViewModel: RistoranteTipoRistoranteViewModel,
     utenteViewModel: UtenteViewModel,
     utenteScansionaRistoranteViewModel: UtenteScansionaRistoranteViewModel,
     session: String,
-    onRestaurantClicked: ()->Unit
+    onRestaurantClicked: () -> Unit
 ){
     val utenti by utenteViewModel.utenti.collectAsState(initial = listOf())
     if(utenti.isNotEmpty() || utenteViewModel.utenteLoggato != null) {

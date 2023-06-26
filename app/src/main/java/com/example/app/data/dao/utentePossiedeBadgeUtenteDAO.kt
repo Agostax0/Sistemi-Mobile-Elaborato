@@ -14,11 +14,8 @@ interface UtentePossiedeBadgeUtenteDAO{
 
     @Query("SELECT * FROM UtenteBadgeUtenteCrossRef")
     fun getBadgeUtentiRef(): Flow<List<UtenteBadgeUtenteCrossRef>>
-    /*
-    @Query("SELECT * FROM utente_possiede_badge_utente WHERE utente_possiede_badge_utente.ID = :userId")
-    fun getBadgeUtenteObtainedOfUtente(userId:Int) : List<UtentePossiedeBadgeUtente>
 
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun newBadgeUtenteForUtente(vararg utentePossiedeBadgeUtente: UtentePossiedeBadgeUtente)
-    */
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun newBadgeUtenteForUtente(vararg UtenteBadgeUtenteCrossRef: UtenteBadgeUtenteCrossRef)
+
 }

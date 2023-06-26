@@ -1,6 +1,5 @@
 package com.example.app.ui
 
-import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -9,7 +8,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -65,7 +63,7 @@ fun FiltersScreen(filtroConsegnaViewModel: FiltroConsegnaViewModel,
                 fontWeight = FontWeight.Bold,
                 fontSize = 20.sp
             )
-            if (!filtriSelezionati.isEmpty() && !filtri.isEmpty()) {
+            if (filtriSelezionati.isNotEmpty() && filtri.isNotEmpty()) {
                 for (i in 0 until 4) {
                     CheckBoxFiltro(
                         nomeFiltro = filtri[i].filtro,
@@ -87,7 +85,7 @@ fun FiltersScreen(filtroConsegnaViewModel: FiltroConsegnaViewModel,
                 fontWeight = FontWeight.Bold,
                 fontSize = 20.sp
             )
-            if(!ordineSelezionato.isEmpty()) {
+            if(ordineSelezionato.isNotEmpty()) {
                 for(i in ordini.indices) {
                     CheckboxOrdine(
                         ordini[i],

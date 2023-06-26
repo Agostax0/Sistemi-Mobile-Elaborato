@@ -30,7 +30,6 @@ import com.example.app.viewModel.RistoranteViewModel
 @Composable
 fun RistoranteMenuScreen(
     ristoranteViewModel: RistoranteViewModel,
-    modifier: Modifier = Modifier,
     ristoranteMenuRistoranteViewModel: RistoranteMenuRistoranteViewModel
 ) {
     val selectedRistorante: Ristorante? = ristoranteViewModel.ristoranteSelected

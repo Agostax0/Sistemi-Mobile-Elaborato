@@ -40,19 +40,20 @@ import com.example.app.data.entity.Ristorante
 import com.example.app.data.entity.TipoRistorante
 import com.example.app.data.entity.Utente
 import com.example.app.data.relation.UtenteBadgeRistoranteCrossRef
+import com.example.app.data.relation.UtenteBadgeUtenteCrossRef
 import com.example.app.data.relation.UtenteRistoranteCrossRef
 import com.example.app.ui.theme.Green
 import com.example.app.viewModel.RistoranteFiltroConsegnaViewModel
 import com.example.app.viewModel.RistoranteTipoRistoranteViewModel
 import com.example.app.viewModel.RistoranteViewModel
 import com.example.app.viewModel.UtentePossiedeBadgeRistoranteViewModel
+import com.example.app.viewModel.UtentePossiedeBadgeUtenteViewModel
 import com.example.app.viewModel.UtenteScansionaRistoranteViewModel
 import com.example.app.viewModel.UtenteViewModel
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
 import java.text.SimpleDateFormat
 import java.util.Calendar
-import java.util.Date
 
 @Composable
 fun RistoranteMainScreen(ristoranteViewModel: RistoranteViewModel,
@@ -61,6 +62,7 @@ fun RistoranteMainScreen(ristoranteViewModel: RistoranteViewModel,
                          ristoranteFiltroConsegnaViewModel: RistoranteFiltroConsegnaViewModel,
                          utenteScansionaRistoranteViewModel: UtenteScansionaRistoranteViewModel,
                          utentePossiedeBadgeRistoranteViewModel: UtentePossiedeBadgeRistoranteViewModel,
+                         utentePossiedeBadgeUtenteViewModel: UtentePossiedeBadgeUtenteViewModel,
                          utenteViewModel: UtenteViewModel,
                          session: String
 ) {
@@ -78,8 +80,11 @@ fun RistoranteMainScreen(ristoranteViewModel: RistoranteViewModel,
         val utenteLoggato = if (utenteViewModel.utenteLoggato == null)
             utenti.find { it.username == session }!!
         else utenteViewModel.utenteLoggato!!
-        val badgeUtenteLoggato = utentiBadgeRistorante.filter {
+        val badgeUtenteLoggatoRistoranteSelected = utentiBadgeRistorante.filter {
             it.COD_BR == selectedRistorante!!.COD_BR && it.ID == utenteLoggato.ID
+        }
+        val badgesUtenteLoggato = utentiBadgeRistorante.filter {
+            it.ID == utenteLoggato.ID
         }
         val isPreferito = utenteScansionaRistoranteViewModel.getRistorantiPreferitiPerUtente(utenteLoggato.ID.toString()).collectAsState(
             initial = listOf()
@@ -89,7 +94,7 @@ fun RistoranteMainScreen(ristoranteViewModel: RistoranteViewModel,
         val scroll = rememberScrollState(0)
 
         if (!tipoRistorante?.tipi.isNullOrEmpty() && !filtriSelectedRistorante?.filtri.isNullOrEmpty()) {
-            val tipo: TipoRistorante = tipoRistorante!!.tipi.get(0)
+            val tipo: TipoRistorante = tipoRistorante!!.tipi[0]
             val filtriConsegna = filtriSelectedRistorante!!.filtri
 
             Column(
@@ -102,7 +107,7 @@ fun RistoranteMainScreen(ristoranteViewModel: RistoranteViewModel,
                     filtriConsegna,
                     utenteScansionaRistoranteViewModel,
                     isPreferito,
-                    utenteLoggato!!
+                    utenteLoggato
                 )
                 AsyncImage(
                     model = selectedRistorante.icona,
@@ -123,11 +128,13 @@ fun RistoranteMainScreen(ristoranteViewModel: RistoranteViewModel,
                     ristorante = selectedRistorante,
                     utentePossiedeBadgeRistoranteViewModel,
                     context,
-                    badgeUtenteLoggato,
+                    badgeUtenteLoggatoRistoranteSelected,
+                    badgesUtenteLoggato,
                     utenteLoggato.ID,
                     ristoranteViewModel.isRistoranteAperto(selectedRistorante),
                     utenteLoggato,
-                    utenteViewModel
+                    utenteViewModel,
+                    utentePossiedeBadgeUtenteViewModel
                 )
                 ZonaInfo(ristorante = selectedRistorante,
                     ristoranteViewModel,
@@ -261,11 +268,13 @@ fun ZonaUtente(
     ristorante: Ristorante,
     utentePossiedeBadgeRistoranteViewModel: UtentePossiedeBadgeRistoranteViewModel,
     context: Context,
+    badgeUtenteLoggatoRistoranteSelected: List<UtenteBadgeRistoranteCrossRef>,
     badgeUtenteLoggato: List<UtenteBadgeRistoranteCrossRef>,
     ID: Int,
     isRistoranteAperto: Boolean,
     utenteLoggato: Utente,
-    utenteViewModel: UtenteViewModel
+    utenteViewModel: UtenteViewModel,
+    utentePossiedeBadgeUtenteViewModel: UtentePossiedeBadgeUtenteViewModel
 ) {
     val options = ScanOptions()
     options.setOrientationLocked(false)
@@ -276,20 +285,42 @@ fun ZonaUtente(
 
     var badge = UtenteBadgeRistoranteCrossRef(ID, ristorante.COD_BR, currentDate,0)
 
-    if(badgeUtenteLoggato.isNotEmpty()) {
-        badge = badgeUtenteLoggato[0]
+    if(badgeUtenteLoggatoRistoranteSelected.isNotEmpty()) {
+        badge = badgeUtenteLoggatoRistoranteSelected[0]
     }
 
     val barcodeLauncher = rememberLauncherForActivityResult(contract = ScanContract()) { result ->
-        if(result.getContents() == null) {
+        if(result.contents == null) {
             Toast.makeText(context, "Cancelled", Toast.LENGTH_LONG).show()
         } else {
             val esperienza = badge.esperienzaBadge + 30
-            val newBadge = UtenteBadgeRistoranteCrossRef(badge.ID, badge.COD_BR, currentDate, esperienza)
+            val newBadge = UtenteBadgeRistoranteCrossRef(badge.ID, badge.COD_BR, badge.dataAcquisizione, esperienza)
             utentePossiedeBadgeRistoranteViewModel.newScansione(newBadge)
             val expTot = utenteLoggato.esperienzaTotale + 30
             utenteViewModel.updateExp(utenteLoggato.ID, expTot.toString())
             Toast.makeText(context, "+30 Esperienza", Toast.LENGTH_LONG).show()
+
+            if(badgeUtenteLoggato.isEmpty()) {  //BADGE SCANSIONA UN RISTORANTE
+                utentePossiedeBadgeUtenteViewModel.newBadgeUtente(
+                    UtenteBadgeUtenteCrossRef(
+                        badge.ID, COD_BU = 2, dataAcquisizione = currentDate, esperienzaBadge = 1
+                    )
+                )
+            }
+            if(badge.COD_BR == 2) {  //BADGE 5 HAMBURGHERIE --> solo il ristorante 2 è amburgheria
+                utentePossiedeBadgeUtenteViewModel.newBadgeUtente(
+                    UtenteBadgeUtenteCrossRef(
+                        badge.ID, COD_BU = 3, dataAcquisizione = currentDate, esperienzaBadge = badgeUtenteLoggato.filter { it.COD_BR == 2}.size
+                    )
+                )
+            }
+            //BADGE SCANSIONA 50 RISTORANTI
+            utentePossiedeBadgeUtenteViewModel.newBadgeUtente(
+                UtenteBadgeUtenteCrossRef(
+                    badge.ID, COD_BU = 4, dataAcquisizione = currentDate, esperienzaBadge = badgeUtenteLoggato.size
+                )
+            )
+
         }
     }
 
@@ -306,7 +337,7 @@ fun ZonaUtente(
     Row(modifier = Modifier
         .fillMaxWidth()
     ) {
-        val isScanButtonEnabled = isRistoranteAperto && if(badgeUtenteLoggato.isNotEmpty()) badgeUtenteLoggato[0].dataAcquisizione != currentDate else true  //&& isAbbastanzaVicino
+        val isScanButtonEnabled = isRistoranteAperto && if(badgeUtenteLoggatoRistoranteSelected.isNotEmpty()) badgeUtenteLoggatoRistoranteSelected[0].dataAcquisizione != currentDate else true  //&& isAbbastanzaVicino
         Text(text = "Livello " + (badge.esperienzaBadge / 100).toString() +
                 " (" + badge.esperienzaBadge + "/" + ((badge.esperienzaBadge - badge.esperienzaBadge%100) + 100).toString() + ")",
             modifier = Modifier.weight(1f)
@@ -392,6 +423,6 @@ fun ZonaInfo(
 }
 
 private fun makeCall(context: Context, phoneNumber: String){
-    val intent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:" + phoneNumber))
+    val intent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:$phoneNumber"))
     context.startActivity(intent)
 }

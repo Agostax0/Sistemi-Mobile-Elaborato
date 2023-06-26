@@ -23,8 +23,7 @@ import com.github.tehras.charts.piechart.animation.simpleChartAnimation
 fun RistoranteScoreboardScreen(
     ristoranteViewModel: RistoranteViewModel,
     utentePossiedeBadgeRistoranteViewModel: UtentePossiedeBadgeRistoranteViewModel,
-    utenteViewModel: UtenteViewModel,
-    modifier: Modifier = Modifier
+    utenteViewModel: UtenteViewModel
 ) {
     val selectedRistorante = ristoranteViewModel.ristoranteSelected
     val utentiBadgeRistorante = utentePossiedeBadgeRistoranteViewModel.utentiBadgeRistorante.collectAsState(initial = listOf()).value

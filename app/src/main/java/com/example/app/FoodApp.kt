@@ -218,7 +218,6 @@ fun ProfileNavigationBottomBar(
 fun NavigationApp(
     session: String,
     navController: NavHostController = rememberNavController(),
-    startLocationUpdates: () -> Unit,
     warningViewModel: WarningViewModel
 ) {
     val ristoranteViewModel = hiltViewModel<RistoranteViewModel>()
@@ -242,7 +241,7 @@ fun NavigationApp(
                     currentScreen = currentScreen,
                     canNavigateBack = navController.previousBackStackEntry != null,
                     navigateUp = {
-                        if(!RESTAURANT_SCREENS.contains(currentScreen) || !PROFILE_SCREENS.contains(currentScreen))
+                        if(!RESTAURANT_SCREENS.contains(currentScreen) && !PROFILE_SCREENS.contains(currentScreen))
                             navController.navigateUp()
                         else
                             navController.navigate(AppScreen.Home.name)
@@ -268,7 +267,7 @@ fun NavigationApp(
             }
         }
     ) { innerPadding ->
-        NavigationGraph(navController, innerPadding, session= session, startLocationUpdates = startLocationUpdates)
+        NavigationGraph(navController, innerPadding, session= session)
         val context = LocalContext.current
         if (warningViewModel.showPermissionSnackBar.value) {
             PermissionSnackBarComposable(snackbarHostState, context, warningViewModel)
@@ -291,8 +290,7 @@ private fun NavigationGraph(
     navController: NavHostController,
     innerPadding: PaddingValues,
     session: String,
-    modifier: Modifier = Modifier,
-    startLocationUpdates: () -> Unit
+    modifier: Modifier = Modifier
 ) {
     val utenteViewModel = hiltViewModel<UtenteViewModel>()
     val ristoranteViewModel = hiltViewModel<RistoranteViewModel>()
@@ -351,6 +349,7 @@ private fun NavigationGraph(
                     ristoranteTipoRistoranteViewModel = ristoranteTipoRistoranteViewModel,
                     ristoranteFiltroConsegnaViewModel = ristoranteFiltroConsegnaViewModel,
                     utenteScansionaRistoranteViewModel = utenteScansionaRistoranteViewModel,
+                    utentePossiedeBadgeUtenteViewModel = utentePossiedeBadgeUtenteViewModel,
                     utentePossiedeBadgeRistoranteViewModel = utentePossiedeBadgeRistoranteViewModel,
                     utenteViewModel = utenteViewModel,
                     session = session
@@ -378,7 +377,7 @@ private fun NavigationGraph(
 
             Log.d(NAV_TAG + "FoodApp.kt" ,"navigating "+AppScreen.Map.name)
 
-            MapScreen(startLocationUpdates,
+            MapScreen(
                 locationViewModel,
                 ristoranteViewModel,
                 onRestaurantClicked = {
@@ -491,7 +490,8 @@ private fun NavigationGraph(
                 onLoginButtonClicked = {
                     navController.navigate(AppScreen.Login.name)
                 },
-                utenteViewModel = utenteViewModel
+                utenteViewModel = utenteViewModel,
+                utentePossiedeBadgeUtenteViewModel = utentePossiedeBadgeUtenteViewModel
             )
         }
 
@@ -511,7 +511,6 @@ private fun NavigationGraph(
                         }
                     }
                 },
-                startLocationUpdates,
                 session
             )
         }
