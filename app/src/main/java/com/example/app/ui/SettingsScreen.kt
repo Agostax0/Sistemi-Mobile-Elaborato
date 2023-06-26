@@ -96,21 +96,23 @@ fun SettingsScreen(
             modifier = Modifier.padding(15.dp)
         )
 
-        Spacer(modifier = Modifier.height(20.dp))
 
-        Button(
-            onClick = {
-                utenteViewModel.clearSession()
-
-                onLogoutButtonClicked()
-            },
-            shape = RoundedCornerShape(50.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = Orange),
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(50.dp)
+        Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()
         ){
-            Text(text = "LOGOUT")
+
+            Button(
+                onClick = {
+                    utenteViewModel.clearSession()
+
+                    onLogoutButtonClicked()
+                },
+                shape = RoundedCornerShape(50.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Orange),
+                modifier = Modifier
+                    .height(50.dp).padding(horizontal = 10.dp)
+            ){
+                Text(text = "LOGOUT")
+            }
         }
     }
 }
