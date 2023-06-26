@@ -219,8 +219,6 @@ fun BadgeDisplayScreen(
         if(tuttiIBadge.isNotEmpty() && badgesUtenteLoggatoCrossRef.isNotEmpty()){
             val badgePossedutiDaUtente = badgesUtenteLoggatoCrossRef[0].badgeUtenti
 
-            Log.d("BADGE_TAG","all badge: ${tuttiIBadge.isNotEmpty()} - ${tuttiIBadge.size} \t badgeLogRef: ${badgesUtenteLoggatoCrossRef.isNotEmpty()}")
-
             badgeUtenteMancanti = tuttiIBadge.filter { !badgePossedutiDaUtente.contains(it) }.map { BadgeInfo(
                 badgeURL = it.icona,
                 badgeName = it.nome,
