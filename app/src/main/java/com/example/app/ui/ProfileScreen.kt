@@ -14,12 +14,14 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
@@ -54,6 +56,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import coil.compose.AsyncImagePainter.State.Empty.painter
 import coil.request.ImageRequest
 import com.example.app.data.entity.BadgeUtente
 import com.example.app.data.relation.UtenteBadgeUtenteCrossRef
@@ -188,21 +191,21 @@ fun ProfileScreen(
 
                         Text("LIVELLO: $currentLevel")
 
-                        Text("ESP: ${utenteLoggato.esperienzaTotale}/${experienceForNextLevel}")
+                        Text("EXP: ${utenteLoggato.esperienzaTotale}/${experienceForNextLevel}")
                     }
 
                     LinearProgressIndicator(
                         modifier = Modifier.fillMaxWidth(),
                         color = MaterialTheme.colorScheme.primary,
                         trackColor = MaterialTheme.colorScheme.primaryContainer,
-                        progress = currentProgressToNextLevel.toFloat()
+                        progress = currentProgressToNextLevel.toFloat()/100
                     )
 
                 }
 
             }
 
-            Header("BADGE RARI: $numberOfBadgesObtained", "", sideTextOnClick = {})
+            Header("BADGE RARI", )
 
             Row(horizontalArrangement = Arrangement.SpaceEvenly){
 
@@ -211,13 +214,12 @@ fun ProfileScreen(
                         AsyncImage(
                             model = badge.icona,
                             contentDescription = badge.nome,
-                            contentScale = ContentScale.Fit,
+                            contentScale = ContentScale.Crop,
                             modifier = Modifier
                                 .clip(HexagonShape())
-                                .size(100.dp)
-                                .clickable {  }
-
-
+                                .height(100.dp)
+                                .width(100.dp)
+                                .clickable {  } //TODO
                                 .border(
                                     width = 8.dp,
 
@@ -234,7 +236,7 @@ fun ProfileScreen(
             }
 
 
-            Header(mainText = "BADGE RISTORANTI: ${ristorantiVisitatiCrossRef.size}", sideText = "", sideTextOnClick = {})
+            Header(mainText = "BADGE RISTORANTI",)
 
             Row(horizontalArrangement = Arrangement.SpaceEvenly){
 
@@ -243,12 +245,13 @@ fun ProfileScreen(
                         AsyncImage(
                             model = ristorante.icona,
                             contentDescription = ristorante.nome,
-                            contentScale = ContentScale.Crop,
+                            contentScale = ContentScale.Fit,
                             modifier = Modifier
+                                .clip(HexagonShape())
                                 .size(100.dp)
                                 .clickable { ristoranteViewModel.selectRistorante(ristorante)
                                     navigateToRestaurant() }
-                                .clip(HexagonShape())
+
                         )
                     }
                 }
@@ -257,7 +260,7 @@ fun ProfileScreen(
     }
 }
 @Composable
-fun Header(mainText:String, sideText:String, sideTextOnClick:()->Unit){
+fun Header(mainText:String){
     Column(
         modifier = Modifier
             .fillMaxWidth(),
@@ -276,19 +279,6 @@ fun Header(mainText:String, sideText:String, sideTextOnClick:()->Unit){
             Text(mainText,
                 Modifier
                     .padding(horizontal = 10.dp))
-
-
-            if(sideText.isNotEmpty()){
-
-                ClickableText(
-                    text=AnnotatedString(text = sideText) ,
-                    style = TextStyle(color = Color.Blue),
-                    onClick = {sideTextOnClick()},
-                    modifier = Modifier
-                        .padding(horizontal = 10.dp)
-                )
-
-            }
         }
 
 

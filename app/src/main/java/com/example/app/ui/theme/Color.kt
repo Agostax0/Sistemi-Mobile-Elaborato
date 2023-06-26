@@ -21,7 +21,7 @@ val Red = Color(0xF7FF0000)
 val Green = Color(0xF725F700)
 val Light_Orange = Color(0x7CFDDEBA)
 
-val Gold = Color(0xFFFFD700)
+val Gold = Color(0xFFFFBF00)
 val Silver = Color(0xFFC0C0C0)
 val Copper = Color(0xFFB87333)
 

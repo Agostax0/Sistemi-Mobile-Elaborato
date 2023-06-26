@@ -257,20 +257,11 @@ fun BadgeDisplayScreen(
             }
         }
 
-
-
-
-
-
-
-
-
-
         Column(modifier = Modifier
             .fillMaxWidth()
         ){
 
-            Header(mainText = "Badge Ottenuti", sideText = "", sideTextOnClick = {})
+            Header(mainText = "Badge Ottenuti: ${badgeUtente.size}")
 
             LazyVerticalGrid(columns = GridCells.Adaptive(minSize = 72.dp), modifier = Modifier.padding(bottom = 9.dp, top=3.dp)){
                 items(badgeUtente){badge->
@@ -279,30 +270,29 @@ fun BadgeDisplayScreen(
                     Column(horizontalAlignment = Alignment.Start, modifier = Modifier
                         .fillMaxWidth()
                         .padding(5.dp)){
+                        Box(){
+                            AsyncImage(
+                                model = badge.badgeURL,
+                                contentDescription = badge.badgeDescription,
+                                contentScale = ContentScale.Fit,
+                                modifier = Modifier
+                                    .clip(HexagonShape())
+                                    .size(72.dp)
+                                    .clickable { badge.onBadgeClick() }
 
-                        Text("+"+badge.experienceObtained.toString(), style = TextStyle(fontSize = 15.sp, color = MaterialTheme.colorScheme.primary), textAlign = TextAlign.Start)
+                                    .border(
+                                        width = 8.dp,
 
-                        AsyncImage(
-                            model = badge.badgeURL,
-                            contentDescription = badge.badgeDescription,
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier
-                                .size(72.dp)
-                                .clickable { badge.onBadgeClick() }
-                                .clip(HexagonShape())
-                                .border(
-                                    width = 8.dp,
-
-                                    if (badge.rarity == 0) rainbowBrush else
-                                        CustomBrush2(
-                                            badge.rarity,
-                                            MaterialTheme.colorScheme.primaryContainer,
-                                            currentTheme
-                                        ),
-                                    HexagonShape()
-                                )
-                                .padding(bottom = 5.dp)
-                        )
+                                        if (badge.rarity == 0) rainbowBrush else
+                                            CustomBrush2(
+                                                badge.rarity,
+                                                MaterialTheme.colorScheme.primaryContainer,
+                                                currentTheme
+                                            ),
+                                        HexagonShape()
+                                    )
+                            )
+                        }
 
                         Text(badge.acquisitionDate, style = TextStyle(fontSize = 12.sp), textAlign = TextAlign.End, modifier = Modifier.fillMaxWidth())
 
@@ -310,7 +300,7 @@ fun BadgeDisplayScreen(
                 }
             }
 
-            Header(mainText = "Badge Ristoranti", sideText = "", sideTextOnClick = {})
+            Header(mainText = "Badge Ristoranti: ${badgeRistoranti.size}")
 
             LazyVerticalGrid(columns = GridCells.Adaptive(minSize = 72.dp),modifier = Modifier.padding(bottom = 9.dp, top=3.dp)){
                 items(badgeRistoranti){badge->
@@ -319,19 +309,19 @@ fun BadgeDisplayScreen(
                     Column(horizontalAlignment = Alignment.Start, modifier = Modifier
                         .fillMaxWidth()
                         .padding(5.dp)){
+                        Box(modifier = Modifier.padding(bottom = 5.dp)){
+                            AsyncImage(
+                                model = badge.badgeURL,
+                                contentDescription = badge.badgeDescription,
+                                contentScale = ContentScale.Fit,
+                                modifier = Modifier
+                                    .clip(HexagonShape())
+                                    .size(72.dp)
+                                    .clickable { badge.onBadgeClick() }
 
-                        Text("+"+badge.experienceObtained.toString(), style = TextStyle(fontSize = 15.sp, color = MaterialTheme.colorScheme.primary), textAlign = TextAlign.Start)
 
-                        AsyncImage(
-                            model = badge.badgeURL,
-                            contentDescription = badge.badgeDescription,
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier
-                                .size(72.dp)
-                                .clickable { badge.onBadgeClick() }
-                                .clip(HexagonShape())
-                                .padding(bottom = 5.dp)
-                        )
+                            )
+                        }
 
                         Text(badge.acquisitionDate, style = TextStyle(fontSize = 12.sp), textAlign = TextAlign.End, modifier = Modifier.fillMaxWidth())
 
@@ -339,7 +329,7 @@ fun BadgeDisplayScreen(
                 }
             }
 
-            Header(mainText = "Badge Non Ottenuti", sideText = "", sideTextOnClick = {})
+            Header(mainText = "Badge Non Ottenuti: ${badgeUtenteMancanti.size}")
 
             LazyVerticalGrid(columns = GridCells.Adaptive(minSize = 72.dp),modifier = Modifier.padding(bottom = 9.dp, top=3.dp)){
                 items(badgeUtenteMancanti){badge->
@@ -350,7 +340,7 @@ fun BadgeDisplayScreen(
                         AsyncImage(
                             model = badge.badgeURL,
                             contentDescription = badge.badgeDescription,
-                            contentScale = ContentScale.Crop,
+                            contentScale = ContentScale.Fit,
                             colorFilter = ColorFilter.colorMatrix(ColorMatrix().apply{setToSaturation(0f)}),
                             modifier = Modifier
                                 .size(72.dp)
@@ -366,7 +356,6 @@ fun BadgeDisplayScreen(
                                         ),
                                     HexagonShape())
                                 .alpha(0.3f)
-
                                 .clickable { badge.onBadgeClick() }
                                 .padding(bottom = 5.dp)
                         )

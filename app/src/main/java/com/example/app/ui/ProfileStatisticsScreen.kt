@@ -33,7 +33,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.app.data.relation.UtenteRistoranteCrossRef
 import com.example.app.viewModel.RistoranteTipoRistoranteViewModel
@@ -142,7 +145,7 @@ fun ProfileStatisticsScreen(
                 }
             }
             
-            Header(mainText="Ristoranti Preferiti" , sideText = ristorantiPreferiti.size.toString(), sideTextOnClick = {})
+            Header(mainText="Ristoranti Preferiti: ${ristorantiPreferiti.size}")
 
             LazyColumn(Modifier.fillMaxWidth().padding(vertical=10.dp)){
                 items(ristorantiPreferiti){ristorante->
@@ -170,10 +173,13 @@ fun ProfileStatisticsScreen(
                                 }
                         )
 
-                        ClickableText(text = AnnotatedString(text = ristorante.nome), onClick = {
+                        ClickableText(
+                            text = AnnotatedString(text = ristorante.nome),
+                            onClick = {
                             ristoranteViewModel.selectRistorante(ristorante)
-                            navigateToRestaurant()
-                        })
+                            navigateToRestaurant() },
+                            style = TextStyle(fontWeight = FontWeight.Bold, fontSize = 21.sp)
+                        )
 
                         IconButton(
                             onClick = {
@@ -187,12 +193,13 @@ fun ProfileStatisticsScreen(
                                 )
                             },
                             modifier = Modifier
-                                .size(20.dp)
+                                .size(50.dp)
                         ) {
                             Icon(
                                 imageVector = Icons.Filled.Star,
                                 contentDescription = "Preferiti",
                                 tint = MaterialTheme.colorScheme.primary ,
+                                modifier = Modifier.size(30.dp)
                             )
                         }
                     }
