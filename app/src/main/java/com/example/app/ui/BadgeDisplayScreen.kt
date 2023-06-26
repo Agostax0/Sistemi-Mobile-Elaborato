@@ -27,14 +27,17 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AlertDialogDefaults.shape
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -131,24 +134,7 @@ class CustomBrush2(val rarity: Int, val exchangeColor: Color, val theme: String)
 
 }
 
-val badges: List<BadgeInfo> = listOf(
-    BadgeInfo(
-        badgeURL = "https://clipartcraft.com/images/discord-logo-transparent-9.png",
-        badgeName = "Discord",
-        badgeDescription = "Discord Mod",
-        rarity = 2,
-        acquisitionDate = "25/06/2023",
-        experienceObtained = 30,
-        onBadgeClick = {}
-    ),
-    BadgeInfo(badgeURL = "https://gyazo.com/a4abc5fdb965d1b97db38453012efc73/thumb/1000",
-        badgeName = "Minecraft",
-        badgeDescription = "Minecraft Mod",
-        rarity = 3,
-        acquisitionDate = "25/06/2023",
-        experienceObtained = 50,
-        onBadgeClick = {})
-)
+
 
 @Composable
 fun BadgeDisplayScreen(
@@ -210,7 +196,18 @@ fun BadgeDisplayScreen(
                                 rarity = badge.livello,
                                 experienceObtained = crossRefInfo.esperienzaBadge,
                                 acquisitionDate = crossRefInfo.dataAcquisizione,
-                                onBadgeClick = {  }) //TODO
+                                onBadgeClick = {
+                                    showBadgeInfo.value = BadgeInfo(
+                                        badgeURL = badge.icona,
+                                        badgeDescription = badge.descrizione,
+                                        badgeName = badge.nome,
+                                        rarity = badge.livello,
+                                        experienceObtained = crossRefInfo.esperienzaBadge,
+                                        acquisitionDate = crossRefInfo.dataAcquisizione,
+                                        onBadgeClick = {}
+                                    )
+                                    showDialog.value = true
+                                })
                         )
                     }
             }
@@ -227,7 +224,18 @@ fun BadgeDisplayScreen(
                 badgeURL = it.icona,
                 badgeName = it.nome,
                 badgeDescription = it.descrizione,
-                onBadgeClick = {},
+                onBadgeClick = {
+                    showBadgeInfo.value = BadgeInfo(
+                        badgeURL = it.icona,
+                        badgeDescription = it.descrizione,
+                        badgeName = it.nome,
+                        rarity = it.livello,
+                        experienceObtained = 0,
+                        acquisitionDate = "",
+                        onBadgeClick = {}
+                    )
+                    showDialog.value = true
+                },
                 rarity = it.livello,
                 acquisitionDate = "",
                 experienceObtained = 0,
@@ -354,7 +362,8 @@ fun BadgeDisplayScreen(
                                             MaterialTheme.colorScheme.primaryContainer,
                                             currentTheme
                                         ),
-                                    HexagonShape())
+                                    HexagonShape()
+                                )
                                 .alpha(0.3f)
                                 .clickable { badge.onBadgeClick() }
                                 .padding(bottom = 5.dp)
@@ -364,6 +373,43 @@ fun BadgeDisplayScreen(
                 }
             }
 
+        }
+        if(showDialog.value){
+            AlertDialog(
+                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                textContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                onDismissRequest = {
+                    showDialog.value = false
+                },
+                title = {
+                    showBadgeInfo.value!!.badgeName
+                },
+                text = {
+                    val info = showBadgeInfo.value!!
+                    Column(verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
+                        AsyncImage(
+                            model = info.badgeURL,
+                            contentDescription = info.badgeName,
+                            contentScale = ContentScale.Fit,
+                            modifier = Modifier
+                                .clip(HexagonShape())
+                                .size(120.dp)
+                                .border(
+                                    8.dp,
+                                    if (info.rarity == 0) rainbowBrush else
+                                        CustomBrush2(
+                                            info.rarity,
+                                            MaterialTheme.colorScheme.primaryContainer,
+                                            currentTheme
+                                        ),
+                                    HexagonShape()
+                                )
+                        )
+                        Text(info.badgeDescription)
+                    }
+                },
+                confirmButton = {}
+            )
         }
 
     }
@@ -395,7 +441,7 @@ class HexagonShape: Shape{
 }
 
 class BadgeInfo(val badgeURL:String,val rarity: Int, val badgeDescription: String, val badgeName: String, val acquisitionDate: String, val experienceObtained: Int, val onBadgeClick: ()->Unit){
-    override fun toString(): String {
-        return badgeURL+","+rarity+","+badgeDescription+","+badgeName+","+acquisitionDate+","+experienceObtained
-    }
 }
+
+val showDialog = mutableStateOf(false)
+val showBadgeInfo: MutableState<BadgeInfo?> = mutableStateOf(null)
