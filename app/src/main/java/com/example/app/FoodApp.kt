@@ -442,6 +442,7 @@ private fun NavigationGraph(
                     ristoranteViewModel = ristoranteViewModel,
                     utentePossiedeBadgeUtenteViewModel = utentePossiedeBadgeUtenteViewModel,
                     badgeUtenteViewModel = badgeUtenteViewModel,
+                    settingsViewModel = settingsViewModel,
                     navigateToRestaurant = {navController.navigate(RESTAURANT_ROUTE)}
                 )
 
@@ -462,7 +463,15 @@ private fun NavigationGraph(
             }
 
             composable(route = AppScreen.ProfileStatistics.name){
-                ProfileStatisticsScreen()
+                ProfileStatisticsScreen(
+                    utenteViewModel = utenteViewModel,
+                    session = session,
+                    utenteScansionaRistoranteViewModel = utenteScansionaRistoranteViewModel,
+                    utentePossiedeBadgeRistoranteViewModel = utentePossiedeBadgeRistoranteViewModel,
+                    ristoranteViewModel = ristoranteViewModel,
+                    ristoranteTipoRistoranteViewModel = ristoranteTipoRistoranteViewModel,
+                    navigateToRestaurant = {navController.navigate(RESTAURANT_ROUTE)}
+                )
             }
 
         }
