@@ -96,15 +96,6 @@ fun SettingsScreen(
             modifier = Modifier.padding(15.dp)
         )
 
-        Text(
-            text = "Modifica profilo",
-            fontWeight = FontWeight.Bold,
-            fontSize = 20.sp,
-            color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier
-                .padding(horizontal = 5.dp)
-        )
-
         Spacer(modifier = Modifier.height(20.dp))
 
         Button(

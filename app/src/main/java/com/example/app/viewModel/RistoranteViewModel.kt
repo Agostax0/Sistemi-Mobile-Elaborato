@@ -2,9 +2,11 @@ package com.example.app.viewModel
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.app.data.entity.Ristorante
 import com.example.app.data.repository.RistoranteRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.launch
 import java.util.Calendar
 import javax.inject.Inject
 
@@ -21,6 +23,10 @@ class RistoranteViewModel @Inject constructor(
 
     fun selectRistorante(ristorante: Ristorante?) {
         _ristoranteSelected = ristorante
+    }
+
+    fun changePreferiti(newPref: Int, COD_RIS: Int) = viewModelScope.launch {
+        repository.changePref(newPref, COD_RIS)
     }
 
     fun getListaOrari(ristorante: Ristorante): List<String> {

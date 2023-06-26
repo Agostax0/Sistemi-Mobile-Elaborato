@@ -197,18 +197,22 @@ fun BadgeDisplayScreen(
 
         if(badgesUtenteLoggatoCrossRef.isNotEmpty() && badgeUtenteRef.isNotEmpty()){
             badgesUtenteLoggatoCrossRef[0].badgeUtenti.forEach { badge ->
-                    val crossRefInfo = badgeUtenteRef.filter { it -> it.COD_BU == badge.COD_BU }.first()
+                    val crossRefInfo = badgeUtenteRef.filter { it.COD_BU == badge.COD_BU }.first()
 
-                    badgeUtente.add(
-                        BadgeInfo(
-                            badgeURL = badge.icona,
-                            badgeDescription = badge.descrizione,
-                            badgeName = badge.nome,
-                            rarity = badge.livello,
-                            experienceObtained = crossRefInfo.esperienzaBadge,
-                            acquisitionDate = crossRefInfo.dataAcquisizione,
-                            onBadgeClick = {  }) //TODO
+                    if((crossRefInfo.COD_BU == 3 && crossRefInfo.esperienzaBadge >= 5) ||
+                        (crossRefInfo.COD_BU == 4 && crossRefInfo.esperienzaBadge >= 50) ||
+                        !listOf(3,4).contains(crossRefInfo.COD_BU)) {
+                        badgeUtente.add(
+                            BadgeInfo(
+                                badgeURL = badge.icona,
+                                badgeDescription = badge.descrizione,
+                                badgeName = badge.nome,
+                                rarity = badge.livello,
+                                experienceObtained = crossRefInfo.esperienzaBadge,
+                                acquisitionDate = crossRefInfo.dataAcquisizione,
+                                onBadgeClick = {  }) //TODO
                         )
+                    }
             }
         }
 
@@ -228,9 +232,6 @@ fun BadgeDisplayScreen(
                 acquisitionDate = "",
                 experienceObtained = 0,
             )} as ArrayList<BadgeInfo>
-
-
-
         }
 
         val badgeRistoranti: ArrayList<BadgeInfo> = ArrayList<BadgeInfo>()
@@ -266,7 +267,6 @@ fun BadgeDisplayScreen(
             LazyVerticalGrid(columns = GridCells.Adaptive(minSize = 72.dp), modifier = Modifier.padding(bottom = 9.dp, top=3.dp)){
                 items(badgeUtente){badge->
 
-
                     Column(horizontalAlignment = Alignment.Start, modifier = Modifier
                         .fillMaxWidth()
                         .padding(5.dp)){
@@ -294,7 +294,7 @@ fun BadgeDisplayScreen(
                             )
                         }
 
-                        Text(badge.acquisitionDate, style = TextStyle(fontSize = 12.sp), textAlign = TextAlign.End, modifier = Modifier.fillMaxWidth())
+                        Text(badge.acquisitionDate, style = TextStyle(fontSize = 11.sp), textAlign = TextAlign.End, modifier = Modifier.fillMaxWidth())
 
                     }
                 }
@@ -323,7 +323,7 @@ fun BadgeDisplayScreen(
                             )
                         }
 
-                        Text(badge.acquisitionDate, style = TextStyle(fontSize = 12.sp), textAlign = TextAlign.End, modifier = Modifier.fillMaxWidth())
+                        Text(badge.acquisitionDate, style = TextStyle(fontSize = 11.sp), textAlign = TextAlign.End, modifier = Modifier.fillMaxWidth())
 
                     }
                 }

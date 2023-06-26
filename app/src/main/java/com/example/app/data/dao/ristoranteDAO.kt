@@ -12,6 +12,9 @@ interface RistoranteDAO{
     @Query("SELECT * FROM ristorante")
     fun getRistoranti() : Flow<List<Ristorante>>
 
+    @Query("UPDATE ristorante SET numero_preferiti=:newPref WHERE COD_RIS=:COD_RIS")
+    suspend fun updatePreferiti(newPref: Int, COD_RIS: Int)
+
     /*
     @Query("SELECT * FROM ristorante " +
             "WHERE ristorante.posizione - :location BETWEEN 0 AND :distance")

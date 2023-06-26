@@ -209,29 +209,35 @@ fun ProfileScreen(
 
             Row(horizontalArrangement = Arrangement.SpaceEvenly){
 
-                badgesRari.forEach{ badge->
-                    Box(modifier = Modifier.padding(10.dp)){
-                        AsyncImage(
-                            model = badge.icona,
-                            contentDescription = badge.nome,
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier
-                                .clip(HexagonShape())
-                                .height(100.dp)
-                                .width(100.dp)
-                                .clickable {  } //TODO
-                                .border(
-                                    width = 8.dp,
+                badgesRari.forEach{ badge ->
+                    val badgeUtente = badgeUtenteRef.find { it.ID == utenteLoggato.ID && it.COD_BU == badge.COD_BU }
+                    if((badgeUtente!!.COD_BU == 3 && badgeUtente.esperienzaBadge >= 5) ||
+                        (badge.COD_BU == 4 && badgeUtente.esperienzaBadge >= 50) ||
+                        !listOf(3,4).contains(badge.COD_BU)) {
+                        Box(modifier = Modifier.padding(10.dp)){
+                            AsyncImage(
+                                model = badge.icona,
+                                contentDescription = badge.nome,
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier
+                                    .clip(HexagonShape())
+                                    .height(100.dp)
+                                    .width(100.dp)
+                                    .clickable {  } //TODO
+                                    .border(
+                                        width = 8.dp,
 
-                                    if (badge.livello == 0) rainbowBrush else
-                                        CustomBrush2(
-                                            badge.livello,
-                                            MaterialTheme.colorScheme.primaryContainer,
-                                            currentTheme
-                                        ),
-                                    HexagonShape()
-                                )
-                        ) }
+                                        if (badge.livello == 0) rainbowBrush else
+                                            CustomBrush2(
+                                                badge.livello,
+                                                MaterialTheme.colorScheme.primaryContainer,
+                                                currentTheme
+                                            ),
+                                        HexagonShape()
+                                    )
+                            ) }
+                    }
+
                 }
             }
 

@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -25,6 +26,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
@@ -107,7 +109,8 @@ fun RistoranteMainScreen(ristoranteViewModel: RistoranteViewModel,
                     filtriConsegna,
                     utenteScansionaRistoranteViewModel,
                     isPreferito,
-                    utenteLoggato
+                    utenteLoggato,
+                    ristoranteViewModel
                 )
                 AsyncImage(
                     model = selectedRistorante.icona,
@@ -197,13 +200,17 @@ fun Header(
     filtriConsegna: List<FiltroConsegna>,
     utenteScansionaRistoranteViewModel: UtenteScansionaRistoranteViewModel,
     isPreferito: List<Int>,
-    utenteLoggato: Utente
-){
+    utenteLoggato: Utente,
+    ristoranteViewModel: RistoranteViewModel
+) {
     var filtriText = ""
     filtriConsegna.forEach{
         filtriText += it.filtro + " / "
     }
     filtriText = filtriText.removeSuffix(" / ")
+    var numPref by remember {
+        mutableStateOf(ristorante.numeroPreferiti.toInt())
+    }
 
     Row(
         modifier = Modifier
@@ -235,6 +242,7 @@ fun Header(
         }
         IconButton(
             onClick = {
+                Log.d("RISTORANTEP", ristorante.numeroPreferiti.toString())
                 val newPreferito = isPreferito.isEmpty()
                 utenteScansionaRistoranteViewModel.updatePreferito(
                     UtenteRistoranteCrossRef(
@@ -243,6 +251,14 @@ fun Header(
                         preferito = newPreferito
                     )
                 )
+                var adder = 0
+                if(newPreferito) {
+                    adder++
+                } else {
+                    adder--
+                }
+                numPref += adder
+                //ristoranteViewModel.changePreferiti(numPref, ristorante.COD_RIS)
             },
             modifier = Modifier
                 .weight(.3f)
@@ -256,7 +272,7 @@ fun Header(
                 modifier = Modifier.padding(end = 25.dp),
                 tint = if(isPreferito.isNotEmpty()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primaryContainer
             )
-            Text(text = ristorante.numeroPreferiti.toString(),
+            Text(text = numPref.toString(),
                 modifier = Modifier.padding(start = 25.dp)
             )
         }
@@ -382,7 +398,7 @@ fun ZonaInfo(
         .padding(top = 20.dp)
     ) {
         Text(
-            text = ristorante.numeroTelefono,
+            text = "Tel: " + ristorante.numeroTelefono,
             modifier = Modifier
                 .weight(.2f)
                 .align(CenterVertically),
