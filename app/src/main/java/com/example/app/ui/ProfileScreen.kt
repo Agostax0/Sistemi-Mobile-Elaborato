@@ -6,6 +6,7 @@ import android.graphics.drawable.shapes.OvalShape
 import android.util.Log
 import android.widget.GridLayout
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -41,6 +42,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
@@ -69,6 +71,11 @@ import java.text.SimpleDateFormat
 import java.util.Collections
 import java.util.Date
 
+import com.example.app.ui.CustomBrush2
+import com.example.app.ui.HexagonShape
+import com.example.app.ui.rainbowBrush
+import com.example.app.viewModel.SettingsViewModel
+
 
 private const val LEVEL_THRESHOLD = 100
 
@@ -81,13 +88,12 @@ fun ProfileScreen(
     utentePossiedeBadgeUtenteViewModel: UtentePossiedeBadgeUtenteViewModel,
     ristoranteViewModel: RistoranteViewModel,
     badgeUtenteViewModel: BadgeUtenteViewModel,
-    //onFavoriteRestaurantsClicked: ()->Unit,
-    //onRestaurantBadgesClicked: ()->Unit,
-    //onUserBadgesClicked: ()->Unit,
+    settingsViewModel: SettingsViewModel,
     navigateToRestaurant: ()->Unit,
 ) {
     val context = LocalContext.current
     val utenti by utenteViewModel.utenti.collectAsState(initial = listOf())
+    val currentTheme = settingsViewModel.theme.collectAsState(initial = "Chiaro").value
 
     if(utenti.isNotEmpty() || utenteViewModel.utenteLoggato != null) {
         val utenteLoggato = if (utenteViewModel.utenteLoggato == null)
@@ -196,26 +202,35 @@ fun ProfileScreen(
 
             }
 
-            Column(verticalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth().padding(vertical = 10.dp)) {
-                Row(horizontalArrangement = Arrangement.SpaceEvenly, verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-                    Icon(Icons.Outlined.Star, contentDescription = "Ristoranti Preferiti", tint = MaterialTheme.colorScheme.primary)
-
-                    Text("Ristoranti Preferiti")
-
-                    ClickableText(text=AnnotatedString(text = numberOfFavoriteRestaurants.toString()) , style = TextStyle(color = Color.Blue), onClick = {})
-                }
-
-            }
-
             Header("BADGE RARI: $numberOfBadgesObtained", "", sideTextOnClick = {})
 
             Row(horizontalArrangement = Arrangement.SpaceEvenly){
 
-                badgesRari.forEach{ badge-> BadgeIcon(
-                    iconURL = badge.icona,
-                    iconDescription = badge.descrizione,
-                    rarity = badge.livello
-                ){}}
+                badgesRari.forEach{ badge->
+                    Box(modifier = Modifier.padding(10.dp)){
+                        AsyncImage(
+                            model = badge.icona,
+                            contentDescription = badge.nome,
+                            contentScale = ContentScale.Fit,
+                            modifier = Modifier
+                                .clip(HexagonShape())
+                                .size(100.dp)
+                                .clickable {  }
+
+
+                                .border(
+                                    width = 8.dp,
+
+                                    if (badge.livello == 0) rainbowBrush else
+                                        CustomBrush2(
+                                            badge.livello,
+                                            MaterialTheme.colorScheme.primaryContainer,
+                                            currentTheme
+                                        ),
+                                    HexagonShape()
+                                )
+                        ) }
+                }
             }
 
 
@@ -223,15 +238,20 @@ fun ProfileScreen(
 
             Row(horizontalArrangement = Arrangement.SpaceEvenly){
 
-                ristorantiVisitati.forEach{ ristorante-> BadgeIcon(
-                    iconURL = ristorante.icona,
-                    iconDescription = ristorante.descrizione,
-                    rarity = 0,
-                    onClick = {
-                        ristoranteViewModel.selectRistorante(ristorante)
-                        navigateToRestaurant()
+                ristorantiVisitati.forEach{ ristorante->
+                    Box(modifier = Modifier.padding(10.dp)){
+                        AsyncImage(
+                            model = ristorante.icona,
+                            contentDescription = ristorante.nome,
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .size(100.dp)
+                                .clickable { ristoranteViewModel.selectRistorante(ristorante)
+                                    navigateToRestaurant() }
+                                .clip(HexagonShape())
+                        )
                     }
-                )}
+                }
             }
         }
     }
@@ -278,34 +298,5 @@ fun Header(mainText:String, sideText:String, sideTextOnClick:()->Unit){
             modifier = Modifier
                 .fillMaxWidth()
         )
-    }
-}
-
-@Composable
-fun BadgeIcon(iconURL: String,iconDescription: String, rarity:Int = 0, onClick:()->Unit = {}){
-    Box() {
-        AsyncImage(
-            model = iconURL,
-            contentDescription = iconDescription,
-            modifier = Modifier
-                .clip(CircleShape)
-                .size(100.dp)
-                .padding(10.dp)
-                .align(Alignment.Center)
-                .clickable { onClick() },
-        )
-
-        if(rarity != 0){
-            Icon(
-                imageVector = Icons.Filled.Check,
-                contentDescription = "Rarity Level",
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .size(30.dp),
-                tint = when(rarity){ 3-> Gold 2-> Silver else -> Copper}
-            )
-        }
-
-
     }
 }
