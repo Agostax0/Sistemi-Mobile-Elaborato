@@ -1,6 +1,7 @@
 package com.example.app.ui
 
 import android.Manifest
+import android.app.Activity
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.util.Log
@@ -60,10 +61,12 @@ import com.example.app.createImageFile
 import com.example.app.data.entity.Utente
 import com.example.app.data.relation.UtenteBadgeUtenteCrossRef
 import com.example.app.saveImage
+import com.example.app.showToast
 import com.example.app.ui.theme.Orange
 import com.example.app.ui.theme.White
 import com.example.app.viewModel.UtentePossiedeBadgeUtenteViewModel
 import com.example.app.viewModel.UtenteViewModel
+import com.yagmurerdogan.toasticlib.Toastic
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Objects
@@ -114,7 +117,12 @@ fun RegisterScreen(
         if (it) {
             cameraLauncher.launch(newUri)
         } else {
-            Toast.makeText(context, "Permission Denied", Toast.LENGTH_SHORT).show()
+            Toastic.toastic(
+                context = context as Activity,
+                message = "Permesso negato",
+                duration = Toastic.LENGTH_SHORT,
+                type = Toastic.ERROR,
+                isIconAnimated = true).show()
         }
     }
 
@@ -133,7 +141,12 @@ fun RegisterScreen(
         if (it) {
             galleryLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
         } else {
-            Toast.makeText(context, "Permission Denied", Toast.LENGTH_SHORT).show()
+            Toastic.toastic(
+                context = context as Activity,
+                message = "Permesso negato",
+                duration = Toastic.LENGTH_SHORT,
+                type = Toastic.ERROR,
+                isIconAnimated = true).show()
         }
     }
     val scroll = rememberScrollState(0)
@@ -359,13 +372,25 @@ fun RegisterScreen(
                         val currentDate = sdf.format(date)
                         val newBadge = UtenteBadgeUtenteCrossRef(info.ID, 1, currentDate, 1)
                         utentePossiedeBadgeUtenteViewModel.newBadgeUtente(newBadge)
-
+                        showToast(context)
                         onSuccessfulRegister()
                     } else {
-                        Toast.makeText(context, "Nome utente non disponibile", Toast.LENGTH_LONG).show()
+                        Toastic.toastic(
+                            context = context as Activity,
+                            message = "Nome utente non disponibile",
+                            duration = Toastic.LENGTH_SHORT,
+                            type = Toastic.ERROR,
+                            isIconAnimated = true
+                        ).show()
                     }
                 } else {
-                    Toast.makeText(context, "Completa tutti i campi", Toast.LENGTH_LONG).show()
+                    Toastic.toastic(
+                        context = context as Activity,
+                        message = "Completa tutti i campi",
+                        duration = Toastic.LENGTH_SHORT,
+                        type = Toastic.WARNING,
+                        isIconAnimated = true
+                    ).show()
                 }
             },
             shape = RoundedCornerShape(50.dp),

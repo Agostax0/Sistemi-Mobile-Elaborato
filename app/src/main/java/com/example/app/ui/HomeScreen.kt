@@ -2,6 +2,7 @@ package com.example.app.ui
 
 import android.app.Activity
 import android.util.Log
+import android.view.Gravity
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.*
@@ -32,6 +33,7 @@ import com.example.app.data.entity.Ristorante
 import com.example.app.data.entity.TipoRistorante
 import com.example.app.data.relation.RistoranteFiltroConsegna
 import com.example.app.data.relation.RistoranteTipoRistorante
+import com.example.app.showToast
 import com.example.app.ui.theme.Green
 import com.example.app.viewModel.FiltroConsegnaViewModel
 import com.example.app.viewModel.LocationViewModel
@@ -41,6 +43,7 @@ import com.example.app.viewModel.RistoranteViewModel
 import com.example.app.viewModel.TipoRistoranteViewModel
 import com.example.app.viewModel.UtenteScansionaRistoranteViewModel
 import com.example.app.viewModel.UtenteViewModel
+import com.yagmurerdogan.toasticlib.Toastic
 import kotlin.math.PI
 import kotlin.math.atan2
 import kotlin.math.cos
@@ -322,7 +325,6 @@ fun tipoRistorante(
         val longR = posizioneRistorante[1].toDouble()
 
         val distanzaRistoranteUtente = getDistanceFromLatLonInKm(latR, longR, posizioneUtente.latitude, posizioneUtente.longitude)
-        Log.d("DIST", distanzaRistoranteUtente.toString())
         if(distanzaRistoranteUtente <= (distanzaFiltro/1000)) {
             if(checkTipi(filtriSelezionati, pair.tipi[0], tipiRistorante)) {
                 ristorantiFiltrati.add(pair.ristorante)

@@ -1,5 +1,6 @@
 package com.example.app
 
+import android.app.Activity
 import android.content.ContentResolver
 import android.content.ContentValues
 import android.content.Context
@@ -9,6 +10,12 @@ import android.net.Uri
 import android.os.Build
 import android.os.SystemClock
 import android.provider.MediaStore
+import android.view.Gravity
+import androidx.annotation.ColorInt
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
+import com.yagmurerdogan.toasticlib.Toastic
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
@@ -52,4 +59,21 @@ private fun getBitmap(selectedPhotoUri: Uri, contentResolver: ContentResolver): 
         }
     }
     return bitmap
+}
+
+fun showToast(context: Context) {
+    val activity = context as Activity
+    val toast = Toastic.toastic(
+        context = activity,
+        message = "Nuovo Badge Ottenuto",
+        duration = Toastic.LENGTH_SHORT,
+        type = Toastic.DEFAULT,
+        isIconAnimated = true,
+        customIcon = R.drawable.logo_icon,
+        customIconAnimation = com.yagmurerdogan.toastic.R.anim.pulse,
+        customBackground = R.drawable.toast_bg,
+        textColor = Color(0xFFE65B00).toArgb()
+    )
+    toast.setGravity(Gravity.TOP, 0, 300)
+    toast.show()
 }

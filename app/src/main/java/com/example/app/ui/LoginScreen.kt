@@ -1,7 +1,7 @@
 package com.example.app.ui
 
+import android.app.Activity
 import android.util.Log
-import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.sp
 import com.example.app.R
 import com.example.app.ui.theme.*
 import com.example.app.viewModel.UtenteViewModel
+import com.yagmurerdogan.toasticlib.Toastic
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -137,7 +138,13 @@ fun LoginScreen(
                     onSuccessfulLogin()
                 }
                 else {
-                    Toast.makeText(context, "Username e/o Password incorretti", Toast.LENGTH_SHORT).show()
+                    Toastic.toastic(
+                        context = context as Activity,
+                        message = "Username e/o Password incorretti",
+                        duration = Toastic.LENGTH_SHORT,
+                        type = Toastic.ERROR,
+                        isIconAnimated = true
+                    ).show()
                     Log.d("LOGIN_TAG " + "LoginScreen.kt","failed Login")
                 }
               },

@@ -2,6 +2,7 @@ package com.example.app.ui
 
 
 import android.Manifest
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -46,6 +47,7 @@ import com.example.app.data.entity.Utente
 import com.example.app.data.relation.UtenteBadgeRistoranteCrossRef
 import com.example.app.data.relation.UtenteBadgeUtenteCrossRef
 import com.example.app.data.relation.UtenteRistoranteCrossRef
+import com.example.app.showToast
 import com.example.app.ui.theme.Green
 import com.example.app.viewModel.LocationViewModel
 import com.example.app.viewModel.RistoranteFiltroConsegnaViewModel
@@ -57,6 +59,7 @@ import com.example.app.viewModel.UtenteScansionaRistoranteViewModel
 import com.example.app.viewModel.UtenteViewModel
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
+import com.yagmurerdogan.toasticlib.Toastic
 import java.text.SimpleDateFormat
 import java.util.Calendar
 
@@ -315,14 +318,24 @@ fun ZonaUtente(
 
     val barcodeLauncher = rememberLauncherForActivityResult(contract = ScanContract()) { result ->
         if(result.contents == null) {
-            Toast.makeText(context, "Cancelled", Toast.LENGTH_LONG).show()
+            Toastic.toastic(
+                context = context as Activity,
+                message = "Cancellato",
+                duration = Toastic.LENGTH_SHORT,
+                type = Toastic.DEFAULT,
+                isIconAnimated = true).show()
         } else {
             val esperienza = badge.esperienzaBadge + 30
             val newBadge = UtenteBadgeRistoranteCrossRef(badge.ID, badge.COD_BR, badge.dataAcquisizione, esperienza)
             utentePossiedeBadgeRistoranteViewModel.newScansione(newBadge)
             val expTot = utenteLoggato.esperienzaTotale + 30
             utenteViewModel.updateExp(utenteLoggato.ID, expTot.toString())
-            Toast.makeText(context, "+30 Esperienza", Toast.LENGTH_LONG).show()
+            Toastic.toastic(
+                context = context as Activity,
+                message = "+30 Esperienza",
+                duration = Toastic.LENGTH_SHORT,
+                type = Toastic.SUCCESS,
+                isIconAnimated = true).show()
 
             if(badgeUtenteLoggato.isEmpty()) {  //BADGE SCANSIONA UN RISTORANTE
                 utentePossiedeBadgeUtenteViewModel.newBadgeUtente(
@@ -330,6 +343,7 @@ fun ZonaUtente(
                         badge.ID, COD_BU = 2, dataAcquisizione = currentDate, esperienzaBadge = 1
                     )
                 )
+                showToast(context)
             }
             if(badge.COD_BR == 2) {  //BADGE 5 HAMBURGHERIE --> solo il ristorante 2 è amburgheria
                 utentePossiedeBadgeUtenteViewModel.newBadgeUtente(
@@ -354,17 +368,25 @@ fun ZonaUtente(
         if (it) {
             barcodeLauncher.launch(options)
         } else {
-            Toast.makeText(context, "Permission Denied", Toast.LENGTH_SHORT).show()
+            Toastic.toastic(
+                context = context as Activity,
+                message = "Permesso negato",
+                duration = Toastic.LENGTH_SHORT,
+                type = Toastic.ERROR,
+                isIconAnimated = true).show()
         }
     }
 
     Row(modifier = Modifier
         .fillMaxWidth()
     ) {
+        val distanza = getDistanceFromLatLonInKm(
+            ristorante.posizione.split(";")[0].toDouble(), ristorante.posizione.split(";")[1].toDouble(),
+            locationValue.latitude, locationValue.longitude)
         val isScanButtonEnabled =
             isRistoranteAperto &&
-                    getDistanceFromLatLonInKm(ristorante.posizione.split(";")[0].toDouble(), ristorante.posizione.split(";")[1].toDouble(), locationValue.latitude, locationValue.longitude) < 1
-                    && if(badgeUtenteLoggatoRistoranteSelected.isNotEmpty()) badgeUtenteLoggatoRistoranteSelected[0].dataAcquisizione != currentDate else true  //&& isAbbastanzaVicino
+            distanza < 1 &&
+            if(badgeUtenteLoggatoRistoranteSelected.isNotEmpty()) badgeUtenteLoggatoRistoranteSelected[0].dataAcquisizione != currentDate else true
         Text(text = "Livello " + (badge.esperienzaBadge / 100).toString() +
                 " (" + badge.esperienzaBadge + "/" + ((badge.esperienzaBadge - badge.esperienzaBadge%100) + 100).toString() + ")",
             modifier = Modifier.weight(1f)
