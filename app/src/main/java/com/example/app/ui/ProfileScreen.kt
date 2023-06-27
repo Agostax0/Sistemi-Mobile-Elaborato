@@ -223,7 +223,6 @@ fun ProfileScreen(
                                     .clip(HexagonShape())
                                     .height(100.dp)
                                     .width(100.dp)
-                                    .clickable {  } //TODO
                                     .border(
                                         width = 8.dp,
 

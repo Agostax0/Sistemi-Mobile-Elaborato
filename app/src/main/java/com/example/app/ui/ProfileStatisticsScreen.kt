@@ -104,13 +104,14 @@ fun ProfileStatisticsScreen(
         Log.d("STATS_TAG","$istanzeTipologieRistorante")
 
         val barList = mutableListOf<BarChartData.Bar>()
+        val colors = listOf(Color(0xFFBA68C8),Color(0xFF9575CD),Color(0xFFFFB74D),Color(0xFFFFF176), Color(0xFFAED581), Color(0xFFE57373),Color(0xFF4DD0E1),Color(0xFF9575CD))
 
-        infoTipoRistOrdinato.forEach {
+        for(i in infoTipoRistOrdinato.indices) {
             barList.add(
                 BarChartData.Bar(
-                    label = it.first,
-                    value = it.second.toFloat(),
-                    color = Color(red = (Math.random()*255).toInt(), green = (Math.random()*255).toInt(), blue = (Math.random()*255).toInt())
+                    label = infoTipoRistOrdinato[i].first,
+                    value = infoTipoRistOrdinato[i].second.toFloat(),
+                    color = colors[i]
                 )
             )
         }
@@ -122,7 +123,7 @@ fun ProfileStatisticsScreen(
                     Modifier
                         .fillMaxWidth()
                         .height(200.dp)
-                        .padding(vertical = 10.dp)) {
+                        .padding(top = 10.dp, bottom = 20.dp)) {
                     BarChart(
                         barChartData = BarChartData(bars = barList),
                         modifier = Modifier
@@ -178,7 +179,7 @@ fun ProfileStatisticsScreen(
                             onClick = {
                             ristoranteViewModel.selectRistorante(ristorante)
                             navigateToRestaurant() },
-                            style = TextStyle(fontWeight = FontWeight.Bold, fontSize = 21.sp)
+                            style = TextStyle(fontWeight = FontWeight.Bold, fontSize = 21.sp, color = MaterialTheme.colorScheme.onSurface)
                         )
 
                         IconButton(
