@@ -44,6 +44,7 @@ import com.example.app.viewModel.TipoRistoranteViewModel
 import com.example.app.viewModel.UtenteScansionaRistoranteViewModel
 import com.example.app.viewModel.UtenteViewModel
 import com.yagmurerdogan.toasticlib.Toastic
+import io.karn.notify.Notify
 import kotlin.math.PI
 import kotlin.math.atan2
 import kotlin.math.cos

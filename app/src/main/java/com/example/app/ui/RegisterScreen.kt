@@ -3,6 +3,7 @@ package com.example.app.ui
 import android.Manifest
 import android.app.Activity
 import android.content.pm.PackageManager
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.util.Log
 import android.widget.Toast
@@ -67,6 +68,7 @@ import com.example.app.ui.theme.White
 import com.example.app.viewModel.UtentePossiedeBadgeUtenteViewModel
 import com.example.app.viewModel.UtenteViewModel
 import com.yagmurerdogan.toasticlib.Toastic
+import io.karn.notify.Notify
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Objects
@@ -373,6 +375,15 @@ fun RegisterScreen(
                         val newBadge = UtenteBadgeUtenteCrossRef(info.ID, 1, currentDate, 1)
                         utentePossiedeBadgeUtenteViewModel.newBadgeUtente(newBadge)
                         showToast(context)
+                        Notify
+                            .with(context)
+                            .asBigPicture {
+                                title = "Nuovo badge ottenuto"
+                                text = "Benvenuto su FoodApp"
+                                expandedText = "Crea un nuovo profilo"
+                                image = BitmapFactory.decodeFile(info.icona)
+                            }
+                            .show()
                         onSuccessfulRegister()
                     } else {
                         Toastic.toastic(

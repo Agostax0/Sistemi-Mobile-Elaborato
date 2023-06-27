@@ -30,6 +30,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AlertDialogDefaults.shape
 import androidx.compose.material3.Card
+import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -74,6 +75,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Density
@@ -218,7 +220,11 @@ fun BadgeDisplayScreen(
         val tuttiIBadge = badgeUtenteViewModel.badgeUtenti.collectAsState(initial = listOf()).value
 
         if(tuttiIBadge.isNotEmpty() && badgesUtenteLoggatoCrossRef.isNotEmpty()){
-            val badgePossedutiDaUtente = badgesUtenteLoggatoCrossRef[0].badgeUtenti
+            val badgePossedutiDaUtente = badgesUtenteLoggatoCrossRef[0].badgeUtenti.filter { badge ->
+                (badge.COD_BU == 3 && badgeUtenteRef.find { it.COD_BU == badge.COD_BU }!!.esperienzaBadge >= 5) ||
+                        (badge.COD_BU == 4 && badgeUtenteRef.find { it.COD_BU == badge.COD_BU }!!.esperienzaBadge >= 50) ||
+                        !listOf(3,4).contains(badge.COD_BU)
+            }
 
             badgeUtenteMancanti = tuttiIBadge.filter { !badgePossedutiDaUtente.contains(it) }.map { BadgeInfo(
                 badgeURL = it.icona,
@@ -230,7 +236,7 @@ fun BadgeDisplayScreen(
                         badgeDescription = it.descrizione,
                         badgeName = it.nome,
                         rarity = it.livello,
-                        experienceObtained = 0,
+                        experienceObtained = badgeUtenteRef.find { badge -> badge.COD_BU == it.COD_BU }?.esperienzaBadge,
                         acquisitionDate = "",
                         onBadgeClick = {}
                     )
@@ -278,7 +284,7 @@ fun BadgeDisplayScreen(
                     Column(horizontalAlignment = Alignment.Start, modifier = Modifier
                         .fillMaxWidth()
                         .padding(5.dp)){
-                        Box(){
+                        Box{
                             AsyncImage(
                                 model = badge.badgeURL,
                                 contentDescription = badge.badgeDescription,
@@ -387,6 +393,7 @@ fun BadgeDisplayScreen(
                 text = {
                     val info = showBadgeInfo.value!!
                     Column(verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
+                        Text(text = info.badgeName, fontSize = 20.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(bottom = 10.dp))
                         AsyncImage(
                             model = info.badgeURL,
                             contentDescription = info.badgeName,
@@ -405,7 +412,26 @@ fun BadgeDisplayScreen(
                                     HexagonShape()
                                 )
                         )
-                        Text(info.badgeDescription)
+                        Text(info.badgeDescription, Modifier.padding(top = 10.dp))
+                        Divider(
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                            thickness = 1.dp,
+                            modifier = Modifier.padding(vertical = 20.dp)
+                        )
+                        Text(text = "Progresso", fontSize = 20.sp, fontWeight = FontWeight.SemiBold)
+                        if(info.acquisitionDate == "") {
+                            val scansioni = if(info.experienceObtained == null) "0" else info.experienceObtained.toString()
+                            val tot = when(info.badgeName ) {
+                                "C'è sempre una prima volta" -> "1"
+                                "Amante del cibo americano" -> "5"
+                                "Esperto culinario" -> 50
+                                else -> ""
+                            }
+                            Text(text = "$scansioni su $tot")
+                        } else {
+                            Text("Ottenuto il " + info.acquisitionDate)
+                        }
+                        
                     }
                 },
                 confirmButton = {}
@@ -440,7 +466,7 @@ class HexagonShape: Shape{
     })
 }
 
-class BadgeInfo(val badgeURL:String,val rarity: Int, val badgeDescription: String, val badgeName: String, val acquisitionDate: String, val experienceObtained: Int, val onBadgeClick: ()->Unit){
+class BadgeInfo(val badgeURL:String,val rarity: Int, val badgeDescription: String, val badgeName: String, val acquisitionDate: String, val experienceObtained: Int?, val onBadgeClick: ()->Unit){
 }
 
 val showDialog = mutableStateOf(false)

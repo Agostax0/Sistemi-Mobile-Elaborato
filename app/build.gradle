@@ -102,6 +102,7 @@ dependencies {
     implementation "com.github.tehras:charts:0.2.4-alpha"
 
     implementation 'com.github.yagmurerdogan:Toastic:1.0.1'
+    implementation "io.karn:notify:1.4.0"
 }
 
 class RoomSchemaArgProvider implements CommandLineArgumentProvider {

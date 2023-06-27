@@ -6,6 +6,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.util.Log
 import android.widget.Toast
@@ -60,6 +61,7 @@ import com.example.app.viewModel.UtenteViewModel
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
 import com.yagmurerdogan.toasticlib.Toastic
+import io.karn.notify.Notify
 import java.text.SimpleDateFormat
 import java.util.Calendar
 
@@ -326,7 +328,7 @@ fun ZonaUtente(
                 isIconAnimated = true).show()
         } else {
             val esperienza = badge.esperienzaBadge + 30
-            val newBadge = UtenteBadgeRistoranteCrossRef(badge.ID, badge.COD_BR, badge.dataAcquisizione, esperienza)
+            val newBadge = UtenteBadgeRistoranteCrossRef(badge.ID, badge.COD_BR, currentDate, esperienza)
             utentePossiedeBadgeRistoranteViewModel.newScansione(newBadge)
             val expTot = utenteLoggato.esperienzaTotale + 30
             utenteViewModel.updateExp(utenteLoggato.ID, expTot.toString())
@@ -344,6 +346,15 @@ fun ZonaUtente(
                     )
                 )
                 showToast(context)
+                Notify
+                    .with(context)
+                    .asBigPicture {
+                        title = "Nuovo badge ottenuto"
+                        text = "C'è sempre una prima volta"
+                        expandedText = "Scansiona un ristorante"
+                        image = BitmapFactory.decodeFile(utenteLoggato.icona)
+                    }
+                    .show()
             }
             if(badge.COD_BR == 2) {  //BADGE 5 HAMBURGHERIE --> solo il ristorante 2 è amburgheria
                 utentePossiedeBadgeUtenteViewModel.newBadgeUtente(
@@ -380,6 +391,7 @@ fun ZonaUtente(
     Row(modifier = Modifier
         .fillMaxWidth()
     ) {
+        Log.d("BADGE", badgeUtenteLoggatoRistoranteSelected.toString())
         val distanza = getDistanceFromLatLonInKm(
             ristorante.posizione.split(";")[0].toDouble(), ristorante.posizione.split(";")[1].toDouble(),
             locationValue.latitude, locationValue.longitude)
